@@ -1,0 +1,171 @@
+{
+  "name": "VideoMill v6 - Core Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vm-generate",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook - Video Request",
+      "type": "n8n-nodes-base.webhook",
+      "position": [100, 200],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || {};\nconst secret = $env.N8N_HEADER_AUTH_VALUE;\nconst received = $input.first().json.headers?.['x-videomill-auth'];\n\nif (secret && received !== secret) {\n  return [{ json: { error: 'Unauthorized' } }];\n}\n\nreturn [{ json: body }];"
+      },
+      "id": "check-auth",
+      "name": "Check Auth",
+      "type": "n8n-nodes-base.code",
+      "position": [250, 200],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [{"leftValue": "={{ $json.error }}", "rightValue": "Unauthorized"}],
+          "combinator": "and"
+        },
+        "options": {"caseSensitive": true}
+      },
+      "id": "if-error",
+      "name": "Has Error?",
+      "type": "n8n-nodes-base.if",
+      "position": [400, 200],
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\": \"Unauthorized\"}",
+        "options": {"responseCode": 401}
+      },
+      "id": "resp-401",
+      "name": "401 Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [550, 100],
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst videoId = item.video_id;\n\nconst prompt = `Create a viral video script about: ${item.topic || 'interesting topic'}. Return JSON with title, description, hashtags (array), scenes (array with narration, duration_seconds).`;\n\nreturn [{ json: { video_id: videoId, prompt: prompt } }];"
+      },
+      "id": "prep-1",
+      "name": "Prepare Prompt",
+      "type": "n8n-nodes-base.code",
+      "position": [400, 300],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "Content-Type", "value": "application/json"},
+            {"name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"You are a viral video script writer. Return valid JSON only.\"},\n    {\"role\": \"user\", \"content\": \"{{ $json.prompt }}\"}\n  ],\n  \"max_tokens\": 1000\n}",
+        "options": {}
+      },
+      "id": "groq-1",
+      "name": "Generate Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [600, 300],
+      "typeVersion": 4.4
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $input.first().json.choices?.[0]?.message?.content || '{}';\nlet script = {};\ntry { script = JSON.parse(content); } catch { script = { title: 'Video', scenes: [] }; }\nreturn [{ json: { ...script, ...$input.first().json } }];"
+      },
+      "id": "parse-1",
+      "name": "Parse Script",
+      "type": "n8n-nodes-base.code",
+      "position": [750, 300],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+            {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+            {"name": "Content-Type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"status\": \"scripting\", \"progress\": 20, \"sub_status\": \"Manus generert\"}",
+        "options": {}
+      },
+      "id": "update-1",
+      "name": "Update: Scripting",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [900, 300],
+      "typeVersion": 4.4
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+            {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+            {"name": "Content-Type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"status\": \"complete\", \"progress\": 100, \"sub_status\": \"Video ferdig\"}",
+        "options": {}
+      },
+      "id": "update-2",
+      "name": "Update: Complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1050, 300],
+      "typeVersion": 4.4
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'success', video_id: $json.video_id }) }}",
+        "options": {"responseCode": 200}
+      },
+      "id": "resp-200",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [1200, 300],
+      "typeVersion": 1.5
+    }
+  ],
+  "connections": {
+    "Webhook - Video Request": {"main": [[{"node": "Check Auth", "type": "main", "index": 0}]]},
+    "Check Auth": {"main": [[{"node": "Has Error?", "type": "main", "index": 0}]]},
+    "Has Error?": {
+      "main": [
+        [{"node": "401 Unauthorized", "type": "main", "index": 0}],
+        [{"node": "Prepare Prompt", "type": "main", "index": 0}]
+      ]
+    },
+    "Prepare Prompt": {"main": [[{"node": "Generate Script", "type": "main", "index": 0}]]},
+    "Generate Script": {"main": [[{"node": "Parse Script", "type": "main", "index": 0}]]},
+    "Parse Script": {"main": [[{"node": "Update: Scripting", "type": "main", "index": 0}]]},
+    "Update: Scripting": {"main": [[{"node": "Update: Complete", "type": "main", "index": 0}]]},
+    "Update: Complete": {"main": [[{"node": "Success Response", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "id": "vm-v6-core"
+}
