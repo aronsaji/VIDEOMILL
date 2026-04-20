@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Zap, Globe, Bell, CheckCircle2, XCircle, TestTube, Save,
   ToggleLeft, ToggleRight, Youtube, Link2, AlertTriangle,
-  Radio, ChevronDown, ChevronUp, Instagram,
+  Radio, ChevronDown, ChevronUp, Instagram, Mic, Music, Captions, Send,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/authContext';
@@ -19,13 +19,17 @@ interface ChannelEntry {
 type ChannelRoutes = Record<string, ChannelEntry>;
 
 interface Settings {
-  n8n_webhook_url: string;
-  n8n_enabled:     boolean;
-  language:        string;
-  auto_distribute: boolean;
-  ai_reply_enabled: boolean;
-  channel_routes:  ChannelRoutes;
-  groq_api_key:    string;
+  n8n_webhook_url:   string;
+  n8n_enabled:       boolean;
+  language:          string;
+  auto_distribute:   boolean;
+  ai_reply_enabled:  boolean;
+  channel_routes:    ChannelRoutes;
+  groq_api_key:      string;
+  elevenlabs_api_key: string;
+  auto_publish:      boolean;
+  music_enabled:     boolean;
+  captions_enabled:  boolean;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -187,13 +191,17 @@ export default function Settings() {
   const { t, language, setLanguage } = useLanguage();
 
   const [settings, setSettings] = useState<Settings>({
-    n8n_webhook_url:  '',
-    n8n_enabled:      false,
-    language:         'nb',
-    auto_distribute:  true,
-    ai_reply_enabled: true,
-    channel_routes:   {},
-    groq_api_key:     '',
+    n8n_webhook_url:    '',
+    n8n_enabled:        false,
+    language:           'nb',
+    auto_distribute:    true,
+    ai_reply_enabled:   true,
+    channel_routes:     {},
+    groq_api_key:       '',
+    elevenlabs_api_key: '',
+    auto_publish:       false,
+    music_enabled:      false,
+    captions_enabled:   true,
   });
   const [loading,          setLoading]          = useState(true);
   const [saving,           setSaving]           = useState(false);
@@ -659,6 +667,74 @@ export default function Settings() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* ── AI Produksjon ────────────────────────────────────────────────── */}
+      <div className="bg-[#111118] border border-white/6 rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl bg-teal-500/15 flex items-center justify-center">
+            <Mic size={17} className="text-teal-400" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-white">AI Produksjon</h2>
+            <p className="text-xs text-white/35 mt-0.5">Stemme, musikk, undertekster og auto-publisering</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {/* ElevenLabs */}
+          <div>
+            <label className="text-xs font-medium text-white/50 block mb-1.5 flex items-center gap-1.5">
+              <Mic size={11} /> ElevenLabs API-nøkkel <span className="text-teal-400/60 ml-1">— premium AI-stemmer</span>
+            </label>
+            <input
+              type="password"
+              value={settings.elevenlabs_api_key}
+              onChange={e => setSettings(s => ({ ...s, elevenlabs_api_key: e.target.value }))}
+              placeholder="sk_..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/8 transition-all font-mono"
+            />
+            <p className="text-xs text-white/30 mt-1.5">
+              Hent nøkkel på{' '}
+              <a href="https://elevenlabs.io" target="_blank" rel="noopener noreferrer" className="text-teal-400 underline">elevenlabs.io</a>
+              {' '}— brukes til høykvalitets stemme i pipeline. Uten nøkkel brukes edge-tts (gratis).
+            </p>
+          </div>
+
+          {/* Toggles */}
+          <div className="space-y-1 pt-2 border-t border-white/5">
+            {([
+              { key: 'music_enabled'    as const, icon: <Music size={14} />,    label: 'Bakgrunnsmusikk',   desc: 'Legg til royalty-fri musikk i alle videoer automatisk' },
+              { key: 'captions_enabled' as const, icon: <Captions size={14} />, label: 'Auto-undertekster', desc: 'Brenn inn undertekster via FFmpeg' },
+              { key: 'auto_publish'     as const, icon: <Send size={14} />,     label: 'Auto-publisering',  desc: 'Publiser direkte til YouTube/TikTok når produksjon er ferdig' },
+            ]).map(({ key, icon, label, desc }) => (
+              <div key={key} className="flex items-center justify-between py-3.5 border-b border-white/5 last:border-b-0">
+                <div className="flex items-start gap-2.5">
+                  <span className="text-teal-400/70 mt-0.5">{icon}</span>
+                  <div>
+                    <p className="text-sm font-medium text-white/70">{label}</p>
+                    <p className="text-xs text-white/30 mt-0.5">{desc}</p>
+                  </div>
+                </div>
+                <Toggle value={settings[key]} onChange={v => setSettings(s => ({ ...s, [key]: v }))} />
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 px-5 py-2 bg-teal-500 hover:bg-teal-400 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-teal-500/20"
+          >
+            <Save size={14} />
+            {saving ? t.common.saving : t.common.save}
+          </button>
+          {saveMsg && (
+            <span className="flex items-center gap-1.5 text-sm text-teal-400">
+              <CheckCircle2 size={13} /> {saveMsg}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* ── Bottom save ──────────────────────────────────────────────────── */}

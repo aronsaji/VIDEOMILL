@@ -283,7 +283,7 @@ type Phase = 'input' | 'generating' | 'preview' | 'producing';
 
 export default function SeriesPage() {
   const { user } = useAuth();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   // ── Form state
   const [prompt, setPrompt]           = useState('');

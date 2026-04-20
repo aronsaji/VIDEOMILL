@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Bot, TrendingUp, DollarSign, Shield, MessageSquare, RefreshCw, AlertTriangle, CheckCircle2, Lightbulb, Clock, Hash, Megaphone, Activity, Zap, Brain, Eye, Play, Music, ChevronDown, ChevronUp, Cpu } from 'lucide-react';
+import { Bot, TrendingUp, DollarSign, Shield, MessageSquare, RefreshCw, AlertTriangle, CheckCircle2, Lightbulb, Clock, Hash, Megaphone, Activity, Zap, Brain, Eye, Play, Music, ChevronDown, ChevronUp, Cpu, Radar, Upload, Captions } from 'lucide-react';
 import { useAgentReports, useSocialResponses } from '../lib/hooks/uselivedata';
 import { useLanguage } from '../contexts/languageContext';
 import { PageHeader } from '../components/PageHeader';
@@ -70,8 +70,41 @@ const AGENT_CONFIG = {
     bg: 'bg-cyan-500/10',
     border: 'border-cyan-500/30',
     accent: 'from-cyan-500/20 to-blue-500/10',
-    description: 'Svar på sosiale medier',
+    description: 'Svarer automatisk på kommentarer og DMs',
     schedule: 'Ved webhook',
+  },
+  Watchdog: {
+    name: 'Watchdog',
+    title: 'Video Failure Monitor',
+    icon: Radar,
+    color: 'text-orange-400',
+    bg: 'bg-orange-500/10',
+    border: 'border-orange-500/30',
+    accent: 'from-orange-500/20 to-red-500/10',
+    description: 'Oppdager og starter feilede videoer på nytt automatisk',
+    schedule: 'Hvert 10. min',
+  },
+  TrendHunter: {
+    name: 'Trend Hunter',
+    title: 'Auto Content Planner',
+    icon: Eye,
+    color: 'text-violet-400',
+    bg: 'bg-violet-500/10',
+    border: 'border-violet-500/30',
+    accent: 'from-violet-500/20 to-purple-500/10',
+    description: 'Finner trending topics og bestiller nye videoer automatisk',
+    schedule: 'Daglig kl 06:00',
+  },
+  Publisher: {
+    name: 'Publisher',
+    title: 'Auto YouTube Uploader',
+    icon: Upload,
+    color: 'text-rose-400',
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-500/30',
+    accent: 'from-rose-500/20 to-pink-500/10',
+    description: 'Laster opp ferdige videoer til YouTube og TikTok',
+    schedule: 'Etter ferdig produksjon',
   },
 };
 
@@ -336,6 +369,102 @@ for (const c of (comments || [])) {
 return results.length ? results.map(r => ({ json: r })) : [{ json: { status: 'ingen nye kommentarer' } }];`,
   },
   {
+    title: '🐕 Watchdog — ny workflow, Cron hvert 10. min',
+    code: `const supabaseUrl = $env.SUPABASE_URL;
+const supabaseKey = $env.SUPABASE_SERVICE_ROLE_KEY;
+// Finn videoer som har stått "queued" eller "scripting" i mer enn 30 min
+const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+const { data: stuck } = await this.helpers.httpRequest({
+  method: 'GET',
+  url: supabaseUrl + '/rest/v1/videos?status=in.(queued,scripting,recording)&updated_at=lt.' + cutoff + '&limit=5',
+  headers: { apikey: supabaseKey, Authorization: 'Bearer ' + supabaseKey }, json: true
+});
+const results = [];
+for (const v of (stuck || [])) {
+  // Increment retry_count
+  const retries = (v.retry_count || 0) + 1;
+  if (retries > 3) {
+    // Mark as failed after 3 attempts
+    await this.helpers.httpRequest({
+      method: 'PATCH', url: supabaseUrl + '/rest/v1/videos?id=eq.' + v.id,
+      headers: { apikey: supabaseKey, Authorization: 'Bearer ' + supabaseKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: { status: 'failed', retry_count: retries }, json: true
+    });
+    results.push({ id: v.id, action: 'marked_failed' });
+  } else {
+    // Reset to queued for retry
+    await this.helpers.httpRequest({
+      method: 'PATCH', url: supabaseUrl + '/rest/v1/videos?id=eq.' + v.id,
+      headers: { apikey: supabaseKey, Authorization: 'Bearer ' + supabaseKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: { status: 'queued', retry_count: retries }, json: true
+    });
+    results.push({ id: v.id, action: 'requeued', attempt: retries });
+  }
+  // Log to agent_logs
+  await this.helpers.httpRequest({
+    method: 'POST', url: supabaseUrl + '/rest/v1/agent_logs',
+    headers: { apikey: supabaseKey, Authorization: 'Bearer ' + supabaseKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: { agent_id: 'watchdog', action: 'Stuck video oppdaget: ' + (v.title || v.id), status: 'ok', video_id: v.id }, json: true
+  });
+}
+return results.length ? results.map(r => ({ json: r })) : [{ json: { status: 'ingen saker' } }];`,
+  },
+  {
+    title: '🔭 Trend Hunter — ny workflow, Cron daglig kl 06:00',
+    code: `const supabaseUrl = $env.SUPABASE_URL;
+const supabaseKey = $env.SUPABASE_SERVICE_ROLE_KEY;
+const groqKey = $env.GROQ_API_KEY;
+// Hent top trending topics
+const { data: trends } = await this.helpers.httpRequest({
+  method: 'GET',
+  url: supabaseUrl + '/rest/v1/trending_topics?active=eq.true&order=viral_score.desc&limit=3',
+  headers: { apikey: supabaseKey, Authorization: 'Bearer ' + supabaseKey }, json: true
+});
+function makeUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+const results = [];
+for (const trend of (trends || [])) {
+  const videoId = makeUUID();
+  // Insert video order
+  await this.helpers.httpRequest({
+    method: 'POST', url: supabaseUrl + '/rest/v1/videos',
+    headers: { apikey: supabaseKey, Authorization: 'Bearer ' + supabaseKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: { id: videoId, title: trend.title, topic: trend.title, status: 'queued', language: 'nb', platforms: ['youtube'], retry_count: 0, views: 0, progress: 0, captions_enabled: true }, json: true
+  });
+  results.push({ video_id: videoId, title: trend.title, viral_score: trend.viral_score });
+}
+return results.length ? results.map(r => ({ json: r })) : [{ json: { status: 'ingen trending topics' } }];`,
+  },
+  {
+    title: '🎙️ ElevenLabs TTS — erstatt "Generate Voiceover"-noden',
+    code: `const item = items[0].json;
+const elevenKey = $env.ELEVENLABS_API_KEY;
+const text = item.script || item.narration || '';
+const voiceId = item.voice_id || 'pNInz6obpgDQGcFmaJgB'; // Adam (default)
+if (!elevenKey || !text) return [{ json: item }];
+const dir = \`/workspace/video_assets/\${item.video_id}\`;
+const { execSync } = require('child_process');
+// Call ElevenLabs API
+const resp = await this.helpers.httpRequest({
+  method: 'POST',
+  url: \`https://api.elevenlabs.io/v1/text-to-speech/\${voiceId}\`,
+  headers: { 'xi-api-key': elevenKey, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+  body: {
+    text,
+    model_id: 'eleven_multilingual_v2',
+    voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+  },
+  encoding: 'arraybuffer', json: false
+});
+const fs = require('fs');
+fs.writeFileSync(\`\${dir}/voiceover.mp3\`, Buffer.from(resp));
+return [{ json: { ...item, tts_provider: 'elevenlabs' } }];`,
+  },
+  {
     title: '📣 Promoterings-agent — ny workflow, trigger ved ferdig video',
     code: `const supabaseUrl = $env.SUPABASE_URL;
 const supabaseKey = $env.SUPABASE_SERVICE_ROLE_KEY;
@@ -370,7 +499,7 @@ function PipelinePanel({ show, onToggle }: { show: boolean; onToggle: () => void
         <div className="flex items-center gap-2">
           <Cpu size={16} className="text-teal-400" />
           <span className="text-sm font-bold text-white">Pipeline v6 — n8n kode-noder</span>
-          <span className="text-[10px] bg-teal-500/15 text-teal-400 px-2 py-0.5 rounded-full font-bold">4 oppgraderinger</span>
+          <span className="text-[10px] bg-teal-500/15 text-teal-400 px-2 py-0.5 rounded-full font-bold">7 kode-noder</span>
         </div>
         {show ? <ChevronUp size={14} className="text-white/30" /> : <ChevronDown size={14} className="text-white/30" />}
       </button>
@@ -542,6 +671,18 @@ export default function Agents() {
           <div className="flex items-center gap-2">
             <MessageSquare className="w-3 h-3 text-cyan-400" />
             <span><strong className="text-cyan-400">Social</strong> - Webhook</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Radar className="w-3 h-3 text-orange-400" />
+            <span><strong className="text-orange-400">Watchdog</strong> - 10m</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Eye className="w-3 h-3 text-violet-400" />
+            <span><strong className="text-violet-400">Trend Hunter</strong> - Daglig</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Upload className="w-3 h-3 text-rose-400" />
+            <span><strong className="text-rose-400">Publisher</strong> - Auto</span>
           </div>
         </div>
       </div>
