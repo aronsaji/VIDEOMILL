@@ -465,6 +465,40 @@ fs.writeFileSync(\`\${dir}/voiceover.mp3\`, Buffer.from(resp));
 return [{ json: { ...item, tts_provider: 'elevenlabs' } }];`,
   },
   {
+    title: '📺 Auto YouTube-upload — legg til etter "Upload to Supabase Storage"',
+    code: `const item = items[0].json;
+const supabaseUrl = $env.SUPABASE_URL;
+const supabaseKey = $env.SUPABASE_SERVICE_ROLE_KEY;
+// Finn video_url fra metadata
+const videoUrl = item.video_url_16x9 || item.video_url || item.final_url || '';
+if (!videoUrl || !item.video_id) return [{ json: { ...item, youtube_skip: true } }];
+// Sjekk om auto_publish er aktivert for bruker
+const { data: settings } = await this.helpers.httpRequest({
+  method: 'GET',
+  url: supabaseUrl + '/rest/v1/user_settings?user_id=eq.' + item.user_id + '&select=auto_publish',
+  headers: { apikey: supabaseKey, Authorization: 'Bearer ' + supabaseKey }, json: true
+});
+if (!settings?.[0]?.auto_publish) return [{ json: { ...item, youtube_skip: 'auto_publish disabled' } }];
+// Kall youtube-upload edge function
+const result = await this.helpers.httpRequest({
+  method: 'POST',
+  url: supabaseUrl.replace('/rest/v1','') + '/functions/v1/youtube-upload',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Service-Key': $env.INTERNAL_SERVICE_KEY,
+  },
+  body: {
+    user_id:     item.user_id,
+    video_id:    item.video_id,
+    video_url:   videoUrl,
+    title:       item.title || item.topic || 'VideoMill Video',
+    description: item.script?.substring(0, 500) || '',
+    tags:        item.tags || [],
+  }, json: true
+});
+return [{ json: { ...item, youtube_result: result } }];`,
+  },
+  {
     title: '📣 Promoterings-agent — ny workflow, trigger ved ferdig video',
     code: `const supabaseUrl = $env.SUPABASE_URL;
 const supabaseKey = $env.SUPABASE_SERVICE_ROLE_KEY;
@@ -499,7 +533,7 @@ function PipelinePanel({ show, onToggle }: { show: boolean; onToggle: () => void
         <div className="flex items-center gap-2">
           <Cpu size={16} className="text-teal-400" />
           <span className="text-sm font-bold text-white">Pipeline v6 — n8n kode-noder</span>
-          <span className="text-[10px] bg-teal-500/15 text-teal-400 px-2 py-0.5 rounded-full font-bold">7 kode-noder</span>
+          <span className="text-[10px] bg-teal-500/15 text-teal-400 px-2 py-0.5 rounded-full font-bold">8 kode-noder</span>
         </div>
         {show ? <ChevronUp size={14} className="text-white/30" /> : <ChevronDown size={14} className="text-white/30" />}
       </button>

@@ -183,6 +183,30 @@ export function useSocialResponses() {
   });
 }
 
+// Agent Logs — actual table: agent_logs
+// ─────────────────────────────────────────────────────────────
+export interface AgentLog {
+  id: string;
+  agent_id: string;
+  action: string;
+  status: string;
+  details?: Record<string, unknown> | null;
+  video_id?: string | null;
+  created_at: string;
+}
+
+export function useAgentLogs(limit = 20) {
+  return useRealtimeTable<AgentLog>('agent_logs', async () => {
+    const { data, error } = await supabase
+      .from('agent_logs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []) as AgentLog[];
+  });
+}
+
 // ─────────────────────────────────────────────────────────────
 // Mutations
 // ─────────────────────────────────────────────────────────────

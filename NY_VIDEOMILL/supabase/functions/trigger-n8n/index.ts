@@ -145,6 +145,12 @@ Deno.serve(async (req: Request) => {
       voice_id:        body.voice_id       ?? null,
       aspect_ratio:    body.aspect_ratio   ?? body.video_format ?? null,
       target_audience: body.target_audience ?? null,
+      // Serie-felter
+      series_id:       body.series_id       ?? null,
+      episode_id:      body.episode_id      ?? null,
+      episode_number:  body.episode_number  ?? null,
+      is_series:       body.is_series       ?? false,
+      series_name:     body.series_name     ?? null,
       timestamp:       new Date().toISOString(),
     };
 

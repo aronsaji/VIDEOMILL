@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import {
   TrendingUp, Film, Eye, Zap, ArrowUpRight,
   Clock, CheckCircle2, AlertCircle, Play, RefreshCw,
-  Video, Flame,
+  Video, Flame, Bot, Activity,
 } from 'lucide-react';
 import { Page } from '../lib/types';
-import { useTrends, useVideos } from '../lib/hooks/uselivedata';
+import { useTrends, useVideos, useAgentLogs } from '../lib/hooks/uselivedata';
 import { useLanguage } from '../contexts/languageContext';
 import StatusBadge from '../components/statusbadge';
 import { setPendingTrend } from '../lib/pendingTrend';
@@ -37,6 +37,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   const { t, language } = useLanguage();
   const { data: trends, loading: trendsLoading } = useTrends();
   const { data: videos,  loading: videosLoading, refresh: refreshVideos } = useVideos();
+  const { data: agentLogs } = useAgentLogs(8);
 
   const loading = trendsLoading || videosLoading;
 
@@ -398,6 +399,49 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           )}
         </div>
       </div>
+
+      {/* ── Live Agent Activity ── */}
+      {agentLogs.length > 0 && (
+        <div className="bg-[#111118] border border-white/6 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Activity size={14} className="text-teal-400" />
+              <h2 className="text-sm font-semibold text-white">
+                {isEn ? 'Live Agent Activity' : 'Live agent-aktivitet'}
+              </h2>
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
+            </div>
+            <button onClick={() => onNavigate('agents')} className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1 transition-colors">
+              {isEn ? 'All agents' : 'Alle agenter'} <ArrowUpRight size={12} />
+            </button>
+          </div>
+          <div className="space-y-2">
+            {agentLogs.slice(0, 5).map(log => {
+              const agentColors: Record<string, string> = {
+                COO: 'text-blue-400', CFO: 'text-emerald-400', Marketing: 'text-purple-400',
+                CISO: 'text-red-400', ErrorFixer: 'text-amber-400', SocialResponse: 'text-cyan-400',
+                watchdog: 'text-orange-400', trend_hunter: 'text-violet-400', promoter: 'text-pink-400',
+              };
+              const color = agentColors[log.agent_id] ?? 'text-white/50';
+              return (
+                <div key={log.id} className="flex items-start gap-3 px-3 py-2.5 rounded-lg bg-white/3 hover:bg-white/5 transition-colors">
+                  <Bot size={13} className={`${color} flex-shrink-0 mt-0.5`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-white/70 truncate">{log.action}</p>
+                    <p className={`text-[10px] font-semibold ${color} mt-0.5`}>{log.agent_id}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                      log.status === 'ok' ? 'bg-teal-500/15 text-teal-400' : 'bg-red-500/15 text-red-400'
+                    }`}>{log.status}</span>
+                    <span className="text-[10px] text-white/25">{timeAgo(log.created_at, language)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── System status banner ── */}
       <div className="bg-gradient-to-r from-teal-500/10 to-cyan-500/5 border border-teal-500/15 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
