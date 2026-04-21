@@ -7,7 +7,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [250, 300],
-      "parameters": {"httpMethod": "POST", "path": "viranode-generate"}
+      "parameters": {"httpMethod": "POST", "path": "viranode-generate", "responseMode": "responseNode"}
     },
     {
       "id": "set-queued",
@@ -20,7 +20,7 @@
         "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
         "sendHeaders": true,
         "headerParameters": {"parameters": [
-          {"name": "apikey", "value": "{{$env.SUPABASE_SERVICE_ROLE_KEY}}"},
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
           {"name": "Authorization", "value": "Bearer {{$env.SUPABASE_SERVICE_ROLE_KEY}}"}
         ]},
         "sendBody": true,
@@ -45,7 +45,7 @@
         "method": "PATCH",
         "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
         "sendHeaders": true,
-        "headerParameters": {"parameters": [{"name": "apikey", "value": "{{$env.SUPABASE_SERVICE_ROLE_KEY}}"}]},
+        "headerParameters": {"parameters": [{"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}]},
         "sendBody": true,
         "jsonBody": "{\"status\": \"scripting\", \"progress\": 10}"
       }
@@ -143,7 +143,7 @@
         "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
         "sendHeaders": true,
         "headerParameters": {"parameters": [
-          {"name": "apikey", "value": "{{$env.SUPABASE_SERVICE_ROLE_KEY}}"}
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
         ]},
         "sendBody": true,
         "jsonBody": "{\"status\": \"complete\", \"progress\": 100, \"video_url\": \"{{$json.url}}\"}"
