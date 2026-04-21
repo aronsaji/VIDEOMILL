@@ -263,7 +263,8 @@
     }
   ],
   "connections": {
-    "Webhook": {"main": [[{"node": "Set queued", "type": "main", "index": 0}]]},
+    "Webhook": {"main": [[{"node": "Extract Data", "type": "main", "index": 0}]]},
+    "Extract Data": {"main": [[{"node": "Set queued", "type": "main", "index": 0}]]},
     "Set queued": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]},
     "Respond": {"main": [[{"node": "Set scripting", "type": "main", "index": 0}]]},
     "Set scripting": {"main": [[{"node": "Groq Script", "type": "main", "index": 0}]]},
