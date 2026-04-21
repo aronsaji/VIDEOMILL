@@ -1,0 +1,420 @@
+{
+  "name": "VideoMill Complete v6.0",
+  "nodes": [
+    {
+      "id": "webhook-main",
+      "name": "Webhook - Video Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [250, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "videomill",
+        "responseMode": "responseNode"
+      }
+    },
+    {
+      "id": "auth",
+      "name": "Auth Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300],
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || {};\n// Aksepter alle for nå\nreturn [{ json: { ...body, authorized: true } }];"
+      }
+    },
+    {
+      "id": "set-queued",
+      "name": "Status: queued",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [650, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"status\": \"queued\", \"progress\": 5}"
+      }
+    },
+    {
+      "id": "respond-ok",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [850, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"Mottatt!\", \"video_id\": \"{{ $json.video_id }}\"}",
+        "options": {"responseCode": 200}
+      }
+    },
+    {
+      "id": "set-scripting",
+      "name": "Status: scripting",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1050, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"status\": \"scripting\", \"progress\": 10}"
+      }
+    },
+    {
+      "id": "groq-script",
+      "name": "Groq - Generate Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1250, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "Content-Type", "value": "application/json"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"system\", \"content\": \"Du er en viral kort video script skriver. JSON: {title, scenes: [{narration, seconds, search_keywords}]}. Ikke markdown.\"}, {\"role\": \"user\", \"content\": \"Lag manus om: \" + $('Webhook - Video Request').first().json.body.topic + \". Platform: \" + ($('Webhook - Video Request').first().json.body.platform || 'tiktok') + \". Format: \" + ($('Webhook - Video Request').first().json.body.aspect_ratio || '9:16') + \". 3-5 scener.\"}], \"max_tokens\": 1500, \"temperature\": 0.7}"
+      }
+    },
+    {
+      "id": "parse-script",
+      "name": "Parse Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300],
+      "parameters": {
+        "jsCode": "const r = $input.first().json.choices?.[0]?.message?.content || '';\nlet d = {};\ntry { d = JSON.parse(r); } catch { const m = r.match(/\\{[\\s\\S]*\\}/); d = m ? JSON.parse(m[0]) : {scenes:[{narration:r, seconds:6}]}; }\nconst b = $('Webhook - Video Request').first().json.body;\nreturn [{ json: { title: d.title, scenes: d.scenes, video_id: b.video_id, user_id: b.user_id, platform: b.platform, width: b.aspect_ratio=='16:9'?1920:1080, height: b.aspect_ratio=='16:9'?1080:1920 } }];"
+      }
+    },
+    {
+      "id": "voice-map",
+      "name": "Voice Map",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 300],
+      "parameters": {
+        "jsCode": "const item = items[0].json;\nconst voice = 'nb-NO-PernilleNeural';\nreturn [{ json: { ...item, tts_voice: voice } }];"
+      }
+    },
+    {
+      "id": "edge-tts",
+      "name": "Edge TTS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 300],
+      "parameters": {
+        "jsCode": "var execSync = require('child_process').execSync;\nvar item = items[0].json;\nvar text = (item.scenes || []).map(function(s){return s.narration || '';}).filter(Boolean).join('. ').substring(0,2000);\nvar v = item.video_id;\nvar dir = '/workspace/video_assets/' + v;\nexecSync('mkdir -p ' + dir, {shell:'/bin/bash'});\nexecSync('edge-tts --voice \"' + item.tts_voice + '\" --text \"' + text + '\" --write-media \"' + dir + '/voice.mp3\"', {encoding:'utf-8', timeout:300000, shell:'/bin/bash'});\nreturn [{json:{...item, voice_path:dir+'/voice.mp3'}}];"
+      }
+    },
+    {
+      "id": "set-recording",
+      "name": "Status: recording",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2050, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"status\": \"recording\", \"progress\": 30}"
+      }
+    },
+    {
+      "id": "split-scenes",
+      "name": "Split Scenes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2250, 300],
+      "parameters": {
+        "jsCode": "var item = items[0].json;\nvar scenes = item.scenes || [];\nreturn scenes.map(function(s,i){return{json:{video_id:item.video_id, query:s.search_keywords?s.search_keywords[0]:item.title, duration:s.seconds||6, width:item.width, height:item.height, index:i}};});"
+      }
+    },
+    {
+      "id": "loop-scenes",
+      "name": "Loop Scenes",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [2450, 300],
+      "parameters": {"continue": "true"}
+    },
+    {
+      "id": "pixabay",
+      "name": "Pixabay Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2650, 300],
+      "parameters": {
+        "url": "https://pixabay.com/api/",
+        "sendQuery": true,
+        "queryParameters": {"parameters": [
+          {"name": "key", "value": "55300791-85a1b0dbc3f21edc0dba73e86"},
+          {"name": "q", "value": "={{ $json.query }}"},
+          {"name": "video_type", "value": "film"},
+          {"name": "per_page", "value": "3"}
+        ]},
+        "options": {"timeout": 30000}
+      }
+    },
+    {
+      "id": "select-clip",
+      "name": "Select Clip",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2850, 300],
+      "parameters": {
+        "jsCode": "var hits = $input.first().json.hits || [];\nif(hits.length==0) return[{json:{url:null}}];\nvar url = hits[0].videos && hits[0].videos.large ? hits[0].videos.large.url : hits[0].videos && hits[0].videos.medium ? hits[0].videos.medium.url : null;\nreturn[{json:{url:url, id:hits[0].id}}];"
+      }
+    },
+    {
+      "id": "ffmpeg-scene",
+      "name": "FFmpeg Scene",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3050, 300],
+      "parameters": {
+        "jsCode": "var execSync = require('child_process').execSync;\nvar i = items[0].json;\nvar dir = '/workspace/video_assets/' + i.video_id + '/clips';\nvar sz = i.width + 'x' + i.height;\nexecSync('mkdir -p ' + dir, {shell:'/bin/bash'});\n\nif(!i.url){\nexecSync('ffmpeg -y -f lavfi -i color=c=black:s=' + sz + ':r=30 -t ' + i.duration + ' -c:v libx264 -preset fast ' + dir + '/s_' + i.index + '.mp4', {encoding:'utf-8', timeout:120000, shell:'/bin/bash'});\nreturn[{json:{path:dir+'/s_'+i.index+'.mp4', fallback:true}}];\n}\n\ntry{\nexecSync('ffmpeg -y -i \"' + i.url + '\" -t ' + i.duration + ' -vf scale='+sz+':force_original_aspect_ratio=decrease,pad='+sz+':(ow-iw)/2:(oh-ih)/2,setsar=1 -c:v libx264 -preset fast -an ' + dir + '/s_' + i.index + '.mp4', {encoding:'utf-8', timeout:300000, shell:'/bin/bash'});\n}catch(e){\nexecSync('ffmpeg -y -f lavfi -i color=c=black:s=' + sz + ':r=30 -t ' + i.duration + ' -c:v libx264 -preset fast ' + dir + '/s_' + i.index + '.mp4', {encoding:'utf-8', timeout:120000, shell:'/bin/bash'});\n}\nreturn[{json:{path:dir+'/s_'+i.index+'.mp4'}}];"
+      }
+    },
+    {
+      "id": "loop-exit",
+      "name": "Loop Exit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3250, 300],
+      "parameters": {"jsCode": "return items[0].json;"}
+    },
+    {
+      "id": "set-editing",
+      "name": "Status: editing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [3450, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"status\": \"editing\", \"progress\": 60}"
+      }
+    },
+    {
+      "id": "ffmpeg-concat",
+      "name": "FFmpeg Concat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3650, 300],
+      "parameters": {
+        "jsCode": "var execSync = require('child_process').execSync;\nvar i = items[0].json;\nvar dir = '/workspace/video_assets/' + i.video_id + '/clips';\nvar files = execSync('ls ' + dir + '/s_*.mp4 2>/dev/null | sort -V', {encoding:'utf-8', shell:'/bin/bash'}).trim();\nif(!files) throw new Error('Ingen scener');\nexecSync('echo \"' + files + '\" | sed \"s/^/file \\'/;s/$/\\'/\" > ' + dir + '/list.txt && ffmpeg -y -f concat -safe 0 -i ' + dir + '/list.txt -c:v libx264 -preset fast -c:a aac ' + dir + '/concat.mp4', {encoding:'utf-8', timeout:300000, shell:'/bin/bash'});\nreturn[{json:{concat:dir+'/concat.mp4'}}];"
+      }
+    },
+    {
+      "id": "upload",
+      "name": "Upload to Supabase",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3850, 300],
+      "parameters": {
+        "jsCode": "var execSync = require('child_process').execSync;\nvar i = items[0].json;\nvar v = i.video_id;\nvar u = i.user_id;\nvar dir = '/workspace/video_assets/' + v;\nvar supabase = $env.SUPABASE_URL;\nvar key = $env.SUPABASE_SERVICE_ROLE_KEY;\n\ntry{execSync('ffmpeg -y -i ' + dir + '/concat.mp4 -i ' + dir + '/voice.mp3 -c:v copy -c:a aac -shortest ' + dir + '/final.mp4', {encoding:'utf-8', timeout:300000, shell:'/bin/bash'});}catch(e){execSync('cp ' + dir + '/concat.mp4 ' + dir + '/final.mp4');}\n\nvar path = u + '/' + v + '/final.mp4';\ntry{execSync('curl -sf -X POST ' + supabase + '/storage/v1/object/videos/' + path + ' -H \"Authorization: Bearer ' + key + '\" -H \"Content-Type: video/mp4\" --data-binary @' + dir + '/final.mp4', {encoding:'utf-8', timeout:600000, shell:'/bin/bash'});}catch(e){throw new Error('Upload: '+e.message);}\nreturn[{json:{url:supabase+'/storage/v1/object/public/videos/'+path}}];"
+      }
+    },
+    {
+      "id": "set-complete",
+      "name": "Status: complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [4050, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"status\": \"complete\", \"progress\": 100, \"video_url\": \"{{ $json.url }}\"}"
+      }
+    },
+    {
+      "id": "cron-trends",
+      "name": "Cron - Trends (6t)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 600],
+      "parameters": {
+        "triggerTimes": {"item": [{"mode": "everyX", "value": 6}]}
+      }
+    },
+    {
+      "id": "groq-trends",
+      "name": "Groq - Generate Trends",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [450, 600],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "Content-Type", "value": "application/json"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"system\", \"content\": \"Generate 10 trending topics. JSON array: [{title, category, viral_score, heat_level, tags, platform}]\"}, {\"role\": \"user\", \"content\": \"What are trending topics right now? Return 10 topics.\"}], \"max_tokens\": 2000}"
+      }
+    },
+    {
+      "id": "parse-trends",
+      "name": "Parse Trends",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 600],
+      "parameters": {
+        "jsCode": "function makeId(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){var r=Math.random()*16|0;return (c==='x'?r:(r&0x3|0x8)).toString(16);});}\nvar r = $input.first().json.choices[0].message.content;\nvar topics = [];\ntry{topics = JSON.parse(r);}catch{var m = r.match(/\\[[\\s\\S]*\\]/); if(m) topics = JSON.parse(m[0]);}\nvar rows = topics.slice(0,10).map(function(t){return{\nid:makeId(), title:t.title||t.topic, category:t.category||'general', viral_score:t.viral_score||75, heat_level:t.heat_level||'hot', tags:t.tags||[], platform:t.platform||'youtube', active:true, updated_at:new Date().toISOString()\n}});\nreturn rows.length ? rows.map(function(r){return{json:r}});"
+      }
+    },
+    {
+      "id": "insert-trends",
+      "name": "Insert Trends",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [850, 600],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/trending_topics",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Content-Type", "value": "application/json"},
+          {"name": "Prefer", "value": "resolution=merge-duplicates"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}"
+      }
+    },
+    {
+      "id": "cron-comments",
+      "name": "Cron - Comments (30m)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 900],
+      "parameters": {
+        "triggerTimes": {"item": [{"mode": "everyX", "value": 30}]}
+      }
+    },
+    {
+      "id": "get-comments",
+      "name": "Get Unreplied Comments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [450, 900],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/comments?replied=is.null&limit=5",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"}
+        ]}
+      }
+    },
+    {
+      "id": "groq-reply",
+      "name": "Groq - Generate Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [650, 900],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "Content-Type", "value": "application/json"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"system\", \"content\": \"Du er en hyggelig YouTube kommentator. Skriv et vennlig svar.\"}, {\"role\": \"user\", \"content\": \"Kommentar: \" + $('Get Unreplied Comments').first().json.text_content + \". Skriv et svar.\"}], \"max_tokens\": 200}"
+      }
+    },
+    {
+      "id": "save-reply",
+      "name": "Save Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [850, 900],
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/comments?id=eq.{{ $('Get Unreplied Comments').first().json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}"},
+          {"name": "Content-Type", "value": "application/json"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ai_reply: $input.first().json.choices[0].message.content, replied_at: new Date().toISOString()}) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Video Request": {"main": [[{"node": "Auth Check", "type": "main", "index": 0}]]},
+    "Auth Check": {"main": [[{"node": "Status: queued", "type": "main", "index": 0}]]},
+    "Status: queued": {"main": [[{"node": "Respond 200", "type": "main", "index": 0}]]},
+    "Respond 200": {"main": [[{"node": "Status: scripting", "type": "main", "index": 0}]]},
+    "Status: scripting": {"main": [[{"node": "Groq - Generate Script", "type": "main", "index": 0}]]},
+    "Groq - Generate Script": {"main": [[{"node": "Parse Script", "type": "main", "index": 0}]]},
+    "Parse Script": {"main": [[{"node": "Voice Map", "type": "main", "index": 0}]]},
+    "Voice Map": {"main": [[{"node": "Edge TTS", "type": "main", "index": 0}]]},
+    "Edge TTS": {"main": [[{"node": "Status: recording", "type": "main", "index": 0}]]},
+    "Status: recording": {"main": [[{"node": "Split Scenes", "type": "main", "index": 0}]]},
+    "Split Scenes": {"main": [[{"node": "Loop Scenes", "type": "main", "index": 0}]]},
+    "Loop Scenes": {"main": [[{"node": "Pixabay Search", "type": "main", "index": 0}], {"node": "Loop Exit", "type": "main", "index": 0}]]},
+    "Pixabay Search": {"main": [[{"node": "Select Clip", "type": "main", "index": 0}]]},
+    "Select Clip": {"main": [[{"node": "FFmpeg Scene", "type": "main", "index": 0}]]},
+    "FFmpeg Scene": {"main": [[{"node": "Loop Scenes", "type": "main", "index": 0}]]},
+    "Loop Exit": {"main": [[{"node": "Status: editing", "type": "main", "index": 0}]]},
+    "Status: editing": {"main": [[{"node": "FFmpeg Concat", "type": "main", "index": 0}]]},
+    "FFmpeg Concat": {"main": [[{"node": "Upload to Supabase", "type": "main", "index": 0}]]},
+    "Upload to Supabase": {"main": [[{"node": "Status: complete", "type": "main", "index": 0}]]},
+    "Cron - Trends (6t)": {"main": [[{"node": "Groq - Generate Trends", "type": "main", "index": 0}]]},
+    "Groq - Generate Trends": {"main": [[{"node": "Parse Trends", "type": "main", "index": 0}]]},
+    "Parse Trends": {"main": [[{"node": "Insert Trends", "type": "main", "index": 0}]]},
+    "Cron - Comments (30m)": {"main": [[{"node": "Get Unreplied Comments", "type": "main", "index": 0}]]},
+    "Get Unreplied Comments": {"main": [[{"node": "Groq - Generate Reply", "type": "main", "index": 0}]]},
+    "Groq - Generate Reply": {"main": [[{"node": "Save Reply", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "active": true
+}

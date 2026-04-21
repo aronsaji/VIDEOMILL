@@ -74,7 +74,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1250, 300],
-      "parameters": {"jsCode": "var item = items[0].json;\nvar voice = 'nb-NO-PernilleNeural';\nreturn [{json: {...item, tts_voice: voice}}];"}
+      "parameters": {"jsCode": "var item = items[0].json;\nvar lang = item.language || 'nb';\nvar voices = {\n  'nb': 'nb-NO-PernilleNeural',\n  'en': 'en-US-AriaNeural',\n  'ta': 'ta-IN-PallaviNeural',\n  'es': 'es-ES-ElviraNeural',\n  'de': 'de-DE-KatjaNeural',\n  'fr': 'fr-FR-DeniseNeural',\n  'pt': 'pt-BR-FranciscaNeural'\n};\nvar voice = voices[lang] || voices['nb'];\nreturn [{json: {...item, tts_voice: voice}}];"}
     },
     {
       "id": "tts",
@@ -82,7 +82,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1450, 300],
-      "parameters": {"jsCode": "var execSync = require('child_process').execSync;\nvar item = items[0].json;\nvar vid = item.video_id;\nvar dir = '/workspace/video_assets/' + vid;\nvar txt = item.topic ? item.topic.substring(0, 2000) : 'Video';\nexecSync('mkdir -p ' + dir, {shell: '/bin/bash'});\nexecSync('edge-tts --voice \"nb-NO-PernilleNeural\" --text \"' + txt + '\" --write-media \"' + dir + '/voice.mp3\"', {encoding: 'utf-8', timeout: 300000, shell: '/bin/bash'});\nreturn [{json: {...item, voice_path: dir + '/voice.mp3'}}];"}
+      "parameters": {"jsCode": "var execSync = require('child_process').execSync;\nvar item = items[0].json;\nvar vid = item.video_id;\nvar dir = '/workspace/video_assets/' + vid;\nvar txt = item.topic ? item.topic.substring(0, 2000) : 'Video';\nvar voice = item.tts_voice || 'nb-NO-PernilleNeural';\nexecSync('mkdir -p ' + dir, {shell: '/bin/bash'});\nexecSync('edge-tts --voice \"' + voice + '\" --text \"' + txt + '\" --write-media \"' + dir + '/voice.mp3\"', {encoding: 'utf-8', timeout: 300000, shell: '/bin/bash'});\nreturn [{json: {...item, voice_path: dir + '/voice.mp3'}}];"}
     },
     {
       "id": "set-recording",
