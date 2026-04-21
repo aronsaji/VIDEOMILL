@@ -137,8 +137,8 @@ Deno.serve(async (req: Request) => {
     const n8nAuthValue = Deno.env.get("N8N_HEADER_AUTH_VALUE") ?? "";
 
     const webhookPayload = {
-      action:          body.action         ?? "test",
-      user_id:         userId,
+      action:          body.action         ?? "new_order",
+      user_id:         body.user_id        ?? userId,
       video_id:        body.video_id       ?? body.production_id ?? null,
       title:           body.title          ?? null,
       topic:           body.topic          ?? null,

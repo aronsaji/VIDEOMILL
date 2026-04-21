@@ -183,19 +183,19 @@ const LANGUAGES = [
 // Voices: ElevenLabs (⭐ best) + edge-tts fallback
 const VOICES: Record<string, { id: string; name: string; gender: string; quality: 'best' | 'good' | 'standard' }[]> = {
   nb: [
-    { id: 'XB0fDUnXU5powFXDhCwa', name: 'Charlotte', gender: 'Kvinne', quality: 'best' },
-    { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily',      gender: 'Kvinne', quality: 'best' },
     { id: 'nb-NO-PernilleNeural', name: 'Pernille',  gender: 'Kvinne', quality: 'good' },
     { id: 'nb-NO-FinnNeural',     name: 'Finn',      gender: 'Mann',   quality: 'good' },
     { id: 'nb-NO-IselinNeural',   name: 'Iselin',    gender: 'Kvinne', quality: 'good' },
+    { id: 'XB0fDUnXU5powFXDhCwa', name: 'Charlotte', gender: 'Kvinne', quality: 'best' },
+    { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily',      gender: 'Kvinne', quality: 'best' },
   ],
   en: [
-    { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella',   gender: 'Female', quality: 'best' },
-    { id: 'onwK4e9ZLuTAKqWW03F9',  name: 'Daniel',  gender: 'Male',   quality: 'best' },
     { id: 'en-US-AriaNeural',      name: 'Aria',    gender: 'Female', quality: 'good' },
     { id: 'en-US-AndrewNeural',    name: 'Andrew',  gender: 'Male',   quality: 'good' },
     { id: 'en-GB-SoniaNeural',     name: 'Sonia',   gender: 'Female', quality: 'good' },
     { id: 'en-GB-RyanNeural',      name: 'Ryan',    gender: 'Male',   quality: 'good' },
+    { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella',   gender: 'Female', quality: 'best' },
+    { id: 'onwK4e9ZLuTAKqWW03F9',  name: 'Daniel',  gender: 'Male',   quality: 'best' },
   ],
   ta: [
     { id: 'ta-IN-PallaviNeural',  name: 'Pallavi', gender: 'பெண்',  quality: 'good' },
