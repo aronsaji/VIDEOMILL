@@ -27,35 +27,35 @@ function useRealtimeTable<T extends { id: string }>(
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    let channelRef: ReturnType<typeof supabase.channel> | null = null;
-    let isMounted = true;
-
+    const channelName = `${table}_changes_${Date.now()}`;
+    
     const setupChannel = async () => {
       await refresh();
-      if (!isMounted) return;
-
-      channelRef = supabase
-        .channel(`${table}_changes_${Date.now()}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
-          if (!isMounted) return;
-          if (payload.eventType === 'INSERT') {
-            setData(prev => [payload.new as T, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setData(prev => prev.map(item =>
-              item.id === (payload.new as T).id ? (payload.new as T) : item
-            ));
-          } else if (payload.eventType === 'DELETE') {
-            setData(prev => prev.filter(item => item.id !== (payload.old as { id: string }).id));
-          }
-        });
-      await channelRef.subscribe();
+      
+      const channel = supabase.channel(channelName);
+      
+      channel.on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setData(prev => [payload.new as T, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          setData(prev => prev.map(item =>
+            item.id === (payload.new as T).id ? (payload.new as T) : item
+          ));
+        } else if (payload.eventType === 'DELETE') {
+          setData(prev => prev.filter(item => item.id !== (payload.old as { id: string }).id));
+        }
+      });
+      
+      const { error } = await channel.subscribe();
+      if (error) {
+        console.error(`Realtime error for ${table}:`, error);
+      }
     };
 
     setupChannel();
 
     return () => {
-      isMounted = false;
-      if (channelRef) supabase.removeChannel(channelRef);
+      supabase.removeChannel(channelName);
     };
   }, [table]); // eslint-disable-line react-hooks/exhaustive-deps
 
