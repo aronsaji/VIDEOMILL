@@ -1,0 +1,221 @@
+{
+  "name": "VideoMill v7 - Complete",
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [250, 300],
+      "parameters": {"httpMethod": "POST", "path": "videomill"}
+    },
+    {
+      "id": "set-queued",
+      "name": "Set queued",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [450, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "{{$env.SUPABASE_URL}}/rest/v1/videos?id=eq.{{$json.video_id}}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "{{$env.SUPABASE_SERVICE_ROLE_KEY}}"},
+          {"name": "Authorization", "value": "Bearer {{$env.SUPABASE_SERVICE_ROLE_KEY}}"}
+        ]},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"status\": \"queued\", \"progress\": 5}"
+      }
+    },
+    {
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [650, 300],
+      "parameters": {"respondWith": "json", "responseBody": "{\"status\": \"ok\"}", "options": {"responseCode": 200}}
+    },
+    {
+      "id": "set-scripting",
+      "name": "Set scripting",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [850, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "{{$env.SUPABASE_URL}}/rest/v1/videos?id=eq.{{$json.video_id}}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [{"name": "apikey", "value": "{{$env.SUPABASE_SERVICE_ROLE_KEY}}"}]},
+        "sendBody": true,
+        "jsonBody": "{\"status\": \"scripting\", \"progress\": 10}"
+      }
+    },
+    {
+      "id": "groq-script",
+      "name": "Groq Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1050, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "Content-Type", "value": "application/json"},
+          {"name": "Authorization", "value": "Bearer {{$env.GROQ_API_KEY}}"}
+        ]},
+        "sendBody": true,
+        "jsonBody": "{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"user\", \"content\": \"Lag et manus om: \" + $input.first().json.body.topic + \". Max 5 setninger.\"}], \"max_tokens\": 1000}"
+      }
+    },
+    {
+      "id": "voice",
+      "name": "Voice Map",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300],
+      "parameters": {"jsCode": "var item = items[0].json;\nvar voice = 'nb-NO-PernilleNeural';\nreturn [{json: {...item, tts_voice: voice}}];"}
+    },
+    {
+      "id": "tts",
+      "name": "Edge TTS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300],
+      "parameters": {"jsCode": "var execSync = require('child_process').execSync;\nvar item = items[0].json;\nvar vid = item.video_id;\nvar dir = '/workspace/video_assets/' + vid;\nvar txt = item.topic ? item.topic.substring(0, 2000) : 'Video';\nexecSync('mkdir -p ' + dir, {shell: '/bin/bash'});\nexecSync('edge-tts --voice \"nb-NO-PernilleNeural\" --text \"' + txt + '\" --write-media \"' + dir + '/voice.mp3\"', {encoding: 'utf-8', timeout: 300000, shell: '/bin/bash'});\nreturn [{json: {...item, voice_path: dir + '/voice.mp3'}}];"}
+    },
+    {
+      "id": "set-recording",
+      "name": "Set recording",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1650, 300],
+      "parameters": {"method": "PATCH", "url": "{{$env.SUPABASE_URL}}/rest/v1/videos?id=eq.{{$json.video_id}}", "jsonBody": "{\"status\": \"recording\", \"progress\": 30}"}
+    },
+    {
+      "id": "pixabay",
+      "name": "Pixabay",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1850, 300],
+      "parameters": {
+        "url": "https://pixabay.com/api/",
+        "sendQuery": true,
+        "queryParameters": {"parameters": [
+          {"name": "key", "value": "55300791-85a1b0dbc3f21edc0dba73e86"},
+          {"name": "q", "value": "{{$json.topic}}"},
+          {"name": "video_type", "value": "film"}
+        ]}
+      }
+    },
+    {
+      "id": "select",
+      "name": "Select Clip",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2050, 300],
+      "parameters": {"jsCode": "var hits = $input.first().json.hits || [];\nif (hits.length === 0) return [{json: {url: null}}];\nvar url = hits[0].videos && hits[0].videos.large ? hits[0].videos.large.url : null;\nreturn [{json: {url: url}}];"}
+    },
+    {
+      "id": "set-editing",
+      "name": "Set editing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2250, 300],
+      "parameters": {"method": "PATCH", "url": "{{$env.SUPABASE_URL}}/rest/v1/videos?id=eq.{{$json.video_id}}", "jsonBody": "{\"status\": \"editing\", \"progress\": 60}"}
+    },
+    {
+      "id": "final",
+      "name": "Final Video",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2450, 300],
+      "parameters": {"jsCode": "var execSync = require('child_process').execSync;\nvar item = items[0].json;\nvar vid = item.video_id;\nvar uid = item.user_id;\nvar dir = '/workspace/video_assets/' + vid;\nvar su = $env.SUPABASE_URL;\nvar sk = $env.SUPABASE_SERVICE_ROLE_KEY;\nvar path = uid + '/' + vid + '/final.mp4';\nexecSync('cp ' + dir + '/voice.mp4 ' + dir + '/final.mp4', {shell: '/bin/bash'});\nexecSync('curl -sf -X POST ' + su + '/storage/v1/object/videos/' + path + ' -H \"Authorization: Bearer ' + sk + '\" --data-binary @' + dir + '/final.mp4', {timeout: 600000, shell: '/bin/bash'});\nreturn [{json: {url: su + '/storage/v1/object/public/videos/' + path}}];"}
+    },
+    {
+      "id": "set-complete",
+      "name": "Set complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2650, 300],
+      "parameters": {
+        "method": "PATCH",
+        "url": "{{$env.SUPABASE_URL}}/rest/v1/videos?id=eq.{{$json.video_id}}",
+        "sendHeaders": true,
+        "headerParameters": {"parameters": [
+          {"name": "apikey", "value": "{{$env.SUPABASE_SERVICE_ROLE_KEY}}"}
+        ]},
+        "sendBody": true,
+        "jsonBody": "{\"status\": \"complete\", \"progress\": 100, \"video_url\": \"{{$json.url}}\"}"
+      }
+    },
+    {
+      "id": "cron-trends",
+      "name": "Cron Trends (6t)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [300, 600],
+      "parameters": {"triggerTimes": {"item": [{"mode": "everyX", "value": 6}]}}
+    },
+    {
+      "id": "groq-trends",
+      "name": "Groq Trends",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [500, 600],
+      "parameters": {"method": "POST", "url": "https://api.groq.com/openai/v1/chat/completions", "jsonBody": "{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"user\", \"content\": \"10 trending topics\"}]}"}
+    },
+    {
+      "id": "insert-trends",
+      "name": "Insert Trends",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [700, 600],
+      "parameters": {"method": "POST", "url": "{{$env.SUPABASE_URL}}/rest/v1/trending_topics", "jsonBody": "{\"title\": \"Trend\", \"active\": true}"}
+    },
+    {
+      "id": "cron-comments",
+      "name": "Cron Comments (30m)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [300, 900],
+      "parameters": {"triggerTimes": {"item": [{"mode": "everyX", "value": 30}]}}
+    },
+    {
+      "id": "get-comments",
+      "name": "Get Comments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [500, 900],
+      "parameters": {"method": "GET", "url": "{{$env.SUPABASE_URL}}/rest/v1/comments?limit=3"}
+    },
+    {
+      "id": "save-reply",
+      "name": "Save Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [700, 900],
+      "parameters": {"method": "POST", "url": "{{$env.SUPABASE_URL}}/rest/v1/comment_replies", "jsonBody": "{}"}
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "Set queued", "type": "main", "index": 0}]]},
+    "Set queued": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]},
+    "Respond": {"main": [[{"node": "Set scripting", "type": "main", "index": 0}]]},
+    "Set scripting": {"main": [[{"node": "Groq Script", "type": "main", "index": 0}]]},
+    "Groq Script": {"main": [[{"node": "Voice Map", "type": "main", "index": 0}]]},
+    "Voice Map": {"main": [[{"node": "Edge TTS", "type": "main", "index": 0}]]},
+    "Edge TTS": {"main": [[{"node": "Set recording", "type": "main", "index": 0}]]},
+    "Set recording": {"main": [[{"node": "Pixabay", "type": "main", "index": 0}]]},
+    "Pixabay": {"main": [[{"node": "Select Clip", "type": "main", "index": 0}]]},
+    "Select Clip": {"main": [[{"node": "Set editing", "type": "main", "index": 0}]]},
+    "Set editing": {"main": [[{"node": "Final Video", "type": "main", "index": 0}]]},
+    "Final Video": {"main": [[{"node": "Set complete", "type": "main", "index": 0}]]},
+    "Cron Trends (6t)": {"main": [[{"node": "Groq Trends", "type": "main", "index": 0}]]},
+    "Groq Trends": {"main": [[{"node": "Insert Trends", "type": "main", "index": 0}]]},
+    "Cron Comments (30m)": {"main": [[{"node": "Get Comments", "type": "main", "index": 0}]]},
+    "Get Comments": {"main": [[{"node": "Save Reply", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "active": true
+}
