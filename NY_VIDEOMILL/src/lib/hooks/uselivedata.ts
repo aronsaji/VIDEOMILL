@@ -27,24 +27,36 @@ function useRealtimeTable<T extends { id: string }>(
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    refresh();
+    let channelRef: ReturnType<typeof supabase.channel> | null = null;
+    let isMounted = true;
 
-    const channel = supabase
-      .channel(`${table}_changes_${Date.now()}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          setData(prev => [payload.new as T, ...prev]);
-        } else if (payload.eventType === 'UPDATE') {
-          setData(prev => prev.map(item =>
-            item.id === (payload.new as T).id ? (payload.new as T) : item
-          ));
-        } else if (payload.eventType === 'DELETE') {
-          setData(prev => prev.filter(item => item.id !== (payload.old as { id: string }).id));
-        }
-      })
-      .subscribe();
+    const setupChannel = async () => {
+      await refresh();
+      if (!isMounted) return;
 
-    return () => { supabase.removeChannel(channel); };
+      channelRef = supabase
+        .channel(`${table}_changes_${Date.now()}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+          if (!isMounted) return;
+          if (payload.eventType === 'INSERT') {
+            setData(prev => [payload.new as T, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setData(prev => prev.map(item =>
+              item.id === (payload.new as T).id ? (payload.new as T) : item
+            ));
+          } else if (payload.eventType === 'DELETE') {
+            setData(prev => prev.filter(item => item.id !== (payload.old as { id: string }).id));
+          }
+        });
+      await channelRef.subscribe();
+    };
+
+    setupChannel();
+
+    return () => {
+      isMounted = false;
+      if (channelRef) supabase.removeChannel(channelRef);
+    };
   }, [table]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error, refresh };
