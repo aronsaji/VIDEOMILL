@@ -27,11 +27,14 @@ function useRealtimeTable<T extends { id: string }>(
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    refresh();
-
-    const channel = supabase
-      .channel(`${table}_changes_${Date.now()}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+    const channelName = `${table}_changes_${Date.now()}`;
+    
+    const setupChannel = async () => {
+      await refresh();
+      
+      const channel = supabase.channel(channelName);
+      
+      channel.on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
         if (payload.eventType === 'INSERT') {
           setData(prev => [payload.new as T, ...prev]);
         } else if (payload.eventType === 'UPDATE') {
@@ -41,10 +44,19 @@ function useRealtimeTable<T extends { id: string }>(
         } else if (payload.eventType === 'DELETE') {
           setData(prev => prev.filter(item => item.id !== (payload.old as { id: string }).id));
         }
-      })
-      .subscribe();
+      });
+      
+      const { error } = await channel.subscribe();
+      if (error) {
+        console.error(`Realtime error for ${table}:`, error);
+      }
+    };
 
-    return () => { supabase.removeChannel(channel); };
+    setupChannel();
+
+    return () => {
+      supabase.removeChannel(channelName);
+    };
   }, [table]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error, refresh };
@@ -180,6 +192,30 @@ export function useSocialResponses() {
       .limit(50);
     if (error) throw error;
     return (data ?? []) as AgentReport[];
+  });
+}
+
+// Agent Logs — actual table: agent_logs
+// ─────────────────────────────────────────────────────────────
+export interface AgentLog {
+  id: string;
+  agent_id: string;
+  action: string;
+  status: string;
+  details?: Record<string, unknown> | null;
+  video_id?: string | null;
+  created_at: string;
+}
+
+export function useAgentLogs(limit = 20) {
+  return useRealtimeTable<AgentLog>('agent_logs', async () => {
+    const { data, error } = await supabase
+      .from('agent_logs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []) as AgentLog[];
   });
 }
 

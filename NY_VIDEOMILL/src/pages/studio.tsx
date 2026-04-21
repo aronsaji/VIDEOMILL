@@ -104,7 +104,7 @@ export default function Studio() {
                 language: 'nb',
                 platform: topic.platform || 'tiktok',
                 promp: topic.title,
-                voice_id: 'XB0fDUnXU5powFXDhCwa',
+voice_id: 'nb-NO-PernilleNeural',
                 aspect_ratio: '9:16',
               }),
             }
