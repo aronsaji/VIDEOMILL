@@ -23,7 +23,7 @@
             {
               "id": "video_id",
               "name": "video_id",
-              "value": "={{ $json.video_id }}",
+              "value": "={{ $json.body.video_id || crypto.randomUUID() }}",
               "type": "string"
             },
             {
