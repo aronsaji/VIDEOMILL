@@ -109,13 +109,13 @@ export default function Login() {
   );
 
   return (
-    <div className="min-h-screen bg-[#060609] flex items-center justify-center relative overflow-hidden p-4">
-      {backgroundDecor}
-
-      <div className="absolute top-5 right-5 flex items-center gap-2">
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center relative overflow-hidden p-4">
+      <div className="bg-animated" />
+      
+      <div className="absolute top-5 right-5 flex items-center gap-2 z-10">
         <button
           onClick={() => setLanguage(language === 'nb' ? 'en' : 'nb' as Language)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/8 text-white/45 hover:text-white/75 text-xs font-medium transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg glass text-white/50 hover:text-white text-xs font-medium transition-all"
         >
           <Globe size={12} />
           {language === 'nb' ? 'English' : 'Norsk'}
@@ -127,13 +127,13 @@ export default function Login() {
           <Logo size="lg" />
         </div>
 
-        <div className="bg-white/3 border border-white/8 rounded-2xl p-8 backdrop-blur-sm shadow-2xl shadow-black/40">
+        <div className="glass-card p-8">
 
           {mode === 'forgot' ? (
             <>
               <div className="text-center mb-7">
-                <div className="w-12 h-12 bg-teal-500/15 border border-teal-500/25 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Mail size={22} className="text-teal-400" />
+                <div className="w-12 h-12 bg-cyan-500/15 border border-cyan-500/25 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Mail size={22} className="text-cyan-400" />
                 </div>
                 <h1 className="text-2xl font-bold text-white">{t.auth.forgotPasswordTitle}</h1>
                 <p className="text-sm text-white/40 mt-1.5">{t.auth.forgotPasswordSubtitle}</p>
@@ -141,8 +141,8 @@ export default function Login() {
 
               {resetSent ? (
                 <div className="text-center">
-                  <div className="p-4 bg-teal-500/10 border border-teal-500/20 rounded-xl mb-6">
-                    <p className="text-sm font-semibold text-teal-400 mb-1">{t.auth.resetLinkSent}</p>
+                  <div className="p-4 glass border border-cyan-500/20 rounded-xl mb-6">
+                    <p className="text-sm font-semibold text-cyan-400 mb-1">{t.auth.resetLinkSent}</p>
                     <p className="text-xs text-white/50">{t.auth.resetLinkSentDesc}</p>
                   </div>
                   <button
@@ -163,12 +163,12 @@ export default function Login() {
                       onChange={e => setEmail(e.target.value)}
                       required
                       placeholder="navn@eksempel.no"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/8 transition-all"
+                      className="input-field"
                     />
                   </div>
 
                   {error && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <div className="p-3 glass border border-red-500/20 rounded-xl">
                       <p className="text-xs text-red-400">{error}</p>
                     </div>
                   )}
@@ -176,7 +176,7 @@ export default function Login() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-teal-500 hover:bg-teal-400 disabled:opacity-60 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-teal-500/20"
+                    className="w-full py-3 btn-primary"
                   >
                     {loading ? t.auth.sendingResetLink : t.auth.sendResetLink}
                   </button>
@@ -202,7 +202,7 @@ export default function Login() {
               <button
                 onClick={handleGoogleLogin}
                 disabled={googleLoading || loading}
-                className="w-full flex items-center justify-center gap-3 py-3 bg-white/6 hover:bg-white/10 border border-white/10 hover:border-white/18 text-white/80 text-sm font-medium rounded-xl transition-all disabled:opacity-50 mb-5"
+                className="w-full flex items-center justify-center gap-3 py-3 btn-secondary"
               >
                 {googleLoading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white/70 rounded-full animate-spin" />
@@ -222,16 +222,16 @@ export default function Login() {
                 <div className="flex-1 h-px bg-white/8" />
               </div>
 
-              <div className="flex gap-1 bg-white/4 p-1 rounded-xl border border-white/6 mb-5">
+              <div className="flex gap-1 glass p-1 rounded-xl mb-5">
                 <button
                   onClick={() => switchMode('login')}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'login' ? 'bg-teal-500/20 text-teal-400 border border-teal-500/25' : 'text-white/40 hover:text-white/70'}`}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${mode === 'login' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-white/40 hover:text-white/70'}`}
                 >
                   {t.auth.login}
                 </button>
                 <button
                   onClick={() => switchMode('register')}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'register' ? 'bg-teal-500/20 text-teal-400 border border-teal-500/25' : 'text-white/40 hover:text-white/70'}`}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${mode === 'register' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-white/40 hover:text-white/70'}`}
                 >
                   {t.auth.register}
                 </button>
@@ -246,7 +246,7 @@ export default function Login() {
                       value={name}
                       onChange={e => setName(e.target.value)}
                       placeholder="Ola Nordmann"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/8 transition-all"
+                      className="input-field"
                     />
                   </div>
                 )}
@@ -259,7 +259,7 @@ export default function Login() {
                     onChange={e => setEmail(e.target.value)}
                     required
                     placeholder="navn@eksempel.no"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/8 transition-all"
+                    className="input-field"
                   />
                 </div>
 
@@ -270,7 +270,7 @@ export default function Login() {
                       <button
                         type="button"
                         onClick={() => switchMode('forgot')}
-                        className="text-xs text-teal-400/70 hover:text-teal-400 transition-colors"
+                        className="text-xs text-cyan-400/70 hover:text-cyan-400 transition-colors"
                       >
                         {t.auth.forgotPassword}
                       </button>
@@ -283,7 +283,7 @@ export default function Login() {
                       onChange={e => setPassword(e.target.value)}
                       required
                       placeholder="••••••••"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-11 text-sm text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/8 transition-all"
+                      className="input-field pr-11"
                     />
                     <button
                       type="button"
@@ -304,13 +304,13 @@ export default function Login() {
                       onChange={e => setConfirmPassword(e.target.value)}
                       required
                       placeholder="••••••••"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/8 transition-all"
+                      className="input-field"
                     />
                   </div>
                 )}
 
                 {error && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                  <div className="p-3 glass border border-red-500/20 rounded-xl">
                     <p className="text-xs text-red-400">{error}</p>
                   </div>
                 )}
@@ -318,7 +318,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading || googleLoading}
-                  className="w-full py-3 bg-teal-500 hover:bg-teal-400 disabled:opacity-60 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-teal-500/20"
+                  className="w-full py-3 btn-primary"
                 >
                   {loading
                     ? (mode === 'login' ? t.auth.loggingIn : t.auth.registering)

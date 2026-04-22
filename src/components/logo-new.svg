@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <defs>
+    <!-- Gradient: Cyan to Orange -->
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#ff6b35"/>
+    </linearGradient>
+    
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Text glow -->
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background (optional, for dark mode) -->
+  <rect width="400" height="120" fill="none"/>
+  
+  <!-- PLAY BUTTON + V LOGO -->
+  <g transform="20, 20">
+    <!-- Outer circle -->
+    <circle cx="40" cy="40" r="38" fill="none" stroke="url(#logoGrad)" stroke-width="3" opacity="0.8"/>
+    
+    <!-- Inner glow circle -->
+    <circle cx="40" cy="40" r="30" fill="url(#logoGrad)" opacity="0.15"/>
+    
+    <!-- Play triangle -->
+    <polygon points="35,28 35,52 55,40" fill="#00d4ff" filter="url(#glow)"/>
+    
+    <!-- V letter overlaying -->
+    <text x="40" y="55" font-family="Inter, sans-serif" font-weight="800" font-size="28" fill="url(#logoGrad)" text-anchor="middle" filter="url(#textGlow)">V</text>
+  </g>
+  
+  <!-- TEXT: VideoMill -->
+  <text x="95" y="52" font-family="Inter, sans-serif" font-weight="700" font-size="32" fill="white" filter="url(#textGlow)">ideo</text>
+  <text x="175" y="52" font-family="Inter, sans-serif" font-weight="300" font-size="32" fill="url(#logoGrad)" filter="url(#textGlow)">Mill</text>
+  
+  <!-- TAGLINE: NON-STOP VIRAL ENGINE -->
+  <text x="95" y="82" font-family="Inter, sans-serif" font-weight="600" font-size="11" fill="#00d4ff" letter-spacing="3" opacity="0.9">NON-STOP VIRAL ENGINE</text>
+  
+  <!-- Animated dot (optional) -->
+  <circle cx="380" cy="35" r="4" fill="#ff6b35">
+    <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>

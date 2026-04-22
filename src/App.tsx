@@ -54,12 +54,23 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#060609] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/30 to-cyan-500/20 border border-teal-500/30 flex items-center justify-center animate-pulse">
-            <div className="w-4 h-4 rounded bg-teal-400/50" />
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center relative overflow-hidden">
+        <div className="bg-animated" />
+        <div className="flex flex-col items-center gap-6 z-10">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center animate-pulse-glow">
+              <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div className="absolute -inset-2 rounded-2xl bg-cyan-500/10 blur-xl animate-pulse" />
           </div>
-          <div className="text-white/30 text-sm">Loading...</div>
+          <div className="flex flex-col items-center gap-2">
+            <div className="text-white/60 text-sm font-medium">Laster VideoMill</div>
+            <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full animate-shimmer" style={{ width: '60%' }} />
+            </div>
+          </div>
         </div>
       </div>
     );

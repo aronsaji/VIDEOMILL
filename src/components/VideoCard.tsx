@@ -57,11 +57,11 @@ export function VideoCard({ video, onRetry }: VideoCardProps) {
   const videoUrl = video.video_url || (video.metadata as Record<string, unknown>)?.video_url_9x16 as string || (video.metadata as Record<string, unknown>)?.video_url_16x9 as string;
 
   return (
-    <div className="bg-[#111118] border border-white/6 rounded-xl p-4 hover:border-white/12 transition-all">
+    <div className="glass-card p-4 hover-lift cursor-pointer">
       <div className="flex items-start gap-3">
         {/* Platform icon */}
         {video.platform && (
-          <div className="mt-1">
+          <div className="mt-1 text-white/40">
             {platformIcon(video.platform)}
           </div>
         )}
@@ -78,13 +78,13 @@ export function VideoCard({ video, onRetry }: VideoCardProps) {
           {/* Progress bar */}
           {isActive && (
             <div className="mb-2">
-              <div className="flex items-center justify-between text-[10px] text-white/30 mb-1">
+              <div className="flex items-center justify-between text-[10px] text-white/40 mb-1">
                 <span>{video.sub_status ?? 'Behandler...'}</span>
                 <span>{video.progress ?? 0}%</span>
               </div>
-              <div className="h-1 bg-white/6 rounded-full overflow-hidden">
+              <div className="progress-track">
                 <div
-                  className="h-full bg-gradient-to-r from-[#1D9BF0] to-cyan-400 rounded-full transition-all duration-700"
+                  className="progress-bar"
                   style={{ width: `${video.progress ?? 0}%` }}
                 />
               </div>
@@ -115,7 +115,7 @@ export function VideoCard({ video, onRetry }: VideoCardProps) {
           {video.status === 'failed' && onRetry && (
             <button
               onClick={() => onRetry(video.id)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-medium rounded-lg hover:bg-orange-500/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 btn-accent text-xs font-medium"
             >
               <RefreshCw size={11} />
               {t.common?.retry || 'Retry'}
@@ -126,7 +126,7 @@ export function VideoCard({ video, onRetry }: VideoCardProps) {
               href={videoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1D9BF0]/10 border border-[#1D9BF0]/20 text-[#1D9BF0] text-xs font-medium rounded-lg hover:bg-[#1D9BF0]/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 btn-primary text-xs font-medium"
             >
               <ExternalLink size={11} />
               {t.distribution?.title === 'Distribusjon' ? 'Se video' : 'View'}

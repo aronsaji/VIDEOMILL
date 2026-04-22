@@ -30,8 +30,8 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
   const getLabel = (item: typeof navItems[0]) => language === 'en' ? item.label_en : item.label;
 
   return (
-    <aside className="w-64 h-full bg-[#15202B] border-r border-[#38444D] flex flex-col">
-      <div className="px-4 lg:px-5 py-4 lg:py-5 border-b border-[#38444D]">
+    <aside className="w-64 h-full glass border-r border-white/5 flex flex-col">
+      <div className="px-4 lg:px-5 py-4 lg:py-5 border-b border-white/5">
         <Logo size="md" />
       </div>
 
@@ -42,16 +42,16 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
             <button
               key={page}
               onClick={() => onNavigate(page)}
-              className={`w-full flex items-center gap-3 px-3 lg:px-4 py-3 rounded-xl lg:rounded-full text-[14px] lg:text-[15px] font-medium transition-all duration-150 ${
+              className={`w-full flex items-center gap-3 px-3 lg:px-4 py-3 rounded-xl lg:rounded-xl text-[14px] lg:text-[15px] font-medium transition-all duration-200 ${
                 active
-                  ? 'bg-[#1D9BF0]/15 text-[#1D9BF0]'
-                  : 'text-[#E7E9EA] hover:bg-white/5'
+                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
+                  : 'text-white/70 hover:bg-white/5 hover:text-white hover:border-white/10 border border-transparent'
               }`}
             >
               <span className="flex-shrink-0">{icon}</span>
               <span className="truncate">{language === 'en' ? label_en : label}</span>
               {badge && !active && (
-                <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#1D9BF0]/20 text-[#1D9BF0]">
+                <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/30">
                   {badge}
                 </span>
               )}
@@ -60,13 +60,13 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-[#38444D] space-y-2">
+      <div className="px-3 py-4 border-t border-white/5 space-y-2">
         <button
           onClick={() => onNavigate('settings')}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-full text-[15px] font-medium transition-all ${
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium transition-all ${
             current === 'settings'
-              ? 'bg-[#1D9BF0]/15 text-[#1D9BF0]'
-              : 'text-[#E7E9EA] hover:bg-white/5'
+              ? 'bg-cyan-500/15 text-cyan-400'
+              : 'text-white/70 hover:bg-white/5 hover:text-white'
           }`}
         >
           <Settings size={18} />
@@ -75,18 +75,18 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
 
         <button
           onClick={signOut}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-full text-[15px] font-medium text-[#F4212E] hover:bg-[#F4212E]/10 transition-all"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium text-red-400 hover:bg-red-500/10 transition-all"
         >
           <LogOut size={18} />
           {t.common.logout}
         </button>
 
-        <div className="mt-2 mx-1 px-4 py-3 rounded-2xl bg-[#1D9BF0]/10 border border-[#1D9BF0]/20">
+        <div className="mt-2 mx-1 px-4 py-3 rounded-2xl glass border border-cyan-500/20">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full bg-[#1D9BF0] animate-pulse" />
-            <span className="text-xs font-bold text-[#1D9BF0]">{t.common.systemActive}</span>
+            <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+            <span className="text-xs font-bold text-cyan-400">{t.common.systemActive}</span>
           </div>
-          <p className="text-xs text-[#8B98A5]">{t.common.nextScan} 2t 14min</p>
+          <p className="text-xs text-white/30">{t.common.nextScan} 2t 14min</p>
         </div>
       </div>
     </aside>
