@@ -14,7 +14,7 @@ const AGENT_CONFIG = {
     color: 'text-blue-400',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/30',
-    accent: 'from-blue-500/20 to-cyan-500/10',
+    accent: 'from-violet-500/20 to-teal-500/10',
     description: 'Operasjoner, effektivitet og produksjons-KPIer',
     schedule: 'Daglig kl 02:00',
   },
@@ -47,7 +47,7 @@ const AGENT_CONFIG = {
     color: 'text-red-400',
     bg: 'bg-red-500/10',
     border: 'border-red-500/30',
-    accent: 'from-red-500/20 to-orange-500/10',
+    accent: 'from-red-500/20 to-violet-500/10',
     description: 'Sikkerhet og ISO 27001 compliance',
     schedule: 'Hver time',
   },
@@ -67,9 +67,9 @@ const AGENT_CONFIG = {
     title: 'Social Media Agent',
     icon: MessageSquare,
     color: 'text-cyan-400',
-    bg: 'bg-cyan-500/10',
-    border: 'border-cyan-500/30',
-    accent: 'from-cyan-500/20 to-blue-500/10',
+    bg: 'bg-violet-500/10',
+    border: 'border-violet-500/30',
+    accent: 'from-violet-500/20 to-violet-600/10',
     description: 'Svarer automatisk på kommentarer og DMs',
     schedule: 'Ved webhook',
   },
@@ -77,10 +77,10 @@ const AGENT_CONFIG = {
     name: 'Watchdog',
     title: 'Video Failure Monitor',
     icon: Radar,
-    color: 'text-orange-400',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/30',
-    accent: 'from-orange-500/20 to-red-500/10',
+    color: 'text-teal-400',
+    bg: 'bg-teal-500/10',
+    border: 'border-teal-500/30',
+    accent: 'from-teal-500/20 to-violet-500/10',
     description: 'Oppdager og starter feilede videoer på nytt automatisk',
     schedule: 'Hvert 10. min',
   },
@@ -282,7 +282,7 @@ function AgentDetailCard({ report, config }: { report: any; config: any }) {
 
 function SocialResponseCard({ response }: { response: any }) {
   return (
-    <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
+    <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4">
       <div className="flex items-center gap-2 mb-3">
         <MessageSquare className="w-4 h-4 text-cyan-400" />
         <span className="text-sm font-medium text-cyan-400">Svar sendt</span>
@@ -296,7 +296,7 @@ function SocialResponseCard({ response }: { response: any }) {
           <p className="text-sm text-white/70 italic">"{response.original_message}"</p>
         </div>
       )}
-      <div className="mt-2 pt-2 border-t border-cyan-500/20">
+      <div className="mt-2 pt-2 border-t border-violet-500/20">
         <p className="text-xs text-cyan/40">Svar:</p>
         <p className="text-sm text-white">{response.message}</p>
       </div>

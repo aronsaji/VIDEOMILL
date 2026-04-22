@@ -98,12 +98,12 @@ export default function Studio() {
               onClick={() => handleCreate(topic)}
               disabled={generating || success}
               className={`glass-card p-4 text-left hover-lift transition-all ${
-                isSelected ? 'border-cyan-500/50' : ''
+                isSelected ? 'border-violet-500/50' : ''
               } ${(generating || success) ? 'opacity-50' : ''}`}
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  isDone ? 'bg-cyan-500' : generating ? 'bg-orange-500' : 'bg-white/10'
+                  isDone ? 'bg-violet-500' : generating ? 'bg-teal-500' : 'bg-white/10'
                 }`}>
                   {isDone ? (
                     <check size={18} className="text-white" />

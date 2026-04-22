@@ -99,7 +99,7 @@ export default function Login() {
   const backgroundDecor = (
     <div className="absolute inset-0 pointer-events-none">
       <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-teal-500/6 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[100px]" />
+      <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-[100px]" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-teal-600/3 rounded-full blur-[150px]" />
       <div
         className="absolute inset-0 opacity-[0.015]"
@@ -109,7 +109,7 @@ export default function Login() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center relative overflow-hidden p-4">
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center relative overflow-hidden p-4">
       <div className="bg-animated" />
       
       <div className="absolute top-5 right-5 flex items-center gap-2 z-10">
@@ -132,8 +132,8 @@ export default function Login() {
           {mode === 'forgot' ? (
             <>
               <div className="text-center mb-7">
-                <div className="w-12 h-12 bg-cyan-500/15 border border-cyan-500/25 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Mail size={22} className="text-cyan-400" />
+                <div className="w-12 h-12 bg-violet-500/15 border border-violet-500/25 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Mail size={22} className="text-violet-400" />
                 </div>
                 <h1 className="text-2xl font-bold text-white">{t.auth.forgotPasswordTitle}</h1>
                 <p className="text-sm text-white/40 mt-1.5">{t.auth.forgotPasswordSubtitle}</p>
@@ -141,8 +141,8 @@ export default function Login() {
 
               {resetSent ? (
                 <div className="text-center">
-                  <div className="p-4 glass border border-cyan-500/20 rounded-xl mb-6">
-                    <p className="text-sm font-semibold text-cyan-400 mb-1">{t.auth.resetLinkSent}</p>
+                  <div className="p-4 glass border border-violet-500/20 rounded-xl mb-6">
+                    <p className="text-sm font-semibold text-violet-400 mb-1">{t.auth.resetLinkSent}</p>
                     <p className="text-xs text-white/50">{t.auth.resetLinkSentDesc}</p>
                   </div>
                   <button
@@ -225,13 +225,13 @@ export default function Login() {
               <div className="flex gap-1 glass p-1 rounded-xl mb-5">
                 <button
                   onClick={() => switchMode('login')}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${mode === 'login' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-white/40 hover:text-white/70'}`}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${mode === 'login' ? 'bg-violet-500/15 text-violet-400 border border-violet-500/30' : 'text-white/40 hover:text-white/70'}`}
                 >
                   {t.auth.login}
                 </button>
                 <button
                   onClick={() => switchMode('register')}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${mode === 'register' ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' : 'text-white/40 hover:text-white/70'}`}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${mode === 'register' ? 'bg-violet-500/15 text-violet-400 border border-violet-500/30' : 'text-white/40 hover:text-white/70'}`}
                 >
                   {t.auth.register}
                 </button>
@@ -270,7 +270,7 @@ export default function Login() {
                       <button
                         type="button"
                         onClick={() => switchMode('forgot')}
-                        className="text-xs text-cyan-400/70 hover:text-cyan-400 transition-colors"
+                        className="text-xs text-violet-400/70 hover:text-violet-400 transition-colors"
                       >
                         {t.auth.forgotPassword}
                       </button>

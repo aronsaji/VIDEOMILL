@@ -216,7 +216,7 @@ export default function Engagement() {
           <div className="flex items-center gap-2 mb-4">
             <Zap size={14} className="text-orange-400" />
             <h2 className="text-sm font-semibold text-white">Under produksjon nå</h2>
-            <span className="text-xs bg-orange-500/15 text-orange-400 px-2 py-0.5 rounded-full ml-1">{activeVideos.length} aktive</span>
+            <span className="text-xs bg-violet-500/15 text-violet-400 px-2 py-0.5 rounded-full ml-1">{activeVideos.length} aktive</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {activeVideos.slice(0, 6).map(v => (

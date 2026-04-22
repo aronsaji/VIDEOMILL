@@ -607,7 +607,7 @@ export default function Bestilling() {
                         </span>
                         {trend.heat_level && (
                           <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${
-                            trend.heat_level === 'fire'   ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' :
+                            trend.heat_level === 'fire'   ? 'text-violet-400 bg-violet-500/10 border-violet-500/20' :
                             trend.heat_level === 'hot'    ? 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20' :
                             trend.heat_level === 'rising' ? 'text-teal-400   bg-teal-500/10   border-teal-500/20'   :
                                                             'text-white/30   bg-white/5        border-white/10'

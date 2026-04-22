@@ -133,8 +133,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                 stat.color === 'teal'   ? 'bg-teal-500/15 text-teal-400' :
                 stat.color === 'blue'  ? 'bg-blue-500/15 text-blue-400' :
-                stat.color === 'orange'? 'bg-orange-500/15 text-orange-400' :
-                                         'bg-cyan-500/15 text-cyan-400'
+stat.color === 'violet'? 'bg-violet-500/15 text-violet-400' :
+                                          'bg-teal-500/15 text-teal-400'
               }`}>
                 {stat.icon}
               </div>
@@ -289,7 +289,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                   className="flex items-start gap-3 p-3 rounded-lg bg-white/3 hover:bg-white/5 transition-colors group cursor-pointer"
                   onClick={() => { setPendingTrend(trend); onNavigate('bestilling'); }}
                 >
-                  <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/10 border border-teal-500/15 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-gradient-to-br bg-gradient-to-br from-violet-500/20 to-teal-500/10 border border-teal-500/15 flex items-center justify-center">
                     <span className="text-sm font-bold text-teal-400">{trend.viral_score ?? '—'}</span>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -298,7 +298,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                       <span className="text-[10px] text-white/35 capitalize">{trend.platform ?? '—'}</span>
                       {trend.heat_level && (
                         <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${
-                          trend.heat_level === 'fire'   ? 'bg-orange-500/15 text-orange-400' :
+                          trend.heat_level === 'fire'   ? 'bg-violet-500/15 text-violet-400' :
                           trend.heat_level === 'hot'    ? 'bg-yellow-500/15 text-yellow-400' :
                           trend.heat_level === 'rising' ? 'bg-teal-500/15 text-teal-400'     :
                           'bg-white/5 text-white/30'
@@ -444,7 +444,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       )}
 
       {/* ── System status banner ── */}
-      <div className="bg-gradient-to-r from-teal-500/10 to-cyan-500/5 border border-teal-500/15 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-violet-500/10 to-teal-500/5 border border-teal-500/15 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center flex-shrink-0">
             <Zap size={20} className="text-teal-400" />

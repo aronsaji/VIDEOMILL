@@ -669,7 +669,7 @@ export default function SeriesPage() {
                 <button
                   onClick={handleGenerate}
                   disabled={!seasonTitle.trim()}
-                  className="w-full flex items-center justify-center gap-2.5 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-white font-bold text-sm transition-all shadow-lg shadow-teal-500/20 active:scale-[0.99]"
+                  className="w-full flex items-center justify-center gap-2.5 py-4 bg-gradient-to-r from-violet-500 to-teal-500 hover:from-teal-400 hover:to-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-white font-bold text-sm transition-all shadow-lg shadow-teal-500/20 active:scale-[0.99]"
                 >
                   <Sparkles size={18} />
                   Generer {epCount} episoder automatisk
@@ -685,7 +685,7 @@ export default function SeriesPage() {
               <div className="flex justify-center">
                 <div className="relative w-20 h-20">
                   <div className="absolute inset-0 rounded-2xl bg-teal-500/20 animate-ping" />
-                  <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-500/30 to-cyan-500/20 border border-teal-500/30 flex items-center justify-center">
+                  <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-500/30 to-violet-500/20 border border-teal-500/30 flex items-center justify-center">
                     <Sparkles size={32} className="text-teal-400 animate-pulse" />
                   </div>
                 </div>
@@ -710,7 +710,7 @@ export default function SeriesPage() {
           {phase === 'preview' && (
             <div className="space-y-4">
               {/* Series summary */}
-              <div className="bg-gradient-to-r from-teal-500/10 to-cyan-500/5 border border-teal-500/20 rounded-2xl p-5">
+              <div className="bg-gradient-to-r from-teal-500/10 to-violet-500/5 border border-teal-500/20 rounded-2xl p-5">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-1">
@@ -768,7 +768,7 @@ export default function SeriesPage() {
               {/* Start production button */}
               <button
                 onClick={() => handleStartProduction()}
-                className="w-full flex items-center justify-center gap-3 py-5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 rounded-2xl text-white font-bold text-base transition-all shadow-xl shadow-teal-500/25 active:scale-[0.99]"
+                className="w-full flex items-center justify-center gap-3 py-5 bg-gradient-to-r from-violet-500 to-teal-500 hover:from-teal-400 hover:to-cyan-400 rounded-2xl text-white font-bold text-base transition-all shadow-xl shadow-teal-500/25 active:scale-[0.99]"
               >
                 <Play size={20} fill="currentColor" />
                 Start automatisk produksjon av alle {draftEpisodes.length} episoder
@@ -782,7 +782,7 @@ export default function SeriesPage() {
           {/* ── PHASE: producing ── */}
           {phase === 'producing' && (
             <div className="space-y-4">
-              <div className="bg-gradient-to-r from-teal-500/10 to-cyan-500/5 border border-teal-500/20 rounded-2xl p-5">
+              <div className="bg-gradient-to-r from-teal-500/10 to-violet-500/5 border border-teal-500/20 rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center">
                     <Film size={20} className="text-teal-400" />

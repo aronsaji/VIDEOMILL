@@ -31,11 +31,11 @@ const platformColors: Record<string, string> = {
 };
 
 const heatColors: Record<string, string> = {
-  fire:   'text-orange-500 bg-orange-500/10 border-orange-500/20',
-  hot:    'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
-  rising: 'text-[#00BA7C]   bg-[#00BA7C]/10   border-[#00BA7C]/20',
-  high:   'text-orange-500 bg-orange-500/10 border-orange-500/20',
-  medium: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
+  fire:   'text-violet-500 bg-violet-500/10 border-violet-500/20',
+  hot:    'text-teal-500 bg-teal-500/10 border-teal-500/20',
+  rising: 'text-[#8b5cf6]   bg-[#8b5cf6]/10   border-[#8b5cf6]/20',
+  high:   'text-violet-500 bg-violet-500/10 border-violet-500/20',
+  medium: 'text-teal-500 bg-teal-500/10 border-teal-500/20',
   low:    'text-[#8B98A5]  bg-white/5        border-white/10',
 };
 

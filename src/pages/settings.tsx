@@ -571,7 +571,7 @@ export default function Settings() {
       {/* ── Preferences ──────────────────────────────────────────────────── */}
       <div className="bg-[#111118] border border-white/6 rounded-xl p-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-orange-500/15 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center">
             <Bell size={17} className="text-orange-400" />
           </div>
           <h2 className="text-base font-semibold text-white">{t.settings.preferences}</h2>
