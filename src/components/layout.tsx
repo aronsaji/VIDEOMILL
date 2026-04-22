@@ -32,8 +32,9 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white relative">
+    <div className="min-h-screen bg-[#050505] text-white relative">
       <div className="bg-animated" />
+      <div className="neural-grid" />
       
       {/* Mobile menu button */}
       <button

@@ -56,31 +56,31 @@ export default function Logo({ size = 'md', showText = true, variant = 'default'
           <defs>
             <style>{css}</style>
 
-            {/* 🎨 Main gradient: Cyan → Orange (new brand colors!) */}
+            {/* 🎨 Main gradient: Violet → Teal (Obsidian & Violet theme!) */}
             <linearGradient id={gMain} x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#00d4ff" />     {/* Cyan */}
-              <stop offset="50%" stopColor="#00f5ff" />     {/* Bright cyan */}
-              <stop offset="100%" stopColor="#ff6b35" />   {/* Orange accent */}
+              <stop offset="0%" stopColor="#8b5cf6" />     {/* Violet */}
+              <stop offset="50%" stopColor="#a78bfa" />     {/* Light violet */}
+              <stop offset="100%" stopColor="#14b8a6" />   {/* Teal accent */}
             </linearGradient>
 
             {/* Accent gradient for play button */}
             <linearGradient id={gAccent} x1="20" y1="20" x2="44" y2="44" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-              <stop offset="40%" stopColor="#00d4ff" />
-              <stop offset="100%" stopColor="#ff6b35" stopOpacity="0.8" />
+              <stop offset="40%" stopColor="#8b5cf6" />
+              <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.8" />
             </linearGradient>
 
             {/* Deep background */}
             <linearGradient id={gBg} x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#0a0a0f" />
-              <stop offset="100%" stopColor="#0f0f1a" />
+              <stop offset="0%" stopColor="#050505" />
+              <stop offset="100%" stopColor="#0f0f14" />
             </linearGradient>
 
             {/* Orbit ring */}
             <linearGradient id={gOrbit} x1="0" y1="0" x2="64" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#00d4ff" stopOpacity="0.5" />
-              <stop offset="50%" stopColor="#00d4ff" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#ff6b35" stopOpacity="0.5" />
+              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.5" />
+              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.5" />
             </linearGradient>
 
             {/* ✨ Glow filter */}
@@ -112,7 +112,7 @@ export default function Logo({ size = 'md', showText = true, variant = 'default'
 
           {/* Inner subtle ring */}
           <rect x="5" y="5" width="54" height="54" rx="13" 
-            fill="none" stroke="#00d4ff" strokeWidth="0.3" opacity="0.25" />
+            fill="none" stroke="#8b5cf6" strokeWidth="0.3" opacity="0.25" />
 
           {/* 🎬 Rotating blades (mill effect) */}
           <g className={`vml-spin-${uid}`} style={{ transformOrigin: `${dim/2}px ${dim/2}px` }}>
@@ -137,7 +137,7 @@ export default function Logo({ size = 'md', showText = true, variant = 'default'
             className={`vml-spinR-${uid}`} />
 
           {/* Central glow */}
-          <circle cx="32" cy="32" r="14" fill="#00d4ff" opacity="0.08" className={`vml-glow-${uid}`} />
+          <circle cx="32" cy="32" r="14" fill="#8b5cf6" opacity="0.08" className={`vml-glow-${uid}`} />
 
           {/* ▶ Play button */}
           <path
@@ -148,7 +148,7 @@ export default function Logo({ size = 'md', showText = true, variant = 'default'
           />
 
           {/* Status LED */}
-          <circle cx="50" cy="14" r="3" fill="#ff6b35" filter={`url(#${fGlow})`} className={`vml-blink-${uid}`} />
+          <circle cx="50" cy="14" r="3" fill="#14b8a6" filter={`url(#${fGlow})`} className={`vml-blink-${uid}`} />
         </svg>
       </div>
 
@@ -156,9 +156,9 @@ export default function Logo({ size = 'md', showText = true, variant = 'default'
       {showText && (
         <div className="relative">
           <div className={`font-bold tracking-tight leading-none text-white ${textClass}`}>
-            Video<span className="bg-gradient-to-r from-cyan-400 to-orange-500 bg-clip-text text-transparent">Mill</span>
+            Video<span className="bg-gradient-to-r from-violet-400 to-teal-400 bg-clip-text text-transparent">Mill</span>
           </div>
-          <div className={`font-semibold leading-none mt-0.5 bg-gradient-to-r from-cyan-400 to-orange-500 bg-clip-text text-transparent ${subClass}`}>
+          <div className={`font-semibold leading-none mt-0.5 bg-gradient-to-r from-violet-400 to-teal-400 bg-clip-text text-transparent ${subClass}`}>
             NON-STOP VIRAL ENGINE
           </div>
         </div>
