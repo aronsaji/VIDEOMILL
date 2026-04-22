@@ -6,3 +6,4 @@
  * fortsetter å fungere uten endringer.
  */
 export { supabase, getSupabaseClient } from './supabaseClient';
+export { createOrder, createProduction, updateVideoStatus } from './hooks/uselivedata';
