@@ -3,6 +3,7 @@ import { Page } from '../lib/types';
 import { useLanguage } from '../contexts/languageContext';
 import { useAuth } from '../contexts/authContext';
 import Logo from './logo';
+import { motion } from 'framer-motion';
 
 interface SidebarProps {
   current: Page;
@@ -15,7 +16,7 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
 
   const navItems: { page: Page; label: string; label_en: string; icon: React.ReactNode; badge?: string }[] = [
     { page: 'dashboard',    label: t.nav.dashboard,    label_en: 'Dashboard',    icon: <LayoutDashboard size={20} /> },
-    { page: 'studio',       label: 'Studio Pro',       label_en: 'Studio Pro',       icon: <Clapperboard size={20} />, badge: 'NY' },
+    { page: 'studio',       label: 'Command Center', label_en: 'Command Center', icon: <Clapperboard size={20} />, badge: 'NY' },
     { page: 'series',       label: 'Auto-Serie',       label_en: 'Auto Series',       icon: <Layers size={20} />,       badge: 'AI' },
     { page: 'bestilling',   label: t.nav.bestilling,   label_en: 'Orders',   icon: <ShoppingCart size={20} /> },
     { page: 'trends',       label: t.nav.trends,       label_en: 'Trends',       icon: <TrendingUp size={20} /> },
@@ -30,8 +31,8 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
   const getLabel = (item: typeof navItems[0]) => language === 'en' ? item.label_en : item.label;
 
   return (
-    <aside className="w-64 h-full glass border-r border-white/5 flex flex-col">
-      <div className="px-4 lg:px-5 py-4 lg:py-5 border-b border-white/5">
+    <aside className="w-64 h-full bg-[#050505]/80 glass border-r border-violet-500/10 flex flex-col backdrop-blur-xl">
+      <div className="px-4 lg:px-5 py-4 lg:py-5 border-b border-violet-500/10">
         <Logo size="md" />
       </div>
 
@@ -39,23 +40,33 @@ export default function Sidebar({ current, onNavigate }: SidebarProps) {
         {navItems.map(({ page, label, label_en, icon, badge }) => {
           const active = current === page;
           return (
-            <button
+            <motion.button
               key={page}
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate(page)}
-              className={`w-full flex items-center gap-3 px-3 lg:px-4 py-3 rounded-xl lg:rounded-xl text-[14px] lg:text-[15px] font-medium transition-all duration-200 ${
+              className={`w-full flex items-center gap-3 px-3 lg:px-4 py-3 rounded-xl text-[14px] lg:text-[15px] font-medium transition-all duration-200 ${
                 active
-                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white hover:border-white/10 border border-transparent'
+                  ? 'bg-violet-500/15 text-violet-400 border border-violet-500/30 shadow-[0_0_20px_rgba(139,92,246,0.1)]'
+                  : 'text-white/60 hover:bg-white/5 hover:text-white hover:border-white/10 border border-transparent'
               }`}
             >
-              <span className="flex-shrink-0">{icon}</span>
+              <span className={`flex-shrink-0 transition-colors ${active ? 'text-violet-400' : 'text-white/40'}`}>{icon}</span>
               <span className="truncate">{language === 'en' ? label_en : label}</span>
               {badge && !active && (
-                <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/30">
+                <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-violet-500/20 to-teal-500/20 text-violet-400 border border-violet-500/30">
                   {badge}
                 </span>
               )}
-            </button>
+              {active && (
+                <motion.div 
+                  layoutId="activeIndicator"
+                  className="ml-auto w-1.5 h-1.5 rounded-full bg-violet-400"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                />
+              )}
+            </motion.button>
           );
         })}
       </nav>
