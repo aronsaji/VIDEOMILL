@@ -57,7 +57,7 @@ export default function Layout({ children, currentPage, onNavigate }: LayoutProp
         <Sidebar current={currentPage} onNavigate={(page) => { onNavigate(page); setSidebarOpen(false); }} />
       </div>
 
-      <main className="lg:pl-64 min-h-screen relative">
+      <main className="lg:pl-20 min-h-screen relative">
         <header className="sticky top-0 z-20 glass border-b border-white/5 px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between gap-3">
             <div className="pl-12 lg:pl-0">
