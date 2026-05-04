@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { triggerProduction } from '../lib/api';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const VOICE_MAP: Record<string, Record<string, string>> = {
   'Norsk': {
@@ -30,10 +31,6 @@ const ADDITIONAL_VOICES = [
   { id: 'nb-NO-FinnNeural', label: 'Finn (Strong Norsk)', lang: 'NO' },
   { id: 'ta-IN-PallaviNeural', label: 'Pallavi (Tamil Female)', lang: 'TA' },
 ];
-
-import { useNavigate } from 'react-router-dom';
-import { triggerProduction } from '../lib/api';
-import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Factory() {
   const { language: globalLang, t } = useLanguage();

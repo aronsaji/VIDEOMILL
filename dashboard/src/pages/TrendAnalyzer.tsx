@@ -8,8 +8,10 @@ import {
 } from 'lucide-react';
 import type { TrendingTopic } from '../types';
 import { triggerProduction } from '../lib/api';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function TrendAnalyzer() {
+  const { t } = useLanguage();
   const { trends = [], isLoading, fetchInitialData, fetchTrends } = usePipelineStore();
   const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'youtube' | 'instagram' | 'snapchat'>('all');
   const [countryFilter, setCountryFilter] = useState('all');
