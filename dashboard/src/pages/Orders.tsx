@@ -43,7 +43,11 @@ export default function Orders() {
     // AUTO-SELECT VOICE
     const selectedVoice = VOICE_MAP[language]?.[gender] || 'nb-NO-PernilleNeural';
 
+    const orderId = crypto.randomUUID();
+
     const success = await triggerProduction({
+      id: orderId,
+      video_id: orderId,
       action: 'MANUAL_START',
       title: topic,
       topic: topic,

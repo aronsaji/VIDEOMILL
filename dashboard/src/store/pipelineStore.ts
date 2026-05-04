@@ -41,14 +41,19 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
   fetchOrders: async () => {
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
+      // Hent fra både orders og productions for å være sikker
+      const [ordersRes, productionsRes] = await Promise.all([
+        supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50),
+        supabase.from('productions').select('*').order('created_at', { ascending: false }).limit(50)
+      ]);
 
-      if (error) throw error;
-      set({ orders: data || [] });
+      console.log('🔍 SUPABASE RAW ORDERS:', { orders: ordersRes.data, productions: productionsRes.data });
+
+      // Slå sammen og fjern eventuelle duplikater basert på ID
+      const allData = [...(ordersRes.data || []), ...(productionsRes.data || [])];
+      const uniqueOrders = Array.from(new Map(allData.map(item => [item.id, item])).values());
+
+      set({ orders: uniqueOrders });
     } catch (err) {
       console.error('Feil ved henting av ordrer:', err);
       set({ orders: [] });
@@ -116,6 +121,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     const channel = supabase
       .channel('db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => get().fetchOrders())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'productions' }, () => get().fetchOrders())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, () => get().fetchTrends())
       .subscribe();
 
