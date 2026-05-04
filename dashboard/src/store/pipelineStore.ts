@@ -60,7 +60,8 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
       ...orderData
     } as Order;
 
-    set(state => ({ orders: [newOrder, ...state.orders] }));
+    const currentOrders = get().orders || [];
+    set({ orders: [newOrder, ...currentOrders] });
 
     if (!IS_MOCK) {
       try {
@@ -68,11 +69,9 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
         const { error } = await supabase.from('orders').insert(orderWithoutId as any);
         if (error) {
           console.error('Failed to insert order to Supabase:', error);
-          alert('DATABASE ERROR:\n' + error.message + '\n\nDetails: ' + error.details);
         }
       } catch (err: any) {
         console.error('Error inserting order:', err);
-        alert('CRITICAL ERROR:\n' + (err.message || String(err)));
       }
     }
   },
@@ -112,22 +111,24 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
       supabase.channel('db-changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
           const { orders } = get();
+          const currentOrders = orders || [];
           if (payload.eventType === 'INSERT') {
-            set({ orders: [payload.new as Order, ...orders] });
+            set({ orders: [payload.new as Order, ...currentOrders] });
           } else if (payload.eventType === 'UPDATE') {
-            set({ orders: orders.map(o => o.id === payload.new.id ? payload.new as Order : o) });
+            set({ orders: currentOrders.map(o => o.id === payload.new.id ? payload.new as Order : o) });
           } else if (payload.eventType === 'DELETE') {
-            set({ orders: orders.filter(o => o.id !== (payload.old as Order).id) });
+            set({ orders: currentOrders.filter(o => o.id !== (payload.old as Order).id) });
           }
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, (payload) => {
           const { trends } = get();
+          const currentTrends = trends || [];
           if (payload.eventType === 'INSERT') {
-            set({ trends: [...trends, payload.new as TrendingTopic].sort((a, b) => b.viral_score - a.viral_score) });
+            set({ trends: [...currentTrends, payload.new as TrendingTopic].sort((a, b) => b.viral_score - a.viral_score) });
           } else if (payload.eventType === 'UPDATE') {
-            set({ trends: trends.map(t => t.id === payload.new.id ? payload.new as TrendingTopic : t) });
+            set({ trends: currentTrends.map(t => t.id === payload.new.id ? payload.new as TrendingTopic : t) });
           } else if (payload.eventType === 'DELETE') {
-            set({ trends: trends.filter(t => t.id !== (payload.old as TrendingTopic).id) });
+            set({ trends: currentTrends.filter(t => t.id !== (payload.old as TrendingTopic).id) });
           }
         })
         .subscribe();

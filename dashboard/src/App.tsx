@@ -5,14 +5,14 @@ import { usePipelineStore } from './store/pipelineStore';
 import { Play, Activity, Flame, ArrowUpRight } from 'lucide-react';
 
 function App() {
-  const { videos, trends, fetchInitialData, subscribeToChanges, isLoading } = usePipelineStore();
-
+  const { orders, trends, fetchInitialData, subscribeToChanges, isLoading } = usePipelineStore();
+  
   useEffect(() => {
     fetchInitialData();
     subscribeToChanges();
   }, []);
 
-  const activeVideo = videos[0]; // For demonstration, show the most recent video in the pipeline
+  const activeVideo = orders[0]; // For demonstration, show the most recent video in the pipeline
 
   return (
     <Layout>
@@ -43,18 +43,18 @@ function App() {
             </div>
 
             {/* Pipeline Flow Visualization */}
-            <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full">
-              {activeVideo ? (
-                <div className="flex flex-col gap-4">
-                  <PipelineNode title="1. Trend Ingestion" status={activeVideo.progress >= 0 ? 'complete' : 'pending'} details="Sourced from RSS" />
-                  <PipelineConnector active={activeVideo.progress >= 10} />
-                  <PipelineNode title="2. AI Scripting" status={activeVideo.status === 'scripting' ? 'active' : activeVideo.progress > 10 ? 'complete' : 'pending'} details={activeVideo.status === 'scripting' ? activeVideo.sub_status || 'Waiting...' : ''} />
-                  <PipelineConnector active={activeVideo.progress >= 50} />
-                  <PipelineNode title="3. Video Rendering" status={activeVideo.status === 'rendering' ? 'active' : activeVideo.progress >= 90 ? 'complete' : 'pending'} details="Edge-TTS + FFmpeg" />
-                  <PipelineConnector active={activeVideo.progress >= 100} />
-                  <PipelineNode title="4. Distribution" status={activeVideo.status === 'complete' ? 'complete' : 'pending'} details="Ready for upload" />
-                </div>
-              ) : (
+              <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full">
+                {activeVideo ? (
+                  <div className="flex flex-col gap-4">
+                    <PipelineNode title="1. Trend Ingestion" status={activeVideo.progress >= 0 ? 'complete' : 'pending'} details="Sourced from RSS" />
+                    <PipelineConnector active={activeVideo.progress >= 10} />
+                    <PipelineNode title="2. AI Scripting" status={activeVideo.status === 'script_generation' ? 'active' : activeVideo.progress > 10 ? 'complete' : 'pending'} details={activeVideo.status === 'script_generation' ? activeVideo.sub_status || 'Waiting...' : ''} />
+                    <PipelineConnector active={activeVideo.progress >= 50} />
+                    <PipelineNode title="3. Video Rendering" status={activeVideo.status === 'rendering' ? 'active' : activeVideo.progress >= 90 ? 'complete' : 'pending'} details="Edge-TTS + FFmpeg" />
+                    <PipelineConnector active={activeVideo.progress >= 100} />
+                    <PipelineNode title="4. Distribution" status={activeVideo.status === 'complete' ? 'complete' : 'pending'} details="Ready for upload" />
+                  </div>
+                ) : (
                 <div className="flex items-center justify-center h-full text-gray-500 font-mono text-sm">
                   WAITING FOR NEW TREND SIGNAL...
                 </div>
@@ -62,23 +62,23 @@ function App() {
             </div>
           </div>
 
-          {/* Recent Generations */}
-          <div className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm">
-            <h2 className="font-mono text-sm text-gray-400 mb-4 uppercase">Generation History</h2>
-            <div className="space-y-2">
-              {videos.slice(1, 5).map(v => (
-                <div key={v.id} className="flex justify-between items-center py-3 border-b border-border/50 hover:bg-white/5 px-2 rounded transition-colors cursor-pointer">
-                  <div>
-                    <p className="text-gray-200 text-sm font-medium">{v.title}</p>
-                    <p className="text-xs font-mono text-gray-500">{v.video_id} • {new Date(v.created_at).toLocaleTimeString()}</p>
-                  </div>
-                  <span className={`font-mono text-xs px-2 py-1 rounded ${v.status === 'complete' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-neon-amber/10 text-neon-amber border border-neon-amber/20'}`}>
-                    {v.status.toUpperCase()}
-                  </span>
+              {/* Recent Generations */}
+              <div className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm">
+                <h2 className="font-mono text-sm text-gray-400 mb-4 uppercase">Generation History</h2>
+                <div className="space-y-2">
+                  {orders.slice(1, 5).map(v => (
+                    <div key={v.id} className="flex justify-between items-center py-3 border-b border-border/50 hover:bg-white/5 px-2 rounded transition-colors cursor-pointer">
+                      <div>
+                        <p className="text-gray-200 text-sm font-medium">{v.title}</p>
+                        <p className="text-xs font-mono text-gray-500">{v.video_id} • {new Date(v.created_at).toLocaleTimeString()}</p>
+                      </div>
+                      <span className={`font-mono text-xs px-2 py-1 rounded ${v.status === 'complete' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-neon-amber/10 text-neon-amber border border-neon-amber/20'}`}>
+                        {v.status.toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
         </div>
 
         {/* Side Panels - Trend Radar */}
