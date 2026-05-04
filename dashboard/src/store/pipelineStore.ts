@@ -67,8 +67,10 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
       if (error) throw error;
       
-      // Sorter lokalt i appen i stedet (nyeste først)
-      const sortedData = (data || []).sort((a: any, b: any) => {
+      // Fjern duplikater basert på tittel og sorter (nyeste først)
+      const uniqueData = Array.from(new Map(data?.map(item => [item.title, item])).values());
+      
+      const sortedData = (uniqueData || []).sort((a: any, b: any) => {
         const dateA = new Date(a.updated_at || 0).getTime();
         const dateB = new Date(b.updated_at || 0).getTime();
         return dateB - dateA;
