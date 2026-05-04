@@ -93,3 +93,16 @@ body {
 .card-cyber {
   @apply transition-all duration-500 border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#bc13fe]/30;
 }
+
+/* HIGH CONTRAST OVERRIDES FOR LEGIBILITY */
+@layer utilities {
+  .text-gray-400 { color: #f8fafc !important; }
+  .text-gray-500 { color: #f1f5f9 !important; font-weight: 600 !important; }
+  .text-gray-600 { color: #e2e8f0 !important; font-weight: 600 !important; }
+  .text-gray-700 { color: #cbd5e1 !important; }
+}
+
+.glass-ultra select option {
+  background-color: #05060f !important;
+  color: white !important;
+}

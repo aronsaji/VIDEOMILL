@@ -77,7 +77,7 @@ export default function TrendAnalyzer() {
           </motion.div>
           <div className="space-y-2">
             <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
-              Trend <span className="text-neon-cyan">Radar</span>
+              Trend <span className="text-neon-cyan">Radar</span> <span className="text-xs text-neon-cyan/40 align-top ml-3 font-mono">v4.2</span>
             </h1>
             <div className="flex items-center gap-4">
                <div className="h-[1px] w-16 bg-neon-cyan/50" />
@@ -91,19 +91,19 @@ export default function TrendAnalyzer() {
             <select 
               value={countryFilter}
               onChange={e => setCountryFilter(e.target.value)}
-              className="bg-white/[0.02] border border-white/5 rounded-[18px] px-6 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-gray-500 hover:text-white transition-all appearance-none cursor-pointer min-w-[140px]"
+              className="bg-white/[0.02] border border-white/5 rounded-[18px] px-6 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-white hover:bg-white/5 transition-all appearance-none cursor-pointer min-w-[160px]"
             >
-              <option value="all">ALL_REGIONS</option>
-              {countries.map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+              <option value="all">{t('trends.all_regions')}</option>
+              {countries.map(c => <option key={c} value={c} className="bg-[#05060f]">{c.toUpperCase()}</option>)}
             </select>
 
             <select 
               value={languageFilter}
               onChange={e => setLanguageFilter(e.target.value)}
-              className="bg-white/[0.02] border border-white/5 rounded-[18px] px-6 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-gray-500 hover:text-white transition-all appearance-none cursor-pointer min-w-[140px]"
+              className="bg-white/[0.02] border border-white/5 rounded-[18px] px-6 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-white hover:bg-white/5 transition-all appearance-none cursor-pointer min-w-[160px]"
             >
-              <option value="all">ALL_LANGUAGES</option>
-              {languages.map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
+              <option value="all">{t('trends.all_languages')}</option>
+              {languages.map(l => <option key={l} value={l} className="bg-[#05060f]">{l.toUpperCase()}</option>)}
             </select>
           </div>
 

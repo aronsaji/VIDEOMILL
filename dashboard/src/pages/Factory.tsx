@@ -31,11 +31,16 @@ const ADDITIONAL_VOICES = [
   { id: 'ta-IN-PallaviNeural', label: 'Pallavi (Tamil Female)', lang: 'TA' },
 ];
 
+import { useNavigate } from 'react-router-dom';
+import { triggerProduction } from '../lib/api';
+import { useLanguage } from '../contexts/LanguageContext';
+
 export default function Factory() {
+  const { language: globalLang, t } = useLanguage();
   const navigate = useNavigate();
   const [topic, setTopic] = useState('');
   const [gender, setGender] = useState<'Female' | 'Male'>('Female');
-  const [language, setLanguage] = useState('Norsk');
+  const [language, setLanguage] = useState(globalLang === 'no' ? 'Norsk' : 'English');
   const [instructions, setInstructions] = useState('');
   const [isProducing, setIsProducing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,11 +101,10 @@ export default function Factory() {
             Neural Synthesis Core
           </motion.div>
           <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-            The <span className="text-neon-cyan">Factory</span>
+            {t('factory.title')}
           </h1>
-          <p className="text-gray-500 max-w-lg font-medium leading-relaxed">
-            Conceptualize and deploy cinematic content directly to the distribution grid. 
-            Real-time visual rendering and neural voice synthesis active.
+          <p className="text-gray-500 max-w-lg font-medium leading-relaxed italic uppercase tracking-tight text-xs">
+            {t('factory.subtitle')}
           </p>
         </div>
 
