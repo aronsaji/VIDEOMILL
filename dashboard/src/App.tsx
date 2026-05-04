@@ -6,6 +6,7 @@ import TrendAnalyzer from './pages/TrendAnalyzer';
 import Library from './pages/Library';
 import Settings from './pages/Settings';
 import Orders from './pages/Orders';
+import Login from './pages/Login';
 import Agents from './pages/Agents';
 
 import React, { useEffect } from 'react';
@@ -30,6 +31,7 @@ function App() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/login" element={<Login />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

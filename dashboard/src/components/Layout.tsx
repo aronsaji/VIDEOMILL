@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity, LayoutDashboard, Settings, Video, Terminal, Film, Library, List } from 'lucide-react';
+import { Activity, LayoutDashboard, Settings, Video, Film, Library, List, Bot, LogIn } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import Logo from './Logo';
 
 const SidebarIcon = ({ icon: Icon, to, active = false }: { icon: any; to: string; active?: boolean }) => (
   <Link
@@ -29,7 +30,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         className="w-20 bg-surface border-r border-border flex flex-col items-center py-6 gap-8 z-10"
       >
         <div className="text-neon-cyan">
-          <Terminal size={32} />
+          <Logo size="md" />
         </div>
         <nav className="flex flex-col gap-4 flex-1 mt-4">
           <SidebarIcon icon={LayoutDashboard} to="/" active={location.pathname === '/'} />
@@ -37,8 +38,12 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           <SidebarIcon icon={Library} to="/library" active={location.pathname === '/library'} />
           <SidebarIcon icon={List} to="/orders" active={location.pathname === '/orders'} />
           <SidebarIcon icon={Activity} to="/trends" active={location.pathname === '/trends'} />
+          <SidebarIcon icon={Bot} to="/agents" active={location.pathname === '/agents'} />
         </nav>
-        <SidebarIcon icon={Settings} to="/settings" active={location.pathname === '/settings'} />
+        <div className="flex flex-col gap-4 mb-4">
+          <SidebarIcon icon={Settings} to="/settings" active={location.pathname === '/settings'} />
+          <SidebarIcon icon={LogIn} to="/login" active={location.pathname === '/login'} />
+        </div>
       </motion.aside>
 
 
@@ -60,14 +65,14 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
           className="h-20 border-b border-border flex items-center px-8 justify-between z-10 bg-surface/50 backdrop-blur-md"
         >
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-              VIDEOMILL
-              <span className="text-xs font-mono bg-neon-amber/20 text-neon-amber px-2 py-0.5 rounded border border-neon-amber/30 uppercase">
+          <div className="flex flex-col">
+            <Logo size="md" />
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] font-mono bg-neon-amber/20 text-neon-amber px-2 py-0.5 rounded border border-neon-amber/30 uppercase">
                 ERP Active
               </span>
-            </h1>
-            <p className="text-xs text-gray-400 font-mono mt-1">THE NON-STOP VIRAL ENGINE // v2.0</p>
+              <p className="text-[10px] text-gray-500 font-mono">v2.0 // LIVE PRODUCTION</p>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">

@@ -80,6 +80,39 @@ export default function Settings() {
             </div>
           </div>
         </section>
+
+        {/* Social Media Integrations */}
+        <section className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm">
+          <div className="flex items-center gap-2 mb-4 border-b border-border/50 pb-3">
+            <Shield size={18} className="text-rose-400" />
+            <h2 className="text-lg font-medium text-white">Sosiale Medier & Publisering</h2>
+          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-black/20 border border-border rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-white">TikTok</span>
+                  <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 text-[10px] font-bold">AKTIV</span>
+                </div>
+                <button className="w-full py-1.5 bg-white/5 hover:bg-white/10 border border-border rounded text-xs text-gray-300 transition-all">Konfigurer Keys</button>
+              </div>
+              <div className="p-4 bg-black/20 border border-border rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-white">YouTube</span>
+                  <span className="px-1.5 py-0.5 rounded bg-gray-500/10 text-gray-500 text-[10px] font-bold">FRAKOBLET</span>
+                </div>
+                <button className="w-full py-1.5 bg-neon-cyan/10 hover:bg-neon-cyan/20 border border-neon-cyan/30 rounded text-xs text-neon-cyan transition-all">Koble til API</button>
+              </div>
+              <div className="p-4 bg-black/20 border border-border rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-white">Instagram</span>
+                  <span className="px-1.5 py-0.5 rounded bg-gray-500/10 text-gray-500 text-[10px] font-bold">FRAKOBLET</span>
+                </div>
+                <button className="w-full py-1.5 bg-neon-cyan/10 hover:bg-neon-cyan/20 border border-neon-cyan/30 rounded text-xs text-neon-cyan transition-all">Koble til API</button>
+              </div>
+            </div>
+          </div>
+        </section>
         
         <div className="flex justify-end border-t border-border/50 pt-4">
           <SecureAction actionName="Lagre Systeminnstillinger" onVerify={() => alert('Innstillinger lagret sikkert med MFA!')}>
