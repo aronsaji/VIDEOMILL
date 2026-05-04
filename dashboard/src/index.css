@@ -92,12 +92,20 @@ body {
   @apply transition-all duration-500 border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#bc13fe]/30;
 }
 
-/* HIGH CONTRAST OVERRIDES FOR LEGIBILITY */
+/* HIGH CONTRAST OVERRIDES FOR LEGIBILITY - NUCLEAR VERSION */
 @layer utilities {
-  .text-gray-400 { color: #f8fafc !important; }
-  .text-gray-500 { color: #f1f5f9 !important; font-weight: 600 !important; }
-  .text-gray-600 { color: #e2e8f0 !important; font-weight: 600 !important; }
-  .text-gray-700 { color: #cbd5e1 !important; }
+  .text-gray-400 { color: #ffffff !important; font-weight: 700 !important; }
+  .text-gray-500 { color: #f8fafc !important; font-weight: 700 !important; }
+  .text-gray-600 { color: #f1f5f9 !important; font-weight: 700 !important; }
+  .text-gray-700 { color: #e2e8f0 !important; font-weight: 700 !important; }
+  .text-gray-800 { color: #cbd5e1 !important; font-weight: 700 !important; }
+  
+  /* Force all small tactical text to be bright */
+  .text-\[9px\], .text-\[10px\], .text-xs {
+    color: #ffffff !important;
+    letter-spacing: 0.1em !important;
+    font-weight: 800 !important;
+  }
 }
 
 .glass-ultra select option {
