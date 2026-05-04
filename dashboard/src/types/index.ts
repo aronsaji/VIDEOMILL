@@ -78,6 +78,23 @@ export interface PerformanceSnapshot {
   created_at: string;
 }
 
+export interface AgentReport {
+  id: string;
+  agent_id: string;
+  report: string;
+  recommendations: string[];
+  alerts: string[];
+  created_at: string;
+  metadata?: Record<string, any>;
+}
+
+export interface AgentSetting {
+  user_id: string;
+  agent_id: string;
+  enabled: boolean;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -95,6 +112,16 @@ export interface Database {
         Row: PerformanceSnapshot;
         Insert: Omit<PerformanceSnapshot, 'id' | 'created_at'>;
         Update: Partial<PerformanceSnapshot>;
+      };
+      agent_reports: {
+        Row: AgentReport;
+        Insert: Omit<AgentReport, 'id' | 'created_at'>;
+        Update: Partial<AgentReport>;
+      };
+      agent_settings: {
+        Row: AgentSetting;
+        Insert: AgentSetting;
+        Update: Partial<AgentSetting>;
       };
     };
   };

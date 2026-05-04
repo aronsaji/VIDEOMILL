@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
-import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader } from 'lucide-react';
+import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader, Send } from 'lucide-react';
+import { triggerProduction } from '../lib/api';
 import type { OrderStatus } from '../types';
 
 export default function Orders() {
@@ -19,21 +20,42 @@ export default function Orders() {
   const [language, setLanguage] = useState('Norsk');
   const [instructions, setInstructions] = useState('');
 
-  const handleCreateOrder = () => {
-    usePipelineStore.getState().addOrder({
-      title: topic || 'New Manual Video',
-      topic: topic || 'Custom',
+  const handleCreateOrder = async () => {
+    if (!topic) return;
+
+    // 1. Send to n8n
+    const success = await triggerProduction({
+      action: 'MANUAL_START',
+      title: topic,
+      topic: topic,
       style_tone: styleTone,
       target_audience: targetAudience,
       video_format: videoFormat,
       ai_voice: aiVoice,
-      platform_destinations: platforms.map(p => p.toLowerCase().split(' ')[0]) as any,
+      platforms: platforms.map(p => p.toLowerCase().split(' ')[0]),
       language,
-      custom_instructions: instructions,
+      custom_instructions: instructions
     });
-    setShowForm(false);
-    setTopic('');
-    setInstructions('');
+
+    if (success) {
+      // 2. Save to local state / Supabase
+      usePipelineStore.getState().addOrder({
+        title: topic,
+        topic: topic,
+        style_tone: styleTone,
+        target_audience: targetAudience,
+        video_format: videoFormat,
+        ai_voice: aiVoice,
+        platform_destinations: platforms.map(p => p.toLowerCase().split(' ')[0]) as any,
+        language,
+        custom_instructions: instructions,
+      });
+      setShowForm(false);
+      setTopic('');
+      setInstructions('');
+    } else {
+      alert('Kunne ikke koble til n8n-serveren. Kontroller at den kjører!');
+    }
   };
 
   const filteredOrders = statusFilter === 'all' 
