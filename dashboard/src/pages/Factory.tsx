@@ -92,76 +92,76 @@ export default function Factory() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-neon-cyan font-mono text-[10px] uppercase tracking-[0.4em]"
+            className="flex items-center gap-2 text-white font-mono text-[13px] uppercase tracking-[0.4em]"
           >
-            <Cpu size={14} className="text-neon-cyan animate-spin-slow" />
+            <Cpu size={14} className="text-brand-2 animate-spin-slow" />
             Neural Synthesis Core
           </motion.div>
-          <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-            {t('factory.title')}
+          <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
+            Production <span className="text-brand-2">Core</span>
           </h1>
-          <p className="text-gray-500 max-w-lg font-medium leading-relaxed italic uppercase tracking-tight text-xs">
+          <p className="text-white opacity-80 max-w-lg font-medium leading-relaxed italic uppercase tracking-tight text-[14px]">
             {t('factory.subtitle')}
           </p>
         </div>
 
-        <div className="flex items-center gap-6 p-4 glass-ultra rounded-[24px] border border-white/5">
-           <div className="flex -space-x-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="w-10 h-10 rounded-full border-2 border-surface bg-white/5 flex items-center justify-center">
-                  <span className="text-[10px] font-black text-neon-cyan italic">V{i}</span>
-                </div>
-              ))}
-           </div>
-           <div className="flex flex-col">
-              <span className="text-[10px] font-black text-white uppercase tracking-widest italic">Production Load</span>
-              <div className="flex items-center gap-2">
-                 <div className="h-1 w-24 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
-                      animate={{ width: ['0%', '65%'] }}
-                      transition={{ duration: 2 }}
-                      className="h-full bg-neon-cyan shadow-[0_0_8px_#00f5ff]"
-                    />
-                 </div>
-                 <span className="text-[10px] font-mono text-neon-cyan">65%</span>
-              </div>
-           </div>
-        </div>
+         <div className="flex items-center gap-6 p-6 card-standard">
+            <div className="flex -space-x-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="w-12 h-12 rounded-full border-2 border-surface bg-white/5 flex items-center justify-center">
+                    <span className="text-[11px] font-black text-brand-2 italic">V{i}</span>
+                  </div>
+                ))}
+            </div>
+            <div className="flex flex-col">
+               <span className="text-[11px] font-black text-white uppercase tracking-widest italic">Production Load</span>
+               <div className="flex items-center gap-2">
+                   <div className="h-1.5 w-32 bg-white/5 rounded-full overflow-hidden">
+                      <motion.div 
+                        animate={{ width: ['0%', '65%'] }}
+                        transition={{ duration: 2 }}
+                        className="h-full bg-brand-2 shadow-[0_0_15px_rgba(157,78,221,0.5)]"
+                      />
+                   </div>
+                   <span className="text-[13px] font-black text-brand-2">65%</span>
+               </div>
+            </div>
+         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Main Configuration Engine */}
         <div className="lg:col-span-8 space-y-10">
-          <div className="glass-ultra rounded-[48px] p-12 border border-white/5 space-y-10">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Production Title / Topic</label>
-                <span className="text-[8px] font-mono text-neon-cyan/50 uppercase tracking-widest italic">ID: {crypto.randomUUID().slice(0, 8)}</span>
-              </div>
-              <input 
-                value={topic}
-                onChange={e => setTopic(e.target.value)}
-                className="w-full bg-white/[0.02] border border-white/5 rounded-3xl px-8 py-6 text-white focus:border-neon-cyan/40 outline-none transition-all font-black text-xl italic uppercase tracking-tight"
-                placeholder="Eks: The Mystery of the Abyssal Void..."
-              />
-            </div>
+          <div className="card-standard p-12 space-y-10">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-2">
+                    <label className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Production Title / Topic</label>
+                    <span className="text-[11px] font-mono text-brand-2 uppercase tracking-widest italic">ID: {crypto.randomUUID().slice(0, 8)}</span>
+                  </div>
+                  <input 
+                    value={topic}
+                    onChange={e => setTopic(e.target.value)}
+                    className="w-full bg-black/40 border border-white/5 rounded-3xl px-8 py-6 text-white focus:border-brand-2/40 outline-none transition-all font-black text-xl italic uppercase tracking-tight"
+                    placeholder="Eks: The Mystery of the Abyssal Void..."
+                  />
+                </div>
 
             <div className="space-y-4">
               <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em] ml-2">Behavioral Logic & Interaction</label>
               <div 
                 onClick={() => setIsDialogMode(!isDialogMode)}
-                className={`p-8 rounded-[32px] border cursor-pointer transition-all duration-500 flex items-center justify-between group overflow-hidden relative ${isDialogMode ? 'bg-neon-cyan/5 border-neon-cyan/30 shadow-[inset_0_0_20px_rgba(0,245,255,0.05)]' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}
+                className={`p-8 rounded-[32px] border cursor-pointer transition-all duration-500 flex items-center justify-between group overflow-hidden relative ${isDialogMode ? 'bg-brand-2/5 border-brand-2/30 shadow-[inset_0_0_20px_rgba(157,78,221,0.05)]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}
               >
                 <div className="flex items-center gap-6 relative z-10">
-                  <div className={`p-4 rounded-2xl transition-all duration-500 ${isDialogMode ? 'bg-neon-cyan text-black shadow-[0_0_20px_#00f5ff]' : 'bg-white/5 text-gray-600'}`}>
+                  <div className={`p-4 rounded-2xl transition-all duration-500 ${isDialogMode ? 'bg-brand-2 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)]' : 'bg-white/5 text-gray-600'}`}>
                     <Users size={28} />
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-lg font-black text-white uppercase italic tracking-tight">Dialog Mode</h3>
-                    <p className="text-[10px] text-gray-500 font-mono font-medium uppercase tracking-widest">Multi-agent conversational synthesis active.</p>
+                    <p className="text-[13px] text-gray-500 font-mono font-medium uppercase tracking-widest">Multi-agent conversational synthesis active.</p>
                   </div>
                 </div>
-                <div className={`w-14 h-7 rounded-full relative transition-colors duration-500 z-10 ${isDialogMode ? 'bg-neon-cyan' : 'bg-white/10'}`}>
+                <div className={`w-14 h-7 rounded-full relative transition-colors duration-500 z-10 ${isDialogMode ? 'bg-brand-2' : 'bg-white/10'}`}>
                   <motion.div 
                     animate={{ x: isDialogMode ? 28 : 4 }}
                     className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-lg"
@@ -180,11 +180,11 @@ export default function Factory() {
                 <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Neural Programming / Instructions</label>
                 <span className="text-[8px] font-mono text-gray-700 uppercase tracking-widest italic">Optional_Parameters</span>
               </div>
-              <textarea 
+               <textarea 
                 value={instructions}
                 onChange={e => setInstructions(e.target.value)}
                 rows={5}
-                className="w-full bg-white/[0.02] border border-white/5 rounded-[32px] px-8 py-6 text-white focus:border-neon-cyan/40 outline-none transition-all leading-relaxed font-medium italic"
+                className="w-full bg-white/[0.02] border border-white/5 rounded-[32px] px-8 py-6 text-white focus:border-brand-2/40 outline-none transition-all leading-relaxed font-medium italic"
                 placeholder={isDialogMode ? "Define character dynamics. Eks: 'Agent A: Aggressive, Agent B: Logical...'" : "Inject specific narrative constraints or stylistic markers..."}
               />
             </div>
@@ -193,19 +193,19 @@ export default function Factory() {
 
         {/* Tactical Parameters Sidebar */}
         <div className="lg:col-span-4 space-y-8">
-          <div className="glass-ultra rounded-[48px] p-10 border border-white/5 space-y-10 sticky top-10">
+          <div className="card-standard p-10 space-y-10 sticky top-10">
             {/* Primary Voice Identity */}
             <div className="space-y-6">
-              <h3 className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.4em] flex items-center gap-2">
-                 <Mic size={14} className="text-neon-cyan" />
+              <h3 className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.4em] flex items-center gap-2">
+                 <Mic size={14} className="text-brand-2" />
                  Primary Voice Core
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 {['Female', 'Male'].map(g => (
-                  <button
+                   <button
                     key={g}
                     onClick={() => setGender(g as any)}
-                    className={`py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border transition-all duration-300 ${gender === g ? 'bg-neon-cyan text-black border-neon-cyan shadow-[0_0_20px_rgba(0,245,255,0.3)]' : 'bg-white/5 text-gray-500 border-white/5 hover:border-white/10 hover:text-white'}`}
+                    className={`py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] border transition-all duration-300 ${gender === g ? 'bg-brand-2 text-white border-brand-2 shadow-[0_0_20px_rgba(157,78,221,0.3)]' : 'bg-white/5 text-gray-500 border-white/5 hover:border-white/10 hover:text-white'}`}
                   >
                     {g}
                   </button>
@@ -230,7 +230,7 @@ export default function Factory() {
                     <select 
                       value={secondaryVoice}
                       onChange={(e) => setSecondaryVoice(e.target.value)}
-                      className="w-full bg-white/5 border border-neon-cyan/20 rounded-2xl px-6 py-4 text-[10px] font-black text-white outline-none appearance-none cursor-pointer uppercase tracking-widest italic"
+                      className="w-full bg-white/5 border border-brand-2/20 rounded-2xl px-6 py-4 text-[13px] font-black text-white outline-none appearance-none cursor-pointer uppercase tracking-widest italic"
                     >
                       {ADDITIONAL_VOICES.map(v => (
                         <option key={v.id} value={v.id} className="bg-[#0a0a0a] text-white">
@@ -238,7 +238,7 @@ export default function Factory() {
                         </option>
                       ))}
                     </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neon-cyan">
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-2">
                        <Settings2 size={16} />
                     </div>
                   </div>
@@ -253,10 +253,10 @@ export default function Factory() {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {Object.keys(VOICE_MAP).map(lang => (
-                  <button
+                   <button
                     key={lang}
                     onClick={() => setLanguage(lang)}
-                    className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${language === lang ? 'bg-neon-cyan text-black border-neon-cyan shadow-[0_0_15px_rgba(0,245,255,0.3)]' : 'bg-transparent border-white/5 text-gray-600 hover:text-white hover:border-white/10'}`}
+                    className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border transition-all ${language === lang ? 'bg-brand-2 text-white border-brand-2 shadow-[0_0_15px_rgba(157,78,221,0.3)]' : 'bg-transparent border-white/5 text-gray-600 hover:text-white hover:border-white/10'}`}
                   >
                     {lang}
                   </button>
@@ -282,10 +282,10 @@ export default function Factory() {
               Query_All
             </button>
 
-            <button
+             <button
               onClick={handleStartProduction}
               disabled={!topic || isProducing}
-              className="btn-standard w-full py-6 text-base"
+              className="btn-standard w-full py-6 text-base !bg-brand-2 !shadow-brand-2/30"
             >
               {isProducing ? (
                 <>

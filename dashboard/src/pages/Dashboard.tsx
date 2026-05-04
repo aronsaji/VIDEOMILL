@@ -13,10 +13,10 @@ import type { Order, OrderStatus } from '../types';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; glow: string; icon: any }> = {
   queued:           { label: 'BUFFERING',      color: 'text-gray-500',      glow: 'shadow-gray-500/10',     icon: Clock },
-  script_generation:{ label: 'COGNITION',      color: 'text-neon-cyan',     glow: 'shadow-neon-cyan/20',    icon: Cpu },
-  rendering:        { label: 'SYNTHESIS',      color: 'text-neon-purple',   glow: 'shadow-neon-purple/30',  icon: Zap },
-  uploading:        { label: 'UPLOADING',      color: 'text-neon-pink',     glow: 'shadow-neon-pink/20',    icon: Send },
-  published:        { label: 'DEPLOYED',       color: 'text-neon-green',    glow: 'shadow-neon-green/30',   icon: CheckCircle2 },
+  script_generation:{ label: 'COGNITION',      color: 'text-brand-1',       glow: 'shadow-brand-1/20',      icon: Cpu },
+  rendering:        { label: 'SYNTHESIS',      color: 'text-brand-1',       glow: 'shadow-brand-1/30',      icon: Zap },
+  uploading:        { label: 'UPLOADING',      color: 'text-brand-1',       glow: 'shadow-brand-1/20',      icon: Send },
+  published:        { label: 'DEPLOYED',       color: 'text-brand-1',       glow: 'shadow-brand-1/30',      icon: CheckCircle2 },
   failed:           { label: 'CORRUPTED',      color: 'text-red-500',       glow: 'shadow-red-500/20',      icon: AlertTriangle },
 };
 
@@ -39,10 +39,10 @@ export default function Dashboard() {
       {/* Tactical Telemetry Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: t('dash.network_integrity'), value: 'OPTIMAL', icon: Shield, color: 'text-neon-green', detail: 'Encrypted_Link_1' },
-          { label: t('dash.neural_activity'), value: activeProductions.length, icon: Cpu, color: 'text-neon-purple', detail: t('common.active_nodes') },
-          { label: t('dash.cognition_rate'), value: '98.4%', icon: Sparkles, color: 'text-neon-cyan', detail: t('common.stable') },
-          { label: t('dash.data_velocity'), value: '4.2GB/S', icon: Database, color: 'text-neon-amber', detail: 'Burst_Active' },
+          { label: t('dash.network_integrity'), value: 'OPTIMAL', icon: Shield, color: 'text-brand-1', detail: 'Encrypted_Link_1' },
+          { label: t('dash.neural_activity'), value: activeProductions.length, icon: Cpu, color: 'text-brand-1', detail: t('common.active_nodes') },
+          { label: t('dash.cognition_rate'), value: '98.4%', icon: Sparkles, color: 'text-brand-1', detail: t('common.stable') },
+          { label: t('dash.data_velocity'), value: '4.2GB/S', icon: Database, color: 'text-brand-1', detail: 'Burst_Active' },
         ].map((stat, i) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -56,7 +56,7 @@ export default function Dashboard() {
             </div>
             <div className="space-y-3 relative z-10">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.4em]">{stat.label}</p>
+                <p className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.4em]">{stat.label}</p>
                 <div className="w-1 h-1 bg-white/20 rounded-full" />
               </div>
               <h3 className={`text-4xl font-black italic uppercase tracking-tighter ${stat.color} leading-none`}>
@@ -64,7 +64,7 @@ export default function Dashboard() {
               </h3>
               <div className="flex items-center gap-2 pt-1">
                  <div className={`w-1 h-1 rounded-full bg-current ${stat.color} animate-pulse`} />
-                 <span className="text-[8px] font-mono text-gray-600 uppercase tracking-widest">{stat.detail}</span>
+                 <span className="text-[11px] font-mono text-gray-600 uppercase tracking-widest">{stat.detail}</span>
               </div>
             </div>
           </motion.div>
@@ -76,18 +76,18 @@ export default function Dashboard() {
         <div className="lg:col-span-8 space-y-8">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
-                <Radio className="text-neon-purple animate-pulse" size={28} />
-                {t('dash.operations_hub')}
+              <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
+                <Radio className="text-brand-1 animate-pulse" size={28} />
+                Operations <span className="text-brand-1">Hub</span>
               </h2>
               <div className="flex items-center gap-3">
-                 <div className="h-[1px] w-12 bg-neon-purple/50" />
-                 <span className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{t('dash.live_stream')}</span>
+                 <div className="h-[1px] w-12 bg-brand-1/50" />
+                 <span className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{t('dash.live_stream')}</span>
               </div>
             </div>
             <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 backdrop-blur-md">
-               <Layers size={14} className="text-neon-purple" />
-               <span className="text-[10px] font-black font-mono text-white uppercase tracking-widest">{activeProductions.length} {t('common.active_nodes')}</span>
+               <Layers size={14} className="text-brand-1" />
+               <span className="text-[11px] font-black font-mono text-white uppercase tracking-widest">{activeProductions.length} {t('common.active_nodes')}</span>
             </div>
           </div>
 
@@ -113,36 +113,36 @@ export default function Dashboard() {
               </motion.div>
             ) : (
               activeProductions.map((order, i) => (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  key={order.id}
-                  className="glass-ultra rounded-[32px] p-8 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden group hover:border-neon-purple/30 transition-all border border-white/5"
-                >
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-neon-purple shadow-[0_0_15px_rgba(188,19,254,0.5)]" />
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    key={order.id}
+                    className="card-standard !p-8 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden group hover:!border-brand-1/30 transition-all"
+                  >
+                    <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-1 shadow-[0_0_15px_rgba(0,245,255,0.5)]" />
                   
                   <div className="flex-1 space-y-4 w-full">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                      <h4 className="text-xl font-black text-white italic uppercase tracking-tight group-hover:text-neon-purple transition-colors leading-none">
+                      <h4 className="text-xl font-black text-white italic uppercase tracking-tight group-hover:text-brand-1 transition-colors leading-none">
                         {order.title || order.topic}
                       </h4>
                       <div className="flex gap-2">
                         <span className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-gray-400`}>
                           {order.language?.toUpperCase()}
                         </span>
-                        <span className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest bg-neon-purple/10 border border-neon-purple/20 text-neon-purple`}>
+                        <span className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest bg-brand-1/10 border border-brand-1/20 text-brand-1`}>
                           9:16_VERT
                         </span>
                       </div>
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-6">
-                      <div className="flex items-center gap-2 text-[10px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
-                        <Terminal size={12} className="text-neon-purple" />
+                      <div className="flex items-center gap-2 text-[11px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
+                        <Terminal size={12} className="text-brand-1" />
                         DEST: {order.platform_destinations?.join(' / ').toUpperCase() || 'TIKTOK_PRIMARY'}
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
+                      <div className="flex items-center gap-2 text-[11px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
                         <Clock size={12} />
                         TS: {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                       </div>
@@ -150,18 +150,18 @@ export default function Dashboard() {
 
                     {/* Technical Progress Gauge */}
                     <div className="space-y-2 pt-4">
-                      <div className="flex justify-between text-[9px] font-black font-mono text-gray-500 uppercase tracking-[0.2em]">
+                      <div className="flex justify-between text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.2em]">
                         <span className="flex items-center gap-2">
-                           <div className="w-1 h-1 bg-neon-purple rounded-full animate-pulse" />
+                           <div className="w-1 h-1 bg-brand-1 rounded-full animate-pulse" />
                            Synthesis Process
                         </span>
-                        <span className="text-neon-purple">{order.progress || 10}% Complete</span>
+                        <span className="text-brand-1">{order.progress || 10}% Complete</span>
                       </div>
                       <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/5">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${order.progress || 10}%` }}
-                          className="h-full bg-gradient-to-r from-neon-purple to-neon-pink shadow-[0_0_15px_rgba(188,19,254,0.4)]" 
+                          className="h-full bg-brand-1 shadow-[0_0_15px_rgba(0,245,255,0.4)]" 
                         />
                       </div>
                     </div>
@@ -184,11 +184,11 @@ export default function Dashboard() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter flex items-center gap-3">
-                  <Flame className="text-neon-amber" size={24} />
-                  Trend <span className="text-neon-amber">Radar</span>
+                <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter flex items-center gap-3">
+                  <Flame className="text-brand-1" size={24} />
+                  Trend <span className="text-brand-1">Radar</span>
                 </h2>
-                <div className="h-[1px] w-8 bg-neon-amber/50" />
+                <div className="h-[1px] w-8 bg-brand-1/50" />
               </div>
               <button 
                 onClick={() => navigate('/trends')} 
@@ -206,27 +206,27 @@ export default function Dashboard() {
                   transition={{ delay: i * 0.1 }}
                   key={trend.id}
                   onClick={() => navigate('/factory', { state: { trend } })}
-                  className="glass-ultra rounded-[28px] p-6 border border-white/5 hover:border-neon-amber/30 cursor-pointer group transition-all relative overflow-hidden"
+                  className="glass-ultra rounded-[28px] p-6 border border-white/5 hover:border-brand-1/30 cursor-pointer group transition-all relative overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                     <Activity size={40} className="text-neon-amber" />
+                     <Activity size={40} className="text-brand-1" />
                   </div>
                   <div className="space-y-4 relative z-10">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                         <div className="w-1.5 h-1.5 bg-neon-amber rounded-full animate-pulse" />
-                         <span className="text-[10px] font-black font-mono text-neon-amber uppercase tracking-widest italic">
+                         <div className="w-1.5 h-1.5 bg-brand-1 rounded-full animate-pulse" />
+                         <span className="text-[11px] font-black font-mono text-brand-1 uppercase tracking-widest italic">
                             {trend.viral_score}% Viral_Yield
                          </span>
                       </div>
-                      <span className="text-[9px] font-black font-mono text-gray-600 uppercase tracking-widest italic">{trend.platform}</span>
+                      <span className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-widest italic">{trend.platform}</span>
                     </div>
-                    <h4 className="text-[13px] font-black text-white group-hover:text-neon-amber transition-colors leading-tight uppercase tracking-tight italic">
+                    <h4 className="text-[13px] font-black text-white group-hover:text-brand-1 transition-colors leading-tight uppercase tracking-tight italic">
                       {trend.title}
                     </h4>
                     <div className="flex flex-wrap gap-2 pt-1 border-t border-white/5 mt-2">
                       {trend.tags?.slice(0, 3).map(tag => (
-                        <span key={tag} className="text-[8px] font-mono font-bold text-gray-700 uppercase">#{tag}</span>
+                        <span key={tag} className="text-[11px] font-mono font-bold text-gray-700 uppercase">#{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -247,7 +247,7 @@ export default function Dashboard() {
               </div>
               <button 
                 onClick={() => navigate('/auto-series')}
-                className="btn-standard w-full"
+                className="btn-standard w-full !bg-brand-1 !shadow-brand-1/30"
               >
                 Launch Auto-Series Node
                 <ArrowUpRight size={16} />

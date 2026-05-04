@@ -10,10 +10,10 @@ export default function Settings() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-4">
           <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
-            <SettingsIcon className="text-brand-2" size={40} />
-            {t('nav.settings')}
+            <SettingsIcon className="text-brand-1" size={40} />
+            SYSTEM <span className="text-brand-1">SETTINGS</span>
           </h1>
-          <p className="text-sm text-gray-500 font-bold uppercase tracking-widest italic opacity-70">Global System Protocol & Configuration</p>
+          <p className="text-[13px] text-gray-500 font-bold uppercase tracking-widest italic opacity-70">Global System Protocol & Configuration</p>
         </div>
       </div>
 
@@ -62,13 +62,13 @@ export default function Settings() {
         {/* N8N Webhooks */}
         <section className="card-standard">
           <div className="flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
-            <Link size={18} className="text-brand-2" />
+            <Link size={18} className="text-brand-1" />
             <h2 className="text-lg font-black text-white italic uppercase tracking-tighter">Automatisering (n8n Webhooks)</h2>
           </div>
           <div className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-[13px] font-mono text-gray-500 uppercase tracking-widest">PRODUCTION INGEST WEBHOOK URL</label>
-              <input type="text" placeholder="https://n8n.yourserver.com/webhook/video-request" className="w-full bg-black/40 border border-white/5 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-2/50 transition-all font-mono text-sm" />
+              <input type="text" placeholder="https://n8n.yourserver.com/webhook/video-request" className="w-full bg-black/40 border border-white/5 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-1/50 transition-all font-mono text-sm" />
             </div>
             <div className="flex items-center gap-3 mt-4">
               <SecureAction actionName="Test n8n Webhook Connection" onVerify={() => alert('Webhook test vellykket!')}>
@@ -110,7 +110,7 @@ export default function Settings() {
         {/* Social Media Integrations */}
         <section className="card-standard">
           <div className="flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
-            <Shield size={18} className="text-brand-2" />
+            <Shield size={18} className="text-brand-1" />
             <h2 className="text-lg font-black text-white italic uppercase tracking-tighter">Sosiale Medier & Publisering</h2>
           </div>
           <div className="space-y-4">
@@ -130,7 +130,7 @@ export default function Settings() {
         
         <div className="flex justify-end border-t border-white/5 pt-8">
           <SecureAction actionName="Lagre Systeminnstillinger" onVerify={() => alert('Innstillinger lagret!')}>
-            <button className="btn-standard px-10 py-4">
+            <button className="btn-standard !bg-brand-1 !shadow-brand-1/30 px-10 py-4">
               <Save size={18} />
               Lagre Endringer
             </button>

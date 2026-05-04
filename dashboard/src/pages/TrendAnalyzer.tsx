@@ -72,7 +72,7 @@ export default function TrendAnalyzer() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 text-neon-cyan font-mono text-[10px] font-black uppercase tracking-[0.4em]"
+            className="flex items-center gap-3 text-brand-1 font-mono text-[13px] font-black uppercase tracking-[0.4em]"
           >
             <Activity size={14} className="animate-pulse" />
             Global Intelligence Stream v4.2
@@ -82,8 +82,8 @@ export default function TrendAnalyzer() {
               Trend <span className="text-brand-1">Radar</span>
             </h1>
             <div className="flex items-center gap-4">
-               <div className="h-[1px] w-16 bg-neon-cyan/50" />
-               <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] italic">Deep Neural Analysis of Social Velocity</p>
+               <div className="h-[1px] w-16 bg-brand-1/50" />
+               <p className="text-gray-500 font-bold uppercase tracking-widest text-[13px] italic">Deep Neural Analysis of Social Velocity</p>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function TrendAnalyzer() {
             <select 
               value={countryFilter}
               onChange={e => setCountryFilter(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-[18px] px-8 py-4 text-[11px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-white hover:bg-neon-cyan/10 transition-all appearance-none cursor-pointer min-w-[200px]"
+              className="bg-black/40 border border-white/10 rounded-[18px] px-8 py-4 text-[13px] font-black uppercase tracking-widest outline-none focus:border-brand-1/40 text-white hover:bg-brand-1/10 transition-all appearance-none cursor-pointer min-w-[200px]"
             >
               <option value="all" className="bg-[#05060f]">GLOBAL_ALL_REGIONS</option>
               <option value="no" className="bg-[#05060f]">NORWAY_NORTH_SEA</option>
@@ -106,7 +106,7 @@ export default function TrendAnalyzer() {
             <select 
               value={languageFilter}
               onChange={e => setLanguageFilter(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-[18px] px-8 py-4 text-[11px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-white hover:bg-neon-cyan/10 transition-all appearance-none cursor-pointer min-w-[200px]"
+              className="bg-black/40 border border-white/10 rounded-[18px] px-8 py-4 text-[13px] font-black uppercase tracking-widest outline-none focus:border-brand-1/40 text-white hover:bg-brand-1/10 transition-all appearance-none cursor-pointer min-w-[200px]"
             >
               <option value="all" className="bg-[#05060f]">ALL_LANGUAGES</option>
               <option value="no" className="bg-[#05060f]">NORSK_PRIMARY</option>
@@ -117,17 +117,17 @@ export default function TrendAnalyzer() {
           </div>
 
           <div className="relative group min-w-[320px]">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-hover:text-neon-cyan transition-colors" size={18} />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-hover:text-brand-1 transition-colors" size={18} />
             <input 
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="Query Viral Signals..."
-              className="w-full bg-white/[0.02] border border-white/5 rounded-[24px] pl-14 pr-8 py-5 text-sm focus:border-neon-cyan/40 outline-none backdrop-blur-xl transition-all font-black italic uppercase tracking-wider text-white placeholder:text-gray-700"
+              className="w-full bg-black/40 border border-white/5 rounded-[24px] pl-14 pr-8 py-5 text-[14px] focus:border-brand-1/40 outline-none backdrop-blur-xl transition-all font-black italic uppercase tracking-wider text-white placeholder:text-gray-700"
             />
           </div>
           <button 
             onClick={() => fetchTrends()}
-            className="p-5 bg-white/5 text-gray-500 rounded-[24px] hover:bg-neon-cyan hover:text-black transition-all border border-white/5 shadow-xl group"
+            className="p-5 bg-white/5 text-gray-500 rounded-[24px] hover:bg-brand-1 hover:text-black transition-all border border-white/5 shadow-xl group"
           >
             <RefreshCw size={24} className={`${isLoading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
           </button>
@@ -138,9 +138,9 @@ export default function TrendAnalyzer() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: 'Active Signals', value: filteredTrends.length, icon: Radio, color: 'text-brand-1' },
-          { label: 'Avg Velocity', value: '84%', icon: Zap, color: 'text-brand-2' },
+          { label: 'Avg Velocity', value: '84%', icon: Zap, color: 'text-brand-1' },
           { label: 'Network Load', value: 'OPTIMAL', icon: BarChart3, color: 'text-brand-1' },
-          { label: 'Signal Integrity', value: '99.8%', icon: ShieldAlert, color: 'text-brand-2' },
+          { label: 'Signal Integrity', value: '99.8%', icon: ShieldAlert, color: 'text-brand-1' },
         ].map((stat, i) => (
           <motion.div
             key={i}
@@ -187,26 +187,26 @@ export default function TrendAnalyzer() {
               key={trend.id}
               className="group h-full"
             >
-              <div className="glass-ultra rounded-[48px] p-10 border border-white/5 hover:border-neon-cyan/40 transition-all duration-700 flex flex-col h-full relative overflow-hidden group-hover:translate-y-[-8px]">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-cyan/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="card-standard !p-10 flex flex-col h-full relative overflow-hidden group-hover:translate-y-[-8px]">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-1/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 
                 <div className="flex justify-between items-start mb-10">
-                  <div className="flex items-center gap-3 px-5 py-2.5 bg-neon-cyan/5 rounded-[18px] border border-neon-cyan/10">
-                    <Flame size={16} className="text-neon-cyan animate-pulse" />
-                    <span className="text-[13px] font-black text-neon-cyan uppercase tracking-[0.2em] italic">
+                  <div className="flex items-center gap-3 px-5 py-2.5 bg-brand-1/5 rounded-[18px] border border-brand-1/10">
+                    <Flame size={16} className="text-brand-1 animate-pulse" />
+                    <span className="text-[13px] font-black text-brand-1 uppercase tracking-[0.2em] italic">
                       {trend.viral_score}% Viral Yield
                     </span>
                   </div>
-                  <div className="px-5 py-2.5 bg-white/5 rounded-xl text-white/90 uppercase text-[12px] font-black border border-white/5 tracking-widest italic group-hover:bg-neon-cyan/10 transition-colors">
+                  <div className="px-5 py-2.5 bg-white/5 rounded-xl text-white/90 uppercase text-[12px] font-black border border-white/5 tracking-widest italic group-hover:bg-brand-1/10 transition-colors">
                     {trend.platform}
                   </div>
                 </div>
 
                 <div className="space-y-5 flex-1">
-                  <h3 className="text-3xl font-black text-white group-hover:text-neon-cyan transition-colors leading-[1.05] italic uppercase tracking-tighter">
+                  <h3 className="text-3xl font-black text-white group-hover:text-brand-1 transition-colors leading-[1.05] italic uppercase tracking-tighter">
                     {trend.title}
                   </h3>
-                  <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed font-bold italic uppercase tracking-tight opacity-80">
+                  <p className="text-[14px] text-gray-500 line-clamp-3 leading-relaxed font-bold italic uppercase tracking-tight opacity-80">
                     {trend.description}
                   </p>
                 </div>
@@ -221,13 +221,13 @@ export default function TrendAnalyzer() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-[12px] font-black font-mono text-white/80 uppercase tracking-widest italic">
-                      <Globe size={16} className="text-neon-cyan" />
+                    <div className="flex items-center gap-3 text-[13px] font-black font-mono text-white/80 uppercase tracking-widest italic">
+                      <Globe size={16} className="text-brand-1" />
                       <span>{trend.country || 'GLOBAL_NODE'}</span>
                     </div>
                     <button 
                       onClick={() => setSelectedTrend(trend)}
-                      className="btn-standard px-8 py-3"
+                      className="btn-standard !bg-brand-1 !shadow-brand-1/30 px-8 py-3"
                     >
                       Analyze <ArrowUpRight size={18} />
                     </button>
@@ -254,9 +254,9 @@ export default function TrendAnalyzer() {
               initial={{ scale: 0.9, y: 30, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 30, opacity: 0 }}
-              className="w-full max-w-3xl glass-ultra rounded-[64px] p-12 lg:p-16 border border-white/10 relative z-10 overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)]"
+              className="w-full max-w-3xl card-standard !p-12 lg:!p-16 relative z-10 overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)]"
             >
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-cyan opacity-50" />
+              <div className="absolute top-0 left-0 w-full h-2 bg-brand-1/50" />
               
               <button 
                 onClick={() => setSelectedTrend(null)}
@@ -267,40 +267,40 @@ export default function TrendAnalyzer() {
 
               <div className="space-y-12">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 text-neon-cyan font-mono text-[11px] font-black uppercase tracking-[0.5em] italic">
+                  <div className="flex items-center gap-4 text-brand-1 font-mono text-[13px] font-black uppercase tracking-[0.5em] italic">
                     <Terminal size={18} />
                     Extraction Protocol Initialized
                   </div>
                   <h2 className="text-5xl lg:text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
-                    Trigger <span className="text-neon-cyan">Synthesis</span>
+                    Trigger <span className="text-brand-1">Synthesis</span>
                   </h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-10 bg-black/40 rounded-[40px] border border-white/5 space-y-8 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                       <Target size={80} className="text-neon-cyan" />
+                       <Target size={80} className="text-brand-1" />
                     </div>
                     <div className="space-y-6 relative z-10">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-black font-mono text-gray-600 uppercase tracking-[0.3em]">Viral Signal</span>
+                        <span className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-[0.3em]">Viral Signal</span>
                         <p className="text-lg font-black text-white italic uppercase leading-tight">{selectedTrend.title}</p>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-[10px] font-black font-mono text-gray-600 uppercase tracking-[0.3em]">Origin Node</span>
-                        <p className="text-lg font-black text-neon-cyan italic uppercase">{selectedTrend.country || 'GLOBAL_CORE'}</p>
+                        <span className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-[0.3em]">Origin Node</span>
+                        <p className="text-lg font-black text-brand-1 italic uppercase">{selectedTrend.country || 'GLOBAL_CORE'}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-10 bg-white/[0.02] rounded-[40px] border border-white/5 flex flex-col justify-center gap-8 text-center relative overflow-hidden">
-                     <div className="absolute inset-0 bg-neon-purple/[0.02] blur-3xl" />
-                     <div className="space-y-2 relative z-10">
-                        <span className="text-[10px] font-black font-mono text-gray-600 uppercase tracking-[0.3em]">Probability Matrix</span>
-                        <p className="text-5xl font-black text-white italic tracking-tighter leading-none">{selectedTrend.viral_score}%</p>
-                        <p className="text-[9px] font-black text-neon-green uppercase tracking-[0.4em] pt-2 italic">Yield Optimistic</p>
-                     </div>
-                  </div>
+                   <div className="p-10 bg-white/[0.02] rounded-[40px] border border-white/5 flex flex-col justify-center gap-8 text-center relative overflow-hidden">
+                      <div className="absolute inset-0 bg-brand-1/[0.02] blur-3xl" />
+                      <div className="space-y-2 relative z-10">
+                         <span className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-[0.3em]">Probability Matrix</span>
+                         <p className="text-5xl font-black text-white italic tracking-tighter leading-none">{selectedTrend.viral_score}%</p>
+                         <p className="text-[11px] font-black text-brand-1 uppercase tracking-[0.4em] pt-2 italic">Yield Optimistic</p>
+                      </div>
+                   </div>
                 </div>
 
                 <div className="space-y-8">
@@ -313,7 +313,7 @@ export default function TrendAnalyzer() {
                   <button 
                     disabled={isOrdering}
                     onClick={() => handleStartProduction(selectedTrend)}
-                    className="w-full py-7 bg-white text-black font-black uppercase tracking-[0.4em] text-xs rounded-[32px] hover:bg-neon-cyan hover:text-white hover:shadow-[0_0_60px_rgba(0,245,255,0.3)] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-4 group"
+                    className="btn-standard w-full py-7 text-[13px] !bg-brand-1 !shadow-brand-1/30"
                   >
                     {isOrdering ? (
                       <RefreshCw size={20} className="animate-spin" />

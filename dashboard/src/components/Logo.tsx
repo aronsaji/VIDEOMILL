@@ -18,18 +18,18 @@ export default function Logo({ size = 'md', hideText = false }: LogoProps) {
       {/* Procedural Holographic Logo */}
       <div className={`relative ${sizes[size].container} flex items-center justify-center`}>
         {/* Ambient Glow */}
-        <div className="absolute inset-0 bg-neon-purple/20 blur-2xl rounded-full group-hover:bg-neon-purple/40 transition-all duration-700" />
+        <div className="absolute inset-0 bg-brand-1/20 blur-2xl rounded-full group-hover:bg-brand-1/30 transition-all duration-700" />
         
         {/* Kinetic Orbital Rings */}
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-[-4px] border border-neon-purple/20 rounded-xl"
+          className="absolute inset-[-4px] border border-brand-1/20 rounded-xl"
         />
         <motion.div 
           animate={{ rotate: -360 }}
           transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-[-8px] border border-neon-cyan/10 rounded-full"
+          className="absolute inset-[-8px] border border-brand-1/10 rounded-full"
         />
 
         {/* SVG Geometric Core */}
@@ -41,7 +41,8 @@ export default function Logo({ size = 'md', hideText = false }: LogoProps) {
           <motion.path
             d="M50 5 L90 25 L90 75 L50 95 L10 75 L10 25 Z"
             fill="none"
-            stroke="url(#grad1)"
+            stroke="currentColor"
+            className="text-brand-1"
             strokeWidth={sizes[size].stroke}
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
@@ -68,7 +69,7 @@ export default function Logo({ size = 'md', hideText = false }: LogoProps) {
                 key={i}
                 d="M50 50 L50 35 L60 40 Z"
                 fill="currentColor"
-                className="text-neon-cyan"
+                className="text-brand-1"
                 animate={{ 
                   rotate: [angle, angle + 360],
                   opacity: [0.3, 0.8, 0.3]
@@ -104,13 +105,13 @@ export default function Logo({ size = 'md', hideText = false }: LogoProps) {
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
             <span className={`${sizes[size].text} font-black text-white italic tracking-tighter uppercase leading-none`}>
-              Video<span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-purple to-neon-cyan">Mill</span>
+              Video<span className="text-brand-1">Mill</span>
             </span>
           </div>
           <div className="flex items-center gap-2 mt-2">
-            <div className="h-[1.5px] w-12 bg-gradient-to-r from-neon-purple to-transparent" />
-            <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] italic group-hover:text-neon-cyan transition-colors">
-              Neural Production Grid
+            <div className="h-[1.5px] w-12 bg-brand-1/50" />
+            <span className="text-[13px] font-black text-white uppercase tracking-[0.2em] italic group-hover:text-brand-1 transition-colors">
+              The Non-Stop Viral Engine
             </span>
           </div>
         </div>

@@ -16,9 +16,9 @@ const LANGUAGES = [
 ];
 
 const PLATFORMS = [
-  { id: 'youtube', label: 'YouTube', icon: Play, color: 'text-brand-1', bg: 'bg-brand-1/10' },
+  { id: 'youtube', label: 'YouTube', icon: Play, color: 'text-brand-2', bg: 'bg-brand-2/10' },
   { id: 'tiktok', label: 'TikTok', icon: Smartphone, color: 'text-brand-2', bg: 'bg-brand-2/10' },
-  { id: 'instagram', label: 'Instagram', icon: Camera, color: 'text-brand-1', bg: 'bg-brand-1/10' },
+  { id: 'instagram', label: 'Instagram', icon: Camera, color: 'text-brand-2', bg: 'bg-brand-2/10' },
 ];
 
 export default function AutoSeries() {
@@ -65,15 +65,15 @@ export default function AutoSeries() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-brand-1 font-mono text-[13px] uppercase tracking-[0.4em]"
+            className="flex items-center gap-2 text-white font-mono text-[13px] uppercase tracking-[0.4em]"
           >
-            <Radio size={14} className="animate-pulse" />
+            <Radio size={14} className="animate-pulse text-brand-2" />
             Automated Content Stream
           </motion.div>
-          <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
+          <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
             Auto <span className="text-brand-2">Series</span>
           </h1>
-          <p className="text-gray-500 max-w-lg font-medium leading-relaxed">
+          <p className="text-white max-w-lg font-medium leading-relaxed opacity-80">
             Deploy full seasons of viral content. Our neural engine handles scripting, 
             visual synthesis, and multi-channel scheduling.
           </p>
@@ -110,12 +110,12 @@ export default function AutoSeries() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between px-2">
                     <label className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Series Identification</label>
-                    <span className="text-[11px] font-mono text-brand-1 uppercase tracking-widest">Required_Field</span>
+                    <span className="text-[11px] font-mono text-brand-2 uppercase tracking-widest">Required_Field</span>
                   </div>
                   <input 
                     value={title}
                     onChange={e => setTitle(e.target.value)}
-                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-8 py-5 text-white focus:border-brand-1/40 outline-none transition-all font-black text-xl italic uppercase tracking-tight"
+                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-8 py-5 text-white focus:border-brand-2/40 outline-none transition-all font-black text-xl italic uppercase tracking-tight"
                     placeholder="Eks: Chronicles of Muvendar"
                   />
                 </div>
@@ -124,7 +124,7 @@ export default function AutoSeries() {
                   <div className="flex items-center justify-between px-2">
                     <label className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Conceptual Core</label>
                     <div className="flex items-center gap-2">
-                       <div className="w-1.5 h-1.5 bg-brand-1 rounded-full animate-pulse" />
+                       <div className="w-1.5 h-1.5 bg-brand-2 rounded-full animate-pulse" />
                        <span className="text-[11px] font-mono text-gray-500 uppercase tracking-widest">Neural Input Active</span>
                     </div>
                   </div>
@@ -145,7 +145,7 @@ export default function AutoSeries() {
                         <button
                           key={lang.id}
                           onClick={() => setSelectedLanguage(lang.id)}
-                          className={`btn-standard py-4 ${selectedLanguage === lang.id ? '' : 'opacity-40 grayscale'}`}
+                          className={`btn-standard py-4 !bg-brand-2 !shadow-brand-2/20 ${selectedLanguage === lang.id ? '' : 'opacity-40 grayscale'}`}
                         >
                           <span className="text-lg grayscale-0">{lang.flag}</span>
                           {lang.label}
@@ -174,7 +174,7 @@ export default function AutoSeries() {
               <div className="card-standard space-y-10">
                 <div className="relative z-10 space-y-8">
                   <h3 className="text-lg font-black text-white uppercase italic tracking-[0.2em] flex items-center gap-3">
-                    <Zap className="text-brand-1" size={20} />
+                    <Zap className="text-brand-2" size={20} />
                     Stream Protocol
                   </h3>
                   
@@ -196,8 +196,8 @@ export default function AutoSeries() {
                     <div className="flex items-center justify-between py-4 border-b border-white/5">
                       <span className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-widest">Core Status</span>
                       <div className="flex items-center gap-2">
-                         <div className="w-1.5 h-1.5 bg-brand-1 rounded-full animate-pulse" />
-                         <span className="text-[13px] font-black text-brand-1 italic uppercase tracking-tighter">Ready For Ignite</span>
+                         <div className="w-1.5 h-1.5 bg-brand-2 rounded-full animate-pulse" />
+                         <span className="text-[13px] font-black text-brand-2 italic uppercase tracking-tighter">Ready For Ignite</span>
                       </div>
                     </div>
                   </div>
@@ -206,7 +206,7 @@ export default function AutoSeries() {
                     <button 
                       disabled={isGenerating}
                       onClick={handleGenerate}
-                      className="btn-standard w-full py-5 text-[12px]"
+                      className="btn-standard w-full py-5 text-[13px] !bg-brand-2 !shadow-brand-2/30"
                     >
                       {isGenerating ? 'Deploying Nodes...' : 'Commence Auto-Stream'}
                     </button>
@@ -242,7 +242,7 @@ export default function AutoSeries() {
               </div>
               <button 
                 onClick={() => setActiveTab('new')} 
-                className="btn-standard px-10 py-4 text-[12px]"
+                className="btn-standard px-10 py-4 text-[13px] !bg-brand-2 !shadow-brand-2/30"
               >
                 Launch Primary Node
               </button>
