@@ -32,7 +32,7 @@ function App() {
                 {activeVideo && (
                   <div className="mt-2">
                     <h3 className="text-xl font-bold">{activeVideo.title}</h3>
-                    <p className="text-sm text-neon-cyan font-mono">{activeVideo.video_id} // {activeVideo.platform.toUpperCase()}</p>
+                    <p className="text-sm text-neon-cyan font-mono">{activeVideo.video_id} // {activeVideo.platform_destinations?.[0]?.toUpperCase() || 'N/A'}</p>
                   </div>
                 )}
               </div>
