@@ -8,7 +8,17 @@ import Settings from './pages/Settings';
 import Orders from './pages/Orders';
 import Agents from './pages/Agents';
 
+import React, { useEffect } from 'react';
+import { usePipelineStore } from './store/pipelineStore';
+
 function App() {
+  const { fetchInitialData, subscribeToChanges } = usePipelineStore();
+
+  useEffect(() => {
+    fetchInitialData();
+    subscribeToChanges();
+  }, []);
+
   return (
     <Router>
       <Layout>

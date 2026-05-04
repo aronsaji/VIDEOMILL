@@ -5,6 +5,7 @@ import {
   Plus, Minus, Globe, History, Check, ArrowRight
 } from 'lucide-react';
 import { triggerProduction } from '../lib/api';
+import { usePipelineStore } from '../store/pipelineStore';
 
 
 const LANGUAGES = [
