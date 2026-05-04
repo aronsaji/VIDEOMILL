@@ -7,22 +7,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: 'var(--bg-deep)',
-        surface: 'var(--bg-surface)',
-        border: 'var(--border-color)',
+        white: '#e2e8f0', // Dimmed off-white for better eye comfort
+        background: '#030303',
+        surface: '#080808',
+        border: 'rgba(255, 255, 255, 0.03)',
         neon: {
-          cyan: 'var(--neon-cyan)',
-          amber: 'var(--neon-amber)',
-          purple: 'var(--neon-purple)',
-          red: '#FF2A2A',
+          cyan: '#00f5ff',
+          purple: '#bc13fe',
+          pink: '#ff00ff',
+          amber: '#ffaa00',
+          green: '#39ff14',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Outfit', 'Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
-      backgroundImage: {
-        'grid-pattern': "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M0 40L40 40L40 0' fill='none' stroke='white' stroke-opacity='0.05' stroke-width='1'/%3E%3C/svg%3E\")",
+      animation: {
+        'spin-slow': 'spin 12s linear infinite',
+        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       }
     },
   },

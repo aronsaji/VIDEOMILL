@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { usePipelineStore } from './store/pipelineStore';
-import { Layout } from './components/Layout';
+import { supabase } from './lib/supabase';
+import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AutoSeries from './pages/AutoSeries';
 import TrendAnalyzer from './pages/TrendAnalyzer';
@@ -14,28 +15,57 @@ import Agents from './pages/Agents';
 
 function App() {
   const { fetchInitialData, subscribeToChanges } = usePipelineStore();
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Initial data fetch
     fetchInitialData();
-    subscribeToChanges();
-  }, []);
+    const unsubscribeChanges = subscribeToChanges();
+
+    // Auth session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      if (unsubscribeChanges) unsubscribeChanges();
+      subscription.unsubscribe();
+    };
+  }, [fetchInitialData, subscribeToChanges]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center font-mono text-[10px] text-neon-purple tracking-[0.5em] italic">
+        INITIALIZING_SYSTEM_UPLINK...
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Login onSuccess={() => {}} />;
+  }
 
   return (
     <Router>
-      <Layout>
-        <Routes>
+      <Routes>
+        <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/factory" element={<Factory />} />
           <Route path="/auto-series" element={<AutoSeries />} />
           <Route path="/trends" element={<TrendAnalyzer />} />
           <Route path="/library" element={<Library />} />
-          <Route path="/orders" element={<Archive />} />
+          <Route path="/archive" element={<Archive />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </Router>
   );
 }

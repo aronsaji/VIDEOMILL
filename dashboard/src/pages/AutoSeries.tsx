@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Film, Sparkles, Play, Camera, Smartphone,
   Plus, Minus, Globe, History, Check, ArrowRight,
-  Tv, Wand2, Zap, Layers, Clock
+  Tv, Wand2, Zap, Layers, Clock, Cpu, Layout, Radio
 } from 'lucide-react';
 import { triggerProduction } from '../lib/api';
 import { usePipelineStore } from '../store/pipelineStore';
@@ -16,9 +16,9 @@ const LANGUAGES = [
 ];
 
 const PLATFORMS = [
-  { id: 'youtube', label: 'YouTube', icon: Play, color: 'text-red-400', bg: 'bg-red-400/10' },
-  { id: 'tiktok', label: 'TikTok', icon: Smartphone, color: 'text-pink-400', bg: 'bg-pink-400/10' },
-  { id: 'instagram', label: 'Instagram', icon: Camera, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+  { id: 'youtube', label: 'YouTube', icon: Play, color: 'text-neon-cyan', bg: 'bg-neon-cyan/10' },
+  { id: 'tiktok', label: 'TikTok', icon: Smartphone, color: 'text-neon-pink', bg: 'bg-neon-pink/10' },
+  { id: 'instagram', label: 'Instagram', icon: Camera, color: 'text-neon-purple', bg: 'bg-neon-purple/10' },
 ];
 
 export default function AutoSeries() {
@@ -26,8 +26,8 @@ export default function AutoSeries() {
   const { orders = [] } = usePipelineStore();
 
   // Form State
-  const [title, setTitle] = useState('Min Nye Auto-Serie');
-  const [description, setDescription] = useState('Beskriv konseptet ditt her...');
+  const [title, setTitle] = useState('New Production Stream');
+  const [description, setDescription] = useState('Define your core series concept here...');
   const [selectedLanguage, setSelectedLanguage] = useState('no');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok']);
   const [episodesCount, setEpisodesCount] = useState(10);
@@ -51,45 +51,46 @@ export default function AutoSeries() {
       });
       setActiveTab('mine');
     } catch (err) {
-      console.error('Serie produksjon feilet:', err);
+      console.error('Series production failed:', err);
     } finally {
       setIsGenerating(false);
     }
   };
 
   return (
-    <div className="space-y-10 max-w-5xl mx-auto pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
+    <div className="space-y-12 max-w-7xl mx-auto pb-20">
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+        <div className="space-y-4">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-neon-cyan font-mono text-xs uppercase tracking-[0.3em]"
+            className="flex items-center gap-2 text-neon-pink font-mono text-xs uppercase tracking-[0.4em]"
           >
-            <Tv size={14} />
-            Content Automation
+            <Radio size={14} className="animate-pulse" />
+            Automated Content Stream
           </motion.div>
-          <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">
-            Auto <span className="text-neon-cyan">Series</span>
+          <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
+            Auto <span className="text-neon-pink">Series</span>
           </h1>
-          <p className="text-gray-500 max-w-md">
-            Planlegg og automatiser hele sesonger med AI-generert innhold.
+          <p className="text-gray-500 max-w-lg font-medium leading-relaxed">
+            Deploy full seasons of viral content. Our neural engine handles scripting, 
+            visual synthesis, and multi-channel scheduling.
           </p>
         </div>
 
-        <div className="flex bg-surface/50 p-1 rounded-2xl border border-white/5 backdrop-blur-md">
+        <div className="flex bg-white/5 p-1.5 rounded-[24px] border border-white/5 backdrop-blur-xl">
           <button 
             onClick={() => setActiveTab('new')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'new' ? 'bg-neon-cyan text-black' : 'text-gray-500 hover:text-white'}`}
+            className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === 'new' ? 'bg-neon-pink text-white shadow-lg shadow-neon-pink/20' : 'text-gray-500 hover:text-white'}`}
           >
-            Ny Serie
+            Deploy New
           </button>
           <button 
             onClick={() => setActiveTab('mine')}
-            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'mine' ? 'bg-neon-cyan text-black' : 'text-gray-500 hover:text-white'}`}
+            className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === 'mine' ? 'bg-neon-pink text-white shadow-lg shadow-neon-pink/20' : 'text-gray-500 hover:text-white'}`}
           >
-            Mine Serier
+            Active Streams
           </button>
         </div>
       </div>
@@ -101,102 +102,128 @@ export default function AutoSeries() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-10"
           >
-            {/* Left: Form */}
-            <div className="lg:col-span-2 space-y-8">
-              <div className="glass-morphism rounded-[40px] p-10 border-white/5 space-y-8">
+            {/* Left: Configuration Form */}
+            <div className="lg:col-span-8 space-y-10">
+              <div className="glass-ultra rounded-[48px] p-12 border border-white/5 space-y-10">
                 <div className="space-y-4">
-                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Serie Tittel</label>
+                  <div className="flex items-center justify-between px-2">
+                    <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Series Identification</label>
+                    <span className="text-[10px] font-mono text-neon-pink uppercase tracking-widest">Required_Field</span>
+                  </div>
                   <input 
                     value={title}
                     onChange={e => setTitle(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-cyan/50 outline-none transition-all font-bold text-lg"
-                    placeholder="Eks: Muvendar - Historien om de tre kongene"
+                    className="w-full bg-white/[0.02] border border-white/5 rounded-3xl px-8 py-6 text-white focus:border-neon-pink/40 outline-none transition-all font-black text-xl italic uppercase tracking-tight"
+                    placeholder="Eks: Chronicles of Muvendar"
                   />
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Konsept & Beskrivelse</label>
+                  <div className="flex items-center justify-between px-2">
+                    <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Conceptual Core</label>
+                    <div className="flex items-center gap-2">
+                       <div className="w-1.5 h-1.5 bg-neon-cyan rounded-full animate-pulse" />
+                       <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Neural Input Active</span>
+                    </div>
+                  </div>
                   <textarea 
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     rows={6}
-                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-cyan/50 outline-none transition-all leading-relaxed"
-                    placeholder="Hva skal serien handle om? Jo mer detaljert, jo bedre blir resultatet."
+                    className="w-full bg-white/[0.02] border border-white/5 rounded-[32px] px-8 py-6 text-white focus:border-neon-pink/40 outline-none transition-all leading-relaxed font-medium italic"
+                    placeholder="Detail the narrative arc or concept complexity..."
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-4">
-                    <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Språk</label>
-                    <div className="flex flex-wrap gap-2">
+                    <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em] ml-2">Linguistic Logic</label>
+                    <div className="grid grid-cols-2 gap-3">
                       {LANGUAGES.map(lang => (
                         <button
                           key={lang.id}
                           onClick={() => setSelectedLanguage(lang.id)}
-                          className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${selectedLanguage === lang.id ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan' : 'bg-white/5 border-white/5 text-gray-500'}`}
+                          className={`px-6 py-4 rounded-2xl text-[10px] font-black border transition-all uppercase tracking-widest flex items-center justify-center gap-3 ${selectedLanguage === lang.id ? 'bg-neon-pink/10 border-neon-pink text-white shadow-lg shadow-neon-pink/10' : 'glass-ultra border-white/5 text-gray-500'}`}
                         >
-                          {lang.flag} {lang.label}
+                          <span className="text-lg grayscale-0">{lang.flag}</span>
+                          {lang.label}
                         </button>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Antall Episoder</label>
-                    <div className="flex items-center gap-4 bg-black/40 border border-white/10 rounded-2xl p-2 w-fit">
-                      <button onClick={() => setEpisodesCount(Math.max(1, episodesCount - 1))} className="p-2 hover:bg-white/5 rounded-lg text-neon-cyan"><Minus size={20} /></button>
-                      <span className="text-xl font-black text-white w-12 text-center">{episodesCount}</span>
-                      <button onClick={() => setEpisodesCount(episodesCount + 1)} className="p-2 hover:bg-white/5 rounded-lg text-neon-cyan"><Plus size={20} /></button>
+                    <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em] ml-2">Iteration Count</label>
+                    <div className="flex items-center justify-between bg-white/[0.02] border border-white/5 rounded-[24px] p-2">
+                      <button onClick={() => setEpisodesCount(Math.max(1, episodesCount - 1))} className="w-14 h-14 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-2xl text-neon-pink transition-colors"><Minus size={24} /></button>
+                      <div className="flex flex-col items-center">
+                         <span className="text-3xl font-black text-white italic">{episodesCount}</span>
+                         <span className="text-[8px] font-mono text-gray-600 uppercase tracking-[0.2em]">Episodes</span>
+                      </div>
+                      <button onClick={() => setEpisodesCount(episodesCount + 1)} className="w-14 h-14 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-2xl text-neon-pink transition-colors"><Plus size={24} /></button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right: Summary & Action */}
-            <div className="space-y-6">
-              <div className="glass-morphism rounded-3xl p-8 border-white/5 space-y-6">
-                <h3 className="text-sm font-black text-white uppercase italic tracking-widest">Produksjonsplan</h3>
+            {/* Right: Summary & Action Panel */}
+            <div className="lg:col-span-4 space-y-8">
+              <div className="glass-ultra rounded-[48px] p-10 border border-white/5 space-y-10 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-12 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-transform duration-1000">
+                  <Cpu size={200} />
+                </div>
                 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-gray-500">Kanaler</span>
-                    <div className="flex gap-1">
-                      {selectedPlatforms.map(p => {
-                        const Icon = PLATFORMS.find(pl => pl.id === p)?.icon || Smartphone;
-                        return <div key={p} className="p-1.5 bg-neon-cyan/10 rounded-lg text-neon-cyan"><Icon size={14} /></div>
-                      })}
+                <div className="relative z-10 space-y-8">
+                  <h3 className="text-lg font-black text-white uppercase italic tracking-[0.2em] flex items-center gap-3">
+                    <Zap className="text-neon-pink" size={20} />
+                    Stream Protocol
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between py-4 border-b border-white/5">
+                      <span className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-widest">Network Nodes</span>
+                      <div className="flex gap-2">
+                        {selectedPlatforms.map(p => {
+                          const Icon = PLATFORMS.find(pl => pl.id === p)?.icon || Smartphone;
+                          const color = PLATFORMS.find(pl => pl.id === p)?.color || 'text-white';
+                          return <div key={p} className={`p-2 bg-white/5 rounded-xl ${color} border border-white/5`}><Icon size={16} /></div>
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between py-4 border-b border-white/5">
+                      <span className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-widest">Temporal Estimate</span>
+                      <span className="text-[11px] font-black text-white italic uppercase tracking-tighter">~45 min / EP</span>
+                    </div>
+                    <div className="flex items-center justify-between py-4 border-b border-white/5">
+                      <span className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-widest">Core Status</span>
+                      <div className="flex items-center gap-2">
+                         <div className="w-1.5 h-1.5 bg-neon-amber rounded-full animate-pulse shadow-[0_0_8px_#ffaa00]" />
+                         <span className="text-[11px] font-black text-neon-amber italic uppercase tracking-tighter">Ready For Ignite</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-gray-500">Estimert Tid</span>
-                    <span className="text-white">~45 min pr episode</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-gray-500">Status</span>
-                    <span className="text-neon-amber">KLAR FOR GENEREING</span>
-                  </div>
-                </div>
 
-                <div className="pt-6 border-t border-white/5">
-                  <button 
-                    disabled={isGenerating}
-                    onClick={handleGenerate}
-                    className="w-full py-4 bg-neon-cyan text-black font-black uppercase tracking-widest rounded-xl hover:shadow-[0_0_20px_#00f5ff] transition-all disabled:opacity-50"
-                  >
-                    {isGenerating ? 'Starter Fabrikken...' : 'START AUTO-PRODUKSJON'}
-                  </button>
+                  <div className="pt-6">
+                    <button 
+                      disabled={isGenerating}
+                      onClick={handleGenerate}
+                      className="w-full py-6 bg-white text-black font-black uppercase tracking-[0.3em] text-xs rounded-[24px] hover:bg-neon-pink hover:text-white transition-all shadow-xl hover:shadow-neon-pink/20 disabled:opacity-50 disabled:grayscale"
+                    >
+                      {isGenerating ? 'Deploying Nodes...' : 'Commence Auto-Stream'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-6 bg-neon-purple/5 border border-neon-purple/20 rounded-3xl space-y-3">
-                <div className="flex items-center gap-2 text-neon-purple font-black text-[10px] uppercase">
-                  <Zap size={14} /> AI Insight
+              <div className="glass-ultra rounded-[32px] p-8 border border-neon-purple/20 bg-neon-purple/5 space-y-4">
+                <div className="flex items-center gap-3 text-neon-purple font-black text-[10px] uppercase tracking-[0.3em]">
+                  <Sparkles size={16} /> Neural Forecast
                 </div>
-                <p className="text-[10px] text-gray-500 leading-relaxed font-mono">
-                  Dette konseptet har en beregnet suksessrate på 88% basert på nåværende trender i {LANGUAGES.find(l => l.id === selectedLanguage)?.label} markedet.
+                <p className="text-[10px] text-gray-500 leading-relaxed font-mono font-bold uppercase tracking-widest italic text-center">
+                  Predicting 88% engagement saturation in the selected linguistic sector.
                 </p>
               </div>
             </div>
@@ -207,15 +234,22 @@ export default function AutoSeries() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="glass-morphism rounded-[40px] border-white/5 overflow-hidden"
+            className="glass-ultra rounded-[64px] border border-white/5 overflow-hidden"
           >
-            <div className="p-12 text-center space-y-4">
-              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-gray-700">
-                <History size={40} />
+            <div className="p-32 text-center space-y-8">
+              <div className="w-24 h-24 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto text-gray-700 border border-white/5">
+                <History size={48} />
               </div>
-              <h3 className="text-xl font-bold text-white">Ingen aktive serier</h3>
-              <p className="text-gray-500 max-w-xs mx-auto">Start din første automatiserte serie for å se dem her.</p>
-              <button onClick={() => setActiveTab('new')} className="text-neon-cyan font-black uppercase tracking-widest text-xs mt-4">Lag ny serie nå</button>
+              <div className="space-y-2">
+                <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">Zero Active Streams</h3>
+                <p className="text-gray-500 max-w-sm mx-auto font-medium">Your automated production network is currently in standby. Initialize a new series node to begin.</p>
+              </div>
+              <button 
+                onClick={() => setActiveTab('new')} 
+                className="px-10 py-4 bg-white/5 text-neon-pink font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl hover:bg-white/10 border border-neon-pink/20 transition-all"
+              >
+                Launch Primary Node
+              </button>
             </div>
           </motion.div>
         )}

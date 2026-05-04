@@ -118,8 +118,10 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   },
 
   subscribeToChanges: () => {
+    // Bruk et unikt navn for hver kanal for å unngå kollisjoner ved remount
+    const channelId = `db-changes-${Date.now()}`;
     const channel = supabase
-      .channel('db-changes')
+      .channel(channelId)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => get().fetchOrders())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'productions' }, () => get().fetchOrders())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, () => get().fetchTrends())

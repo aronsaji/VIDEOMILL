@@ -1,11 +1,13 @@
 export const triggerProduction = async (payload: any) => {
-  const BASE_URL = import.meta.env.VITE_N8N_WEBHOOK_URL_BASE || 'http://localhost:5678/webhook';
+  // Use the full URL if provided, otherwise construct it from base
+  const envUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
+  const baseUrl = envUrl ? envUrl.split('/webhook/')[0] + '/webhook' : 'http://localhost:5678/webhook';
   
-  // Velg riktig endepunkt basert på om det er en retry eller ny generering
-  const endpoint = payload.retry_video_id ? 'viranode-retry' : 'viranode-generate';
-  const WEBHOOK_URL = `${BASE_URL}/${endpoint}`;
+  // Select endpoint
+  const endpoint = payload.action === 'SERIES_START' ? 'series-start' : (payload.retry_video_id ? 'viranode-retry' : 'viranode-generate');
+  const WEBHOOK_URL = `${baseUrl}/${endpoint}`;
   
-  console.log(`🚀 Sender ${endpoint} til n8n:`, payload);
+  console.log(`🚀 Triggering ${endpoint} at ${WEBHOOK_URL}`, payload);
   
   try {
     const response = await fetch(WEBHOOK_URL, {

@@ -1,202 +1,262 @@
-import { usePipelineStore } from '../store/pipelineStore';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Play, ArrowUpRight, Flame, CheckCircle2, Clock, AlertTriangle, Loader, RefreshCw, Smartphone, Monitor, Send, Heart, Video, Sparkles, Wand2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import type { Order, OrderStatus } from '../types';
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Activity, Play, ArrowUpRight, Flame, CheckCircle2, 
+  Clock, AlertTriangle, Loader, RefreshCw, Smartphone, 
+  Monitor, Send, Heart, Video, Sparkles, Wand2, Zap,
+  Cpu, Database, Radio, Globe, Shield, Terminal, Layers
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { usePipelineStore } from '../store/pipelineStore';
+import type { Order, OrderStatus } from '../types';
 
-const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  queued:           { label: 'Køet',             color: 'text-gray-400',      bg: 'bg-gray-400/10 border-gray-400/20',      icon: Clock },
-  script_generation:{ label: 'Skriver Manus',     color: 'text-blue-400',      bg: 'bg-blue-400/10 border-blue-400/20',      icon: Loader },
-  rendering:        { label: 'Rendrer Video',     color: 'text-neon-cyan',     bg: 'bg-neon-cyan/10 border-neon-cyan/20',    icon: Loader },
-  uploading:        { label: 'Laster opp',       color: 'text-purple-400',    bg: 'bg-purple-400/10 border-purple-400/20',  icon: Loader },
-  published:        { label: 'Publisert',        color: 'text-green-400',     bg: 'bg-green-400/10 border-green-400/20',    icon: CheckCircle2 },
-  analyzing:        { label: 'Analyserer',       color: 'text-neon-amber',    bg: 'bg-neon-amber/10 border-neon-amber/20',  icon: Loader },
-  optimizing:       { label: 'Optimaliserer',    color: 'text-pink-400',      bg: 'bg-pink-400/10 border-pink-400/20',      icon: Loader },
-  failed:           { label: 'Feilet',           color: 'text-red-400',       bg: 'bg-red-400/10 border-red-400/20',        icon: AlertTriangle },
-  needs_attention:  { label: 'Trenger hjelp',    color: 'text-neon-amber',    bg: 'bg-neon-amber/10 border-neon-amber/20',  icon: AlertTriangle },
+const STATUS_CONFIG: Record<string, { label: string; color: string; glow: string; icon: any }> = {
+  queued:           { label: 'BUFFERING',      color: 'text-gray-500',      glow: 'shadow-gray-500/10',     icon: Clock },
+  script_generation:{ label: 'COGNITION',      color: 'text-neon-cyan',     glow: 'shadow-neon-cyan/20',    icon: Cpu },
+  rendering:        { label: 'SYNTHESIS',      color: 'text-neon-purple',   glow: 'shadow-neon-purple/30',  icon: Zap },
+  uploading:        { label: 'UPLOADING',      color: 'text-neon-pink',     glow: 'shadow-neon-pink/20',    icon: Send },
+  published:        { label: 'DEPLOYED',       color: 'text-neon-green',    glow: 'shadow-neon-green/30',   icon: CheckCircle2 },
+  failed:           { label: 'CORRUPTED',      color: 'text-red-500',       glow: 'shadow-red-500/20',      icon: AlertTriangle },
 };
-
-function StatusBadge({ status }: { status: OrderStatus }) {
-  const cfg = STATUS_CONFIG[status] || { 
-    label: status, 
-    color: 'text-gray-400', 
-    bg: 'bg-gray-400/10 border-gray-400/20', 
-    icon: Clock 
-  };
-  const Icon = cfg.icon;
-  return (
-    <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] px-2 py-0.5 rounded border ${cfg.color} ${cfg.bg}`}>
-      <Icon size={10} className={!['queued', 'published', 'failed', 'needs_attention'].includes(status) ? 'animate-spin' : ''} />
-      {cfg.label}
-    </span>
-  );
-}
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { 
-    orders = [], 
-    trends = [], 
-    fetchInitialData, 
-    fetchOrders,
-    error: storeError 
-  } = usePipelineStore();
+  const { orders = [], trends = [], fetchInitialData, fetchOrders, isLoading } = usePipelineStore();
 
   useEffect(() => {
     fetchInitialData();
     const interval = setInterval(() => fetchOrders(), 5000);
     return () => clearInterval(interval);
-  }, [fetchInitialData, fetchOrders]);
+  }, []);
 
-  const activeOrders = Array.isArray(orders) 
-    ? orders.filter(o => ['queued', 'script_generation', 'rendering', 'uploading'].includes(o.status))
-    : [];
-
-  const handleProduceTrend = (trend: any) => {
-    navigate(`/factory?topic=${encodeURIComponent(trend.title || trend.topic)}`);
-  };
+  const activeProductions = orders.filter(o => o.status !== 'published' && o.status !== 'failed');
+  const recentTrends = trends.slice(0, 4);
 
   return (
-    <div className="space-y-10 pb-20">
-      {/* Top Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-black text-white tracking-tight">Command Center</h1>
-          <p className="text-gray-500 mt-1">Full kontroll over VideoMill produksjonslinje.</p>
-        </div>
-        <button 
-          onClick={() => navigate('/factory')}
-          className="flex items-center gap-3 px-8 py-4 bg-neon-cyan text-black rounded-2xl font-black shadow-[0_0_30px_rgba(0,245,255,0.2)] hover:scale-105 transition-all group"
-        >
-          <Wand2 size={20} className="group-hover:rotate-12 transition-transform" />
-          START NY PRODUKSJON
-        </button>
+    <div className="space-y-12 max-w-[1600px] mx-auto pb-20 px-4 lg:px-0">
+      {/* Tactical Telemetry Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Network Integrity', value: 'OPTIMAL', icon: Shield, color: 'text-neon-green', detail: 'Encrypted_Link_1' },
+          { label: 'Neural Activity', value: activeProductions.length, icon: Cpu, color: 'text-neon-purple', detail: 'Active_Nodes' },
+          { label: 'Cognition Rate', value: '98.4%', icon: Sparkles, color: 'text-neon-cyan', detail: 'Sync_Stable' },
+          { label: 'Data Velocity', value: '4.2GB/S', icon: Database, color: 'text-neon-amber', detail: 'Burst_Active' },
+        ].map((stat, i) => (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            key={stat.label}
+            className="glass-ultra rounded-[32px] p-8 group relative overflow-hidden border border-white/5 hover:border-white/10 transition-all cursor-crosshair"
+          >
+            <div className={`absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-all duration-500 transform group-hover:rotate-12 ${stat.color}`}>
+              <stat.icon size={80} />
+            </div>
+            <div className="space-y-3 relative z-10">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.4em]">{stat.label}</p>
+                <div className="w-1 h-1 bg-white/20 rounded-full" />
+              </div>
+              <h3 className={`text-4xl font-black italic uppercase tracking-tighter ${stat.color} leading-none`}>
+                {stat.value}
+              </h3>
+              <div className="flex items-center gap-2 pt-1">
+                 <div className={`w-1 h-1 rounded-full bg-current ${stat.color} animate-pulse`} />
+                 <span className="text-[8px] font-mono text-gray-600 uppercase tracking-widest">{stat.detail}</span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Trend Radar */}
-        <div className="lg:col-span-7 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Operations Hub: Live Production Line */}
+        <div className="lg:col-span-8 space-y-8">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Activity className="text-neon-cyan" />
-              Trend Radar
-            </h2>
-            <div className="px-3 py-1 bg-neon-cyan/10 border border-neon-cyan/20 rounded-full text-[10px] font-mono text-neon-cyan">
-              LIVE UPDATES
+            <div className="space-y-1">
+              <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
+                <Radio className="text-neon-purple animate-pulse" size={28} />
+                Operations <span className="text-neon-purple">Hub</span>
+              </h2>
+              <div className="flex items-center gap-3">
+                 <div className="h-[1px] w-12 bg-neon-purple/50" />
+                 <span className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Live Production Stream</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 backdrop-blur-md">
+               <Layers size={14} className="text-neon-purple" />
+               <span className="text-[10px] font-black font-mono text-white uppercase tracking-widest">{activeProductions.length} Active Nodes</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            {trends.slice(0, 6).map((trend, i) => (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                key={trend.id || i}
-                className="group bg-surface/40 border border-white/5 rounded-2xl p-5 hover:border-neon-cyan/30 transition-all cursor-pointer relative overflow-hidden"
-                onClick={() => handleProduceTrend(trend)}
+          <div className="space-y-5">
+            {activeProductions.length === 0 ? (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="glass-ultra rounded-[48px] py-32 text-center border border-dashed border-white/10"
               >
-                <div className="flex items-start justify-between relative z-10">
-                  <div className="space-y-2 flex-1 pr-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono text-neon-cyan bg-neon-cyan/5 px-2 py-0.5 rounded border border-neon-cyan/10">
-                        {trend.category || 'TRENDING'}
-                      </span>
-                      {trend.viral_score > 80 && (
-                        <span className="flex items-center gap-1 text-[10px] font-mono text-neon-amber">
-                          <Flame size={12} fill="currentColor" />
-                          VIRAL POTENTIAL
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-lg font-bold text-white group-hover:text-neon-cyan transition-colors line-clamp-1">
-                      {trend.title || trend.topic}
-                    </h3>
-                  </div>
-                  <button className="p-3 bg-neon-cyan/10 text-neon-cyan rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-neon-cyan hover:text-black">
-                    <Wand2 size={18} />
-                  </button>
+                <div className="p-8 bg-white/[0.02] rounded-full w-fit mx-auto mb-8 text-gray-700 border border-white/5 relative">
+                  <div className="absolute inset-0 bg-neon-purple/5 rounded-full blur-xl" />
+                  <Video size={48} className="relative z-10" />
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right Column: Live Production */}
-        <div className="lg:col-span-5 space-y-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Video className="text-neon-amber" />
-            Live Fabrikk-linje
-          </h2>
-
-          <div className="bg-surface/30 border border-white/5 rounded-3xl p-6 min-h-[400px] backdrop-blur-md relative overflow-hidden">
-            <AnimatePresence mode="popLayout">
-              {activeOrders.length === 0 ? (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-col items-center justify-center h-full py-20 text-center space-y-4"
+                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-3">System Standby</h3>
+                <p className="text-gray-500 max-w-sm mx-auto text-xs font-medium leading-relaxed uppercase tracking-widest italic">The production grid is currently idle. Initialize a new synthesis cycle at the Factory node.</p>
+                <button 
+                  onClick={() => navigate('/factory')}
+                  className="mt-10 px-12 py-4 bg-white text-black hover:bg-neon-purple hover:text-white rounded-[20px] font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl hover:shadow-neon-purple/20"
                 >
-                  <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-gray-700">
-                    <Clock size={32} />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-gray-400 font-bold">Venter på nye ordre...</p>
-                    <p className="text-xs text-gray-600">Start fabrikken for å se magien skje.</p>
-                  </div>
-                </motion.div>
-              ) : (
-                <div className="space-y-4">
-                  {activeOrders.map((order) => (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      key={order.id}
-                      className="bg-black/40 border border-white/5 rounded-2xl p-4 space-y-3"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <p className="text-sm font-bold text-white line-clamp-1">{order.title || order.topic}</p>
-                          <StatusBadge status={order.status} />
-                        </div>
-                        <span className="text-[10px] font-mono text-gray-600">
-                          {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  Enter Factory Core
+                </button>
+              </motion.div>
+            ) : (
+              activeProductions.map((order, i) => (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  key={order.id}
+                  className="glass-ultra rounded-[32px] p-8 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden group hover:border-neon-purple/30 transition-all border border-white/5"
+                >
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-neon-purple shadow-[0_0_15px_rgba(188,19,254,0.5)]" />
+                  
+                  <div className="flex-1 space-y-4 w-full">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <h4 className="text-xl font-black text-white italic uppercase tracking-tight group-hover:text-neon-purple transition-colors leading-none">
+                        {order.title || order.topic}
+                      </h4>
+                      <div className="flex gap-2">
+                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-gray-500`}>
+                          {order.language?.toUpperCase()}
+                        </span>
+                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-neon-purple/10 border border-neon-purple/20 text-neon-purple`}>
+                          9:16_VERT
                         </span>
                       </div>
-                      
-                      <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-6">
+                      <div className="flex items-center gap-2 text-[10px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
+                        <Terminal size={12} className="text-neon-purple" />
+                        DEST: {order.platform_destinations?.join(' / ').toUpperCase() || 'TIKTOK_PRIMARY'}
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
+                        <Clock size={12} />
+                        TS: {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </div>
+                    </div>
+
+                    {/* Technical Progress Gauge */}
+                    <div className="space-y-2 pt-4">
+                      <div className="flex justify-between text-[9px] font-black font-mono text-gray-500 uppercase tracking-[0.2em]">
+                        <span className="flex items-center gap-2">
+                           <div className="w-1 h-1 bg-neon-purple rounded-full animate-pulse" />
+                           Synthesis Process
+                        </span>
+                        <span className="text-neon-purple">{order.progress || 10}% Complete</span>
+                      </div>
+                      <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/5">
                         <motion.div 
                           initial={{ width: 0 }}
-                          animate={{ 
-                            width: order.status === 'rendering' ? '60%' : 
-                                   order.status === 'uploading' ? '90%' : '20%' 
-                          }}
-                          className="h-full bg-neon-cyan shadow-[0_0_10px_#00f5ff]"
+                          animate={{ width: `${order.progress || 10}%` }}
+                          className="h-full bg-gradient-to-r from-neon-purple to-neon-pink shadow-[0_0_15px_rgba(188,19,254,0.4)]" 
                         />
                       </div>
-                    </motion.div>
-                  ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 min-w-[200px] justify-end w-full md:w-auto">
+                    <div className={`flex items-center gap-3 px-6 py-4 rounded-[20px] bg-black/40 border border-white/5 ${STATUS_CONFIG[order.status]?.color || 'text-white'} shadow-lg group-hover:scale-105 transition-transform`}>
+                      {React.createElement(STATUS_CONFIG[order.status]?.icon || Loader, { size: 16, className: order.status !== 'failed' && order.status !== 'published' ? 'animate-spin-slow' : '' })}
+                      <span className="text-[11px] font-black tracking-[0.2em] uppercase italic">{STATUS_CONFIG[order.status]?.label || order.status}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Intelligence Grid: Trend Radar & AI Expansion */}
+        <div className="lg:col-span-4 space-y-10">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter flex items-center gap-3">
+                  <Flame className="text-neon-amber" size={24} />
+                  Trend <span className="text-neon-amber">Radar</span>
+                </h2>
+                <div className="h-[1px] w-8 bg-neon-amber/50" />
+              </div>
+              <button 
+                onClick={() => navigate('/trends')} 
+                className="text-[10px] font-black text-neon-amber uppercase tracking-[0.3em] hover:text-white transition-colors border-b border-neon-amber/20 pb-0.5"
+              >
+                Query_All
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {recentTrends.map((trend, i) => (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  key={trend.id}
+                  onClick={() => navigate('/factory', { state: { trend } })}
+                  className="glass-ultra rounded-[28px] p-6 border border-white/5 hover:border-neon-amber/30 cursor-pointer group transition-all relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                     <Activity size={40} className="text-neon-amber" />
+                  </div>
+                  <div className="space-y-4 relative z-10">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                         <div className="w-1.5 h-1.5 bg-neon-amber rounded-full animate-pulse" />
+                         <span className="text-[10px] font-black font-mono text-neon-amber uppercase tracking-widest italic">
+                            {trend.viral_score}% Viral_Yield
+                         </span>
+                      </div>
+                      <span className="text-[9px] font-black font-mono text-gray-600 uppercase tracking-widest italic">{trend.platform}</span>
+                    </div>
+                    <h4 className="text-[13px] font-black text-white group-hover:text-neon-amber transition-colors leading-tight uppercase tracking-tight italic">
+                      {trend.title}
+                    </h4>
+                    <div className="flex flex-wrap gap-2 pt-1 border-t border-white/5 mt-2">
+                      {trend.tags?.slice(0, 3).map(tag => (
+                        <span key={tag} className="text-[8px] font-mono font-bold text-gray-700 uppercase">#{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Neural Expansion Module */}
+          <div className="glass-ultra rounded-[40px] p-10 border border-neon-cyan/20 bg-gradient-to-br from-neon-cyan/5 to-transparent relative overflow-hidden group">
+            <div className="absolute -top-10 -right-10 p-12 opacity-5 rotate-12 group-hover:rotate-0 transition-all duration-1000 transform scale-150">
+              <Sparkles size={160} className="text-neon-cyan" />
+            </div>
+            <div className="space-y-6 relative z-10">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-neon-cyan font-black text-[10px] uppercase tracking-[0.4em]">
+                   <Zap size={14} /> Neural Agent X
                 </div>
-              )}
-            </AnimatePresence>
-            
-            {/* Background Decoration */}
-            <div className="absolute bottom-0 right-0 p-4 opacity-10 pointer-events-none">
-              <RefreshCw size={120} className="animate-spin-slow" />
+                <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter leading-tight">Scale Your <span className="text-neon-cyan">Influence</span></h3>
+                <p className="text-[11px] text-gray-500 leading-relaxed font-medium italic">Deploy autonomous series nodes to dominate the content grid with zero manual intervention.</p>
+              </div>
+              <button 
+                onClick={() => navigate('/auto-series')}
+                className="w-full py-5 bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] rounded-[20px] hover:bg-neon-cyan hover:text-white transition-all shadow-xl hover:shadow-neon-cyan/20 flex items-center justify-center gap-3 group"
+              >
+                Launch Auto-Series Node
+                <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </button>
             </div>
           </div>
         </div>
       </div>
-
-      {storeError && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-red-500/20 border border-red-500/50 backdrop-blur-xl px-6 py-3 rounded-2xl flex items-center gap-3 text-red-200 shadow-2xl z-50">
-          <AlertTriangle size={18} />
-          <span className="text-sm font-bold">Tilkoblingsfeil: Kunne ikke hente live-data</span>
-        </div>
-      )}
     </div>
   );
 }
