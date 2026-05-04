@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Play, ArrowUpRight, Flame, CheckCircle2, Clock, AlertTriangle, Loader, RefreshCw, Smartphone, Monitor, Send, Heart, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Order, OrderStatus } from '../types';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { triggerProduction } from '../lib/api';
 
 
@@ -70,9 +70,13 @@ function getStageStatus(order: Order, stageIndex: number): 'done' | 'active' | '
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { orders, trends, addOrder } = usePipelineStore();
+  const { orders = [], trends = [], addOrder, fetchOrders } = usePipelineStore();
   const [orderingId, setOrderingId] = useState<string | null>(null);
   const [trendLanguage, setTrendLanguage] = useState('Auto');
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   const handleQuickOrder = async (trend: any) => {
     if (orderingId) return;
@@ -80,12 +84,11 @@ export default function Dashboard() {
     const finalLanguage = trendLanguage === 'Auto' ? (trend.language || 'English') : trendLanguage;
 
     try {
-      // THE REAL TRIGGER: Using centralized API utility
       const success = await triggerProduction({
         action: 'FORCE_START',
         trend_id: trend.id,
         title: trend.title,
-        topic: trend.tags[0] || 'Trend',
+        topic: (trend.tags && trend.tags[0]) || 'Trend',
         language: finalLanguage,
         platforms: ['tiktok', 'youtube', 'snapchat']
       });
@@ -93,50 +96,43 @@ export default function Dashboard() {
       if (success) {
         addOrder({
           title: trend.title,
-          topic: trend.tags[0] || 'Trend',
+          topic: (trend.tags && trend.tags[0]) || 'Trend',
           platform_destinations: ['tiktok', 'youtube', 'snapchat'],
           language: finalLanguage,
           target_audience: trend.country || 'Global',
         });
+        fetchOrders();
       } else {
-        console.error('n8n Webhook failed');
         alert('Kunne ikke starte n8n-pipelinen. Sjekk om n8n kjører!');
       }
     } catch (err) {
-
       console.error('Fetch error:', err);
-      // Still add locally for UI feedback if n8n is unreachable
-      addOrder({
-        title: trend.title,
-        topic: trend.tags[0] || 'Trend',
-        platform_destinations: ['tiktok', 'youtube', 'snapchat'],
-        language: finalLanguage,
-        target_audience: trend.country || 'Global',
-      });
     } finally {
       setOrderingId(null);
     }
   };
 
-  const activeOrder = orders.find(o => ['script_generation', 'rendering', 'uploading'].includes(o.status)) || orders[0];
-  const recentOrders = orders.slice(0, 8);
+  // Sikre data
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const safeTrends = Array.isArray(trends) ? trends : [];
+
+  const activeOrder = safeOrders.find(o => ['script_generation', 'rendering', 'uploading'].includes(o.status)) || safeOrders[0];
+  const recentOrders = safeOrders.slice(0, 8);
 
   const stats = {
-    queued: orders.filter(o => o.status === 'queued').length,
-    processing: orders.filter(o => ['script_generation', 'rendering', 'uploading'].includes(o.status)).length,
-    published: orders.filter(o => o.status === 'published').length,
-    failed: orders.filter(o => o.status === 'failed' || o.status === 'needs_attention').length,
+    queued: safeOrders.filter(o => o && o.status === 'queued').length,
+    processing: safeOrders.filter(o => o && ['script_generation', 'rendering', 'uploading'].includes(o.status)).length,
+    published: safeOrders.filter(o => o && o.status === 'published').length,
+    failed: safeOrders.filter(o => o && (o.status === 'failed' || o.status === 'needs_attention')).length,
   };
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">🌍 VideoMill Factory</h1>
         <p className="text-sm text-gray-500 mt-1">Global viral content engine — live production overview</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'In Queue', value: stats.queued, color: 'text-gray-400', border: 'border-gray-400/20' },
@@ -152,7 +148,6 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Live Production Panel */}
         <div className="xl:col-span-2 space-y-6">
           <div className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-neon-cyan via-blue-500 to-purple-600" />
@@ -165,13 +160,16 @@ export default function Dashboard() {
                 {activeOrder && (
                   <div className="mt-2">
                     <h3 className="text-lg font-bold text-white">{activeOrder.title}</h3>
-                    <p className="text-xs text-neon-cyan font-mono mt-0.5">{activeOrder.video_id} // {activeOrder.platform_destinations.join(' + ').toUpperCase()}</p>
+                    <p className="text-xs text-neon-cyan font-mono mt-0.5">{activeOrder.video_id} // {(activeOrder.platform_destinations || []).join(' + ').toUpperCase()}</p>
                   </div>
                 )}
               </div>
-              <button className="flex items-center gap-2 px-3 py-1.5 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded-lg font-mono text-xs uppercase transition-colors">
-                <Play size={12} />
-                Force Start
+              <button 
+                onClick={() => fetchOrders()}
+                className="flex items-center gap-2 px-3 py-1.5 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded-lg font-mono text-xs uppercase transition-colors"
+              >
+                <RefreshCw size={12} />
+                Refresh
               </button>
             </div>
 
@@ -188,18 +186,17 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Progress Bar */}
             {activeOrder && (
               <div className="mt-4 space-y-1.5">
                 <div className="flex justify-between text-xs font-mono text-gray-500">
                   <span>Progress</span>
-                  <span className="text-neon-cyan">{activeOrder.progress}%</span>
+                  <span className="text-neon-cyan">{activeOrder.progress || 0}%</span>
                 </div>
                 <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
                   <motion.div
                     className="h-full bg-gradient-to-r from-neon-cyan to-blue-500 rounded-full"
                     initial={{ width: 0 }}
-                    animate={{ width: `${activeOrder.progress}%` }}
+                    animate={{ width: `${activeOrder.progress || 0}%` }}
                     transition={{ duration: 1, ease: 'easeOut' }}
                   />
                 </div>
@@ -207,50 +204,48 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Order Queue */}
           <div className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm">
             <h2 className="font-mono text-sm text-gray-400 uppercase mb-4">Production Queue</h2>
             <div className="space-y-1">
               <AnimatePresence>
-                {recentOrders.map((order, i) => (
-                  <motion.div
-                    key={order.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="flex items-center justify-between py-3 px-2 border-b border-border/50 hover:bg-white/3 rounded transition-colors cursor-pointer group"
-                  >
-                    <div className="min-w-0 flex-1 mr-4">
-                      <p className="text-sm text-gray-200 font-medium truncate group-hover:text-white transition-colors">{order.title}</p>
-                      <p className="text-xs font-mono text-gray-600 mt-0.5">{order.video_id} · {new Date(order.created_at).toLocaleTimeString('nb-NO')}</p>
-                    </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      {order.status === 'failed' && order.error_type && (
-                        <span className="text-xs font-mono text-gray-600">{order.error_type}</span>
-                      )}
-                      <StatusBadge status={order.status} />
-                      {order.status === 'failed' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            usePipelineStore.getState().retryOrder(order);
-                          }}
-                          className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg transition-colors flex items-center gap-1 text-[10px] uppercase font-bold"
-                          title="Retry production"
-                        >
-                          <RefreshCw size={10} />
-                          Retry
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
+                {recentOrders.map((order, i) => {
+                  if (!order) return null;
+                  return (
+                    <motion.div
+                      key={order.id || order.video_id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex items-center justify-between py-3 px-2 border-b border-border/50 hover:bg-white/3 rounded transition-colors cursor-pointer group"
+                    >
+                      <div className="min-w-0 flex-1 mr-4">
+                        <p className="text-sm text-gray-200 font-medium truncate group-hover:text-white transition-colors">{order.title}</p>
+                        <p className="text-xs font-mono text-gray-600 mt-0.5">{order.video_id} · {order.created_at ? new Date(order.created_at).toLocaleTimeString('nb-NO') : 'Just now'}</p>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <StatusBadge status={order.status} />
+                        {order.status === 'failed' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              usePipelineStore.getState().retryOrder(order);
+                            }}
+                            className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg transition-colors flex items-center gap-1 text-[10px] uppercase font-bold"
+                          >
+                            <RefreshCw size={10} />
+                            Retry
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
+              {recentOrders.length === 0 && <p className="text-center py-10 text-gray-600 font-mono text-xs">No videos in queue</p>}
             </div>
           </div>
         </div>
 
-        {/* Trend Radar Sidebar */}
         <div className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-mono text-sm text-gray-400 uppercase flex items-center gap-2">
@@ -259,9 +254,6 @@ export default function Dashboard() {
             </h2>
             <span className="text-xs font-mono bg-neon-amber/10 text-neon-amber border border-neon-amber/20 px-2 py-0.5 rounded">
               LIVE
-            </span>
-            <span className="text-[10px] text-gray-500 font-mono mt-1">
-              DB: {Array.from(new Set(trends.map(t => t.language))).filter(Boolean).join(', ')}
             </span>
           </div>
 
@@ -291,15 +283,11 @@ export default function Dashboard() {
 
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
             <AnimatePresence>
-              {trends.filter(t => {
+              {safeTrends.filter(t => {
                 if (trendLanguage === 'Auto') return true;
-                
-                // Extract language from target_audience if language field is missing
-                // Format in DB: "Norway - Norsk" -> we want "Norsk"
                 const dbLangField = t.language || '';
                 const dbAudienceField = t.target_audience || '';
                 const extractedLang = dbLangField || dbAudienceField.split(' - ')[1] || '';
-                
                 return extractedLang.trim().toLowerCase() === trendLanguage.trim().toLowerCase();
               })
                 .sort((a, b) => (b.viral_score || 0) - (a.viral_score || 0))
@@ -323,23 +311,19 @@ export default function Dashboard() {
                         trend.platform === 'snapchat' ? 'bg-yellow-400/15 text-yellow-400' :
                         'bg-blue-500/15 text-blue-400'
                       }`}>
-                        {trend.platform === 'youtube' && <Video size={10} />}
-                        {trend.platform === 'tiktok' && <Smartphone size={10} />}
-                        {trend.platform === 'snapchat' && <Activity size={10} />}
-                        {trend.platform === 'instagram' && <Heart size={10} />}
-                        {trend.platform === 'snapchat' ? 'Snapchat' : trend.platform}
+                        {trend.platform}
                       </span>
                     </div>
                     <div className="flex items-center gap-0.5 text-neon-amber font-mono text-xs bg-neon-amber/10 px-1.5 rounded">
                       <ArrowUpRight size={12} />
-                      {trend.viral_score}%
+                      {trend.viral_score || 0}%
                     </div>
                   </div>
                   <p className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-1">{trend.title}</p>
                   
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex flex-wrap gap-1">
-                      {trend.tags.slice(0, 2).map(tag => (
+                      {(trend.tags || []).slice(0, 2).map(tag => (
                         <span key={tag} className="text-[10px] font-mono bg-white/5 text-gray-500 px-1.5 py-0.5 rounded border border-white/5">#{tag}</span>
                       ))}
                     </div>
@@ -347,16 +331,13 @@ export default function Dashboard() {
                       disabled={orderingId === trend.id}
                       className="flex items-center gap-1.5 text-[10px] font-bold text-neon-cyan bg-neon-cyan/10 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100"
                     >
-                      {orderingId === trend.id ? (
-                        <><RefreshCw size={10} className="animate-spin" /> Sender...</>
-                      ) : (
-                        '1-Klikk Bestill'
-                      )}
+                      {orderingId === trend.id ? 'Sending...' : '1-Click Order'}
                     </button>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
+            {safeTrends.length === 0 && <p className="text-center py-10 text-gray-600 font-mono text-xs">No trends available</p>}
           </div>
         </div>
       </div>

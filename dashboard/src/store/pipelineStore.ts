@@ -4,21 +4,22 @@ import type { Order, OrderStatus } from '../types';
 
 interface PipelineState {
   orders: Order[];
+  trends: any[];
   loading: boolean;
   fetchOrders: () => Promise<void>;
+  fetchTrends: () => Promise<void>;
   addOrder: (order: Partial<Order>) => void;
   updateOrder: (videoId: string, updates: Partial<Order>) => void;
   retryOrder: (order: Order) => Promise<void>;
   subscribeToChanges: () => () => void;
 }
 
-// Skuddsikker store som fungerer på alle Zustand-versjoner
 export const usePipelineStore = create<PipelineState>((set, get) => ({
   orders: [],
+  trends: [],
   loading: false,
 
   fetchOrders: async () => {
-    set({ loading: true });
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -26,21 +27,32 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) {
-        console.error('Supabase error:', error);
-        set({ orders: [], loading: false });
-        return;
-      }
-      
-      // Sikrer at data alltid er en array
-      set({ orders: data || [], loading: false });
+      if (error) throw error;
+      set({ orders: data || [] });
     } catch (err) {
-      console.error('Kritisk feil ved henting:', err);
-      set({ orders: [], loading: false });
+      console.error('Feil ved henting av ordrer:', err);
+      set({ orders: [] });
     }
   },
 
-  addOrder: () => {
+  fetchTrends: async () => {
+    try {
+      const { data, error } = await supabase
+        .from('trends')
+        .select('*')
+        .order('viral_score', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      set({ trends: data || [] });
+    } catch (err) {
+      console.error('Feil ved henting av trender:', err);
+      set({ trends: [] });
+    }
+  },
+
+  addOrder: (order) => {
+    // Vi trigger en ny henting for å være synkronisert med DB
     get().fetchOrders();
   },
 
@@ -70,13 +82,9 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
   subscribeToChanges: () => {
     const channel = supabase
-      .channel('orders-realtime')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'orders' }, 
-        () => {
-          get().fetchOrders();
-        }
-      )
+      .channel('db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => get().fetchOrders())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'trends' }, () => get().fetchTrends())
       .subscribe();
 
     return () => {
