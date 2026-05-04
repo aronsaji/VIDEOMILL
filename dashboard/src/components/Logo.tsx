@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
+export default function Logo({ size = 'md', hideText = false }: { size?: 'sm' | 'md' | 'lg', hideText?: boolean }) {
   const sizeClasses = {
     sm: 'w-6 h-6',
     md: 'w-8 h-8',
@@ -26,14 +26,16 @@ export default function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
           <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-neon-cyan border-b-[5px] border-b-transparent ml-1" />
         </motion.div>
       </div>
-      <div className="flex flex-col justify-center">
-        <h1 className={`font-bold tracking-tight text-white leading-none ${size === 'lg' ? 'text-3xl mb-1' : 'text-xl mb-0.5'}`}>
-          VIDEOMILL
-        </h1>
-        <p className={`font-mono text-neon-cyan leading-none ${size === 'lg' ? 'text-xs' : 'text-[10px]'}`}>
-          NON-STOP VIRAL ENGINE
-        </p>
-      </div>
+      {!hideText && (
+        <div className="flex flex-col justify-center">
+          <h1 className={`font-bold tracking-tight text-white leading-none ${size === 'lg' ? 'text-3xl mb-1' : 'text-xl mb-0.5'}`}>
+            VIDEOMILL
+          </h1>
+          <p className={`font-mono text-neon-cyan leading-none ${size === 'lg' ? 'text-xs' : 'text-[10px]'}`}>
+            NON-STOP VIRAL ENGINE
+          </p>
+        </div>
+      )}
     </div>
   );
 }

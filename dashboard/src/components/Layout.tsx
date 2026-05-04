@@ -30,7 +30,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         className="w-20 bg-surface border-r border-border flex flex-col items-center py-6 gap-8 z-10"
       >
         <div className="text-neon-cyan">
-          <Logo size="md" />
+          <Logo size="md" hideText={true} />
         </div>
         <nav className="flex flex-col gap-4 flex-1 mt-4">
           <SidebarIcon icon={LayoutDashboard} to="/" active={location.pathname === '/'} />

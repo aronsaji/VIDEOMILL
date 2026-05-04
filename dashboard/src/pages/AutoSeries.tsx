@@ -24,6 +24,20 @@ const PLATFORMS = [
   { id: 'instagram', label: 'Instagram', icon: Camera, color: 'hover:border-purple-500 hover:text-purple-400', activeBg: 'bg-purple-500/10 border-purple-500 text-purple-400' },
 ];
 
+const VOICES = [
+  { id: 'nova', label: 'Nova (Female)', provider: 'OpenAI' },
+  { id: 'shimmer', label: 'Shimmer (Female)', provider: 'OpenAI' },
+  { id: 'echo', label: 'Echo (Male)', provider: 'OpenAI' },
+  { id: 'onyx', label: 'Onyx (Male)', provider: 'OpenAI' },
+  { id: 'adam', label: 'Adam (Deep)', provider: 'ElevenLabs' },
+  { id: 'bella', label: 'Bella (Soft)', provider: 'ElevenLabs' },
+];
+
+const FORMATS = [
+  { id: '9:16', label: 'Portrait (TikTok/Shorts)', icon: Smartphone },
+  { id: '16:9', label: 'Landscape (YouTube)', icon: Play },
+];
+
 export default function AutoSeries() {
   const [activeTab, setActiveTab] = useState<'new' | 'mine'>('new');
   const store = usePipelineStore();
@@ -31,8 +45,10 @@ export default function AutoSeries() {
   // Form State
   const [title, setTitle] = useState('Sesong 1: Muvendar — De tre store Tamil-kongene');
   const [description, setDescription] = useState('Fokus: Chola, Chera og Pandya-dynastiene\nInnhold: Opprinnelsen, de største kongene, handel og de første store militære konfliktene\nVinkling: Episk historiefortelling — som en Netflix-serie om det virkelige Tamil Nadu\nMålgruppe: Tamil-diaspora og historieinteresserte worldwide');
-  const [selectedLanguage, setSelectedLanguage] = useState('ta');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['youtube']);
+  const [selectedLanguage, setSelectedLanguage] = useState('no');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok']);
+  const [selectedVoice, setSelectedVoice] = useState('nova');
+  const [selectedFormat, setSelectedFormat] = useState('9:16');
   const [seasonNum, setSeasonNum] = useState(1);
   const [episodesCount, setEpisodesCount] = useState(10);
   
@@ -59,6 +75,8 @@ export default function AutoSeries() {
         title,
         description,
         language: LANGUAGES.find(l => l.id === selectedLanguage)?.label || 'Norsk',
+        voice: selectedVoice,
+        format: selectedFormat,
         platforms: selectedPlatforms,
         season_num: seasonNum,
         episodes_count: episodesCount,
@@ -172,23 +190,70 @@ export default function AutoSeries() {
             </div>
 
             {/* Language Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Globe size={16} className="text-neon-cyan" /> Språk
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.id}
+                      onClick={() => setSelectedLanguage(lang.id)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                        selectedLanguage === lang.id
+                          ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan'
+                          : 'bg-surface/50 border-border text-gray-400 hover:border-gray-600'
+                      }`}
+                    >
+                      <span>{lang.flag}</span>
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Smartphone size={16} className="text-neon-cyan" /> Video Format
+                </label>
+                <div className="flex gap-2">
+                  {FORMATS.map((fmt) => (
+                    <button
+                      key={fmt.id}
+                      onClick={() => setSelectedFormat(fmt.id)}
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
+                        selectedFormat === fmt.id
+                          ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan'
+                          : 'bg-surface/50 border-border text-gray-400 hover:border-gray-600'
+                      }`}
+                    >
+                      <fmt.icon size={14} />
+                      {fmt.label.split(' ')[0]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Voice Selection */}
             <div className="space-y-3">
               <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                <Globe size={16} className="text-neon-cyan" /> Språk
+                <Sparkles size={16} className="text-neon-amber" /> AI Stemme
               </label>
-              <div className="flex flex-wrap gap-2">
-                {LANGUAGES.map((lang) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {VOICES.map((voice) => (
                   <button
-                    key={lang.id}
-                    onClick={() => setSelectedLanguage(lang.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
-                      selectedLanguage === lang.id
-                        ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan shadow-[0_0_15px_rgba(0,245,255,0.15)]'
-                        : 'bg-surface/50 border-border text-gray-400 hover:border-gray-600 hover:text-gray-200'
+                    key={voice.id}
+                    onClick={() => setSelectedVoice(voice.id)}
+                    className={`flex flex-col items-start px-4 py-2 rounded-lg border text-left transition-all ${
+                      selectedVoice === voice.id
+                        ? 'bg-neon-amber/10 border-neon-amber text-neon-amber'
+                        : 'bg-surface/50 border-border text-gray-400 hover:border-gray-600'
                     }`}
                   >
-                    <span className="text-lg leading-none">{lang.flag}</span>
-                    {lang.label}
+                    <span className="text-sm font-bold">{voice.label}</span>
+                    <span className="text-[10px] opacity-60 uppercase font-mono">{voice.provider}</span>
                   </button>
                 ))}
               </div>
