@@ -57,24 +57,26 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
   fetchTrends: async () => {
     try {
-      // Vi bruker updated_at for sortering for å unngå 'viral_score' feilen i Supabase
+      // Hent uten sortering fra database for å unngå 400-feil
       const { data, error } = await supabase
         .from('trends')
         .select('*')
-        .order('updated_at', { ascending: false })
         .limit(50);
 
-      if (error) {
-        console.warn('Kunne ikke sortere på updated_at, prøver uten sortering...');
-        const { data: fallbackData } = await supabase.from('trends').select('*').limit(50);
-        set({ trends: fallbackData || [] });
-        return;
-      }
+      if (error) throw error;
       
-      set({ trends: data || [] });
+      // Sorter lokalt i appen i stedet (nyeste først)
+      const sortedData = (data || []).sort((a: any, b: any) => {
+        const dateA = new Date(a.updated_at || 0).getTime();
+        const dateB = new Date(b.updated_at || 0).getTime();
+        return dateB - dateA;
+      });
+
+      set({ trends: sortedData });
     } catch (err) {
       console.error('Feil ved henting av trender:', err);
-      set({ trends: [] });
+      // Ved feil, prøv å beholde eksisterende data eller sett til tom liste
+      set({ trends: get().trends || [] });
     }
   },
 

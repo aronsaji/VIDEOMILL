@@ -138,6 +138,15 @@ export default function Dashboard() {
     failed: safeOrders.filter(o => o && (o.status === 'failed' || o.status === 'needs_attention')).length,
   };
 
+  if (!isInitialLoaded && safeOrders.length === 0 && safeTrends.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader size={40} className="text-neon-cyan animate-spin" />
+        <p className="text-gray-400 font-mono text-sm animate-pulse tracking-widest uppercase">Initialiserer VideoMill Production Line...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
