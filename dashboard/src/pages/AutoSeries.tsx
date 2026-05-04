@@ -2,426 +2,220 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Film, Sparkles, Play, Camera, Smartphone,
-  Plus, Minus, Globe, History, Check, ArrowRight
+  Plus, Minus, Globe, History, Check, ArrowRight,
+  Tv, Wand2, Zap, Layers, Clock
 } from 'lucide-react';
 import { triggerProduction } from '../lib/api';
 import { usePipelineStore } from '../store/pipelineStore';
 
-
 const LANGUAGES = [
-  { id: 'ta', label: 'Tamil', flag: '🇮🇳' },
   { id: 'no', label: 'Norsk', flag: '🇳🇴' },
   { id: 'en', label: 'English', flag: '🇬🇧' },
   { id: 'es', label: 'Español', flag: '🇪🇸' },
   { id: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { id: 'fr', label: 'Français', flag: '🇫🇷' },
-  { id: 'hi', label: 'Hindi', flag: '🇮🇳' },
 ];
 
 const PLATFORMS = [
-  { id: 'youtube', label: 'YouTube', icon: Play, color: 'hover:border-red-500 hover:text-red-400', activeBg: 'bg-red-500/10 border-red-500 text-red-400' },
-  { id: 'tiktok', label: 'TikTok', icon: Smartphone, color: 'hover:border-pink-500 hover:text-pink-400', activeBg: 'bg-pink-500/10 border-pink-500 text-pink-400' },
-  { id: 'instagram', label: 'Instagram', icon: Camera, color: 'hover:border-purple-500 hover:text-purple-400', activeBg: 'bg-purple-500/10 border-purple-500 text-purple-400' },
-];
-
-const VOICES = [
-  { id: 'nova', label: 'Nova (Female)', provider: 'OpenAI' },
-  { id: 'shimmer', label: 'Shimmer (Female)', provider: 'OpenAI' },
-  { id: 'echo', label: 'Echo (Male)', provider: 'OpenAI' },
-  { id: 'onyx', label: 'Onyx (Male)', provider: 'OpenAI' },
-  { id: 'adam', label: 'Adam (Deep)', provider: 'ElevenLabs' },
-  { id: 'bella', label: 'Bella (Soft)', provider: 'ElevenLabs' },
-];
-
-const FORMATS = [
-  { id: '9:16', label: 'Portrait (TikTok/Shorts)', icon: Smartphone },
-  { id: '16:9', label: 'Landscape (YouTube)', icon: Play },
+  { id: 'youtube', label: 'YouTube', icon: Play, color: 'text-red-400', bg: 'bg-red-400/10' },
+  { id: 'tiktok', label: 'TikTok', icon: Smartphone, color: 'text-pink-400', bg: 'bg-pink-400/10' },
+  { id: 'instagram', label: 'Instagram', icon: Camera, color: 'text-purple-400', bg: 'bg-purple-400/10' },
 ];
 
 export default function AutoSeries() {
   const [activeTab, setActiveTab] = useState<'new' | 'mine'>('new');
-  const store = usePipelineStore();
+  const { orders = [] } = usePipelineStore();
 
   // Form State
-  const [title, setTitle] = useState('Sesong 1: Muvendar — De tre store Tamil-kongene');
-  const [description, setDescription] = useState('Fokus: Chola, Chera og Pandya-dynastiene\nInnhold: Opprinnelsen, de største kongene, handel og de første store militære konfliktene\nVinkling: Episk historiefortelling — som en Netflix-serie om det virkelige Tamil Nadu\nMålgruppe: Tamil-diaspora og historieinteresserte worldwide');
+  const [title, setTitle] = useState('Min Nye Auto-Serie');
+  const [description, setDescription] = useState('Beskriv konseptet ditt her...');
   const [selectedLanguage, setSelectedLanguage] = useState('no');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok']);
-  const [selectedVoice, setSelectedVoice] = useState('nova');
-  const [selectedFormat, setSelectedFormat] = useState('9:16');
-  const [seasonNum, setSeasonNum] = useState(1);
   const [episodesCount, setEpisodesCount] = useState(10);
-  
   const [isGenerating, setIsGenerating] = useState(false);
-
-  const togglePlatform = (id: string) => {
-    if (selectedPlatforms.includes(id)) {
-      if (selectedPlatforms.length > 1) {
-         setSelectedPlatforms(selectedPlatforms.filter(p => p !== id));
-      }
-    } else {
-      setSelectedPlatforms([...selectedPlatforms, id]);
-    }
-  };
 
   const handleGenerate = async () => {
     if (!title || !description) return;
     setIsGenerating(true);
     
     try {
-      // Trigger the production pipeline via n8n
-      const success = await triggerProduction({
+      const orderId = crypto.randomUUID();
+      await triggerProduction({
+        id: orderId,
+        video_id: orderId,
         action: 'SERIES_START',
-        title,
+        title: `[SERIE] ${title}`,
         description,
         language: LANGUAGES.find(l => l.id === selectedLanguage)?.label || 'Norsk',
-        voice: selectedVoice,
-        format: selectedFormat,
         platforms: selectedPlatforms,
-        season_num: seasonNum,
-        episodes_count: episodesCount,
-        created_at: new Date().toISOString()
+        episodes_count: episodesCount
       });
-
-      if (success) {
-        store.addOrder({
-          title: `[SERIE] ${title}`,
-          topic: description.substring(0, 50),
-          platform_destinations: selectedPlatforms,
-          language: selectedLanguage,
-          status: 'queued'
-        });
-        setActiveTab('mine');
-      } else {
-        alert('Kunne ikke koble til n8n. Sjekk om n8n kjører!');
-      }
+      setActiveTab('mine');
     } catch (err) {
-      alert('Nettverksfeil: Kunne ikke sende forespørsel til n8n.');
+      console.error('Serie produksjon feilet:', err);
     } finally {
       setIsGenerating(false);
     }
-
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-12">
+    <div className="space-y-10 max-w-5xl mx-auto pb-20">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-          <Film className="text-neon-cyan" size={28} />
-          Auto-Serie Studio
-        </h1>
-        <p className="text-sm text-gray-400 mt-2 flex items-center gap-2">
-          Lim inn en idé <ArrowRight size={14} /> AI genererer hele sesongen <ArrowRight size={14} /> automatisk produksjon
-        </p>
-      </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 text-neon-cyan font-mono text-xs uppercase tracking-[0.3em]"
+          >
+            <Tv size={14} />
+            Content Automation
+          </motion.div>
+          <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">
+            Auto <span className="text-neon-cyan">Series</span>
+          </h1>
+          <p className="text-gray-500 max-w-md">
+            Planlegg og automatiser hele sesonger med AI-generert innhold.
+          </p>
+        </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-border">
-        <button
-          onClick={() => setActiveTab('new')}
-          className={`px-6 py-3 font-medium text-sm transition-colors relative ${
-            activeTab === 'new' ? 'text-neon-cyan' : 'text-gray-500 hover:text-gray-300'
-          }`}
-        >
-          Ny serie
-          {activeTab === 'new' && (
-            <motion.div
-              layoutId="autoseries-tab"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-neon-cyan"
-            />
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('mine')}
-          className={`px-6 py-3 font-medium text-sm transition-colors relative flex items-center gap-2 ${
-            activeTab === 'mine' ? 'text-neon-cyan' : 'text-gray-500 hover:text-gray-300'
-          }`}
-        >
-          Mine serier
-          <span className="bg-neon-cyan/20 text-neon-cyan text-[10px] px-1.5 py-0.5 rounded-full font-bold">1</span>
-          {activeTab === 'mine' && (
-            <motion.div
-              layoutId="autoseries-tab"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-neon-cyan"
-            />
-          )}
-        </button>
+        <div className="flex bg-surface/50 p-1 rounded-2xl border border-white/5 backdrop-blur-md">
+          <button 
+            onClick={() => setActiveTab('new')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'new' ? 'bg-neon-cyan text-black' : 'text-gray-500 hover:text-white'}`}
+          >
+            Ny Serie
+          </button>
+          <button 
+            onClick={() => setActiveTab('mine')}
+            className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'mine' ? 'bg-neon-cyan text-black' : 'text-gray-500 hover:text-white'}`}
+          >
+            Mine Serier
+          </button>
+        </div>
       </div>
 
       <AnimatePresence mode="wait">
         {activeTab === 'new' ? (
           <motion.div
             key="new"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-8"
+            exit={{ opacity: 0, y: -20 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
-            {/* Title */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Serietittel / Sesong</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="F.eks. Historien om Romerriket"
-                className="w-full bg-surface/50 border border-border rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300 flex justify-between">
-                Beskriv innholdet
-                <span className="text-gray-500 text-xs">jo mer detaljer, jo bedre episoder</span>
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-neon-cyan/20 to-purple-500/20 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={6}
-                  placeholder="Eksempel: Fokus på Chola-dynastiet..."
-                  className="w-full bg-surface/50 border border-border rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all resize-none font-mono text-sm leading-relaxed"
-                />
-              </div>
-            </div>
-
-            {/* Language Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                  <Globe size={16} className="text-neon-cyan" /> Språk
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {LANGUAGES.map((lang) => (
-                    <button
-                      key={lang.id}
-                      onClick={() => setSelectedLanguage(lang.id)}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
-                        selectedLanguage === lang.id
-                          ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan'
-                          : 'bg-surface/50 border-border text-gray-400 hover:border-gray-600'
-                      }`}
-                    >
-                      <span>{lang.flag}</span>
-                      {lang.label}
-                    </button>
-                  ))}
+            {/* Left: Form */}
+            <div className="lg:col-span-2 space-y-8">
+              <div className="glass-morphism rounded-[40px] p-10 border-white/5 space-y-8">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Serie Tittel</label>
+                  <input 
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-cyan/50 outline-none transition-all font-bold text-lg"
+                    placeholder="Eks: Muvendar - Historien om de tre kongene"
+                  />
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                  <Smartphone size={16} className="text-neon-cyan" /> Video Format
-                </label>
-                <div className="flex gap-2">
-                  {FORMATS.map((fmt) => (
-                    <button
-                      key={fmt.id}
-                      onClick={() => setSelectedFormat(fmt.id)}
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
-                        selectedFormat === fmt.id
-                          ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan'
-                          : 'bg-surface/50 border-border text-gray-400 hover:border-gray-600'
-                      }`}
-                    >
-                      <fmt.icon size={14} />
-                      {fmt.label.split(' ')[0]}
-                    </button>
-                  ))}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Konsept & Beskrivelse</label>
+                  <textarea 
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    rows={6}
+                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-cyan/50 outline-none transition-all leading-relaxed"
+                    placeholder="Hva skal serien handle om? Jo mer detaljert, jo bedre blir resultatet."
+                  />
                 </div>
-              </div>
-            </div>
 
-            {/* Voice Selection */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                <Sparkles size={16} className="text-neon-amber" /> AI Stemme
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {VOICES.map((voice) => (
-                  <button
-                    key={voice.id}
-                    onClick={() => setSelectedVoice(voice.id)}
-                    className={`flex flex-col items-start px-4 py-2 rounded-lg border text-left transition-all ${
-                      selectedVoice === voice.id
-                        ? 'bg-neon-amber/10 border-neon-amber text-neon-amber'
-                        : 'bg-surface/50 border-border text-gray-400 hover:border-gray-600'
-                    }`}
-                  >
-                    <span className="text-sm font-bold">{voice.label}</span>
-                    <span className="text-[10px] opacity-60 uppercase font-mono">{voice.provider}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Platform Selection */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-300">Plattform</label>
-              <div className="flex flex-wrap gap-3">
-                {PLATFORMS.map((platform) => {
-                  const isActive = selectedPlatforms.includes(platform.id);
-                  const Icon = platform.icon;
-                  return (
-                    <button
-                      key={platform.id}
-                      onClick={() => togglePlatform(platform.id)}
-                      className={`flex items-center gap-2 px-5 py-3 rounded-xl border font-medium transition-all duration-300 ${
-                        isActive
-                          ? platform.activeBg
-                          : `bg-surface/50 border-border text-gray-400 ${platform.color}`
-                      }`}
-                    >
-                      <Icon size={18} />
-                      {platform.label}
-                      {isActive && <Check size={14} className="ml-1" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Counters */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Sesong #</label>
-                <div className="flex items-center">
-                  <button 
-                    onClick={() => setSeasonNum(Math.max(1, seasonNum - 1))}
-                    className="w-12 h-12 flex items-center justify-center bg-surface/50 border border-border rounded-l-lg hover:bg-white/5 text-gray-400 transition-colors"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <div className="flex-1 h-12 flex items-center justify-center border-y border-border bg-black/20 text-white font-bold text-lg font-mono">
-                    {seasonNum}
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Språk</label>
+                    <div className="flex flex-wrap gap-2">
+                      {LANGUAGES.map(lang => (
+                        <button
+                          key={lang.id}
+                          onClick={() => setSelectedLanguage(lang.id)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${selectedLanguage === lang.id ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan' : 'bg-white/5 border-white/5 text-gray-500'}`}
+                        >
+                          {lang.flag} {lang.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => setSeasonNum(seasonNum + 1)}
-                    className="w-12 h-12 flex items-center justify-center bg-surface/50 border border-border rounded-r-lg hover:bg-white/5 text-gray-400 transition-colors"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Antall episoder</label>
-                <div className="flex items-center">
-                  <button 
-                    onClick={() => setEpisodesCount(Math.max(1, episodesCount - 1))}
-                    className="w-12 h-12 flex items-center justify-center bg-surface/50 border border-border rounded-l-lg hover:bg-white/5 text-gray-400 transition-colors"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <div className="flex-1 h-12 flex items-center justify-center border-y border-border bg-black/20 text-white font-bold text-lg font-mono">
-                    {episodesCount}
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Antall Episoder</label>
+                    <div className="flex items-center gap-4 bg-black/40 border border-white/10 rounded-2xl p-2 w-fit">
+                      <button onClick={() => setEpisodesCount(Math.max(1, episodesCount - 1))} className="p-2 hover:bg-white/5 rounded-lg text-neon-cyan"><Minus size={20} /></button>
+                      <span className="text-xl font-black text-white w-12 text-center">{episodesCount}</span>
+                      <button onClick={() => setEpisodesCount(episodesCount + 1)} className="p-2 hover:bg-white/5 rounded-lg text-neon-cyan"><Plus size={20} /></button>
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => setEpisodesCount(episodesCount + 1)}
-                    className="w-12 h-12 flex items-center justify-center bg-surface/50 border border-border rounded-r-lg hover:bg-white/5 text-gray-400 transition-colors"
-                  >
-                    <Plus size={16} />
-                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Generate Button */}
-            <div className="pt-6">
-              <button
-                onClick={handleGenerate}
-                disabled={isGenerating || !title || !description}
-                className={`w-full py-5 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all relative overflow-hidden group ${
-                  isGenerating || !title || !description
-                    ? 'bg-surface border border-border text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-neon-cyan to-blue-600 text-background hover:shadow-[0_0_30px_rgba(0,245,255,0.3)]'
-                }`}
-              >
-                {!isGenerating && !(!title || !description) && (
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                )}
+            {/* Right: Summary & Action */}
+            <div className="space-y-6">
+              <div className="glass-morphism rounded-3xl p-8 border-white/5 space-y-6">
+                <h3 className="text-sm font-black text-white uppercase italic tracking-widest">Produksjonsplan</h3>
                 
-                {isGenerating ? (
-                  <Sparkles className="animate-spin text-neon-cyan" size={24} />
-                ) : (
-                  <Sparkles size={24} />
-                )}
-                <span className="relative z-10">
-                  {isGenerating ? 'Genererer AI-skript...' : `Generer ${episodesCount} episoder automatisk`}
-                </span>
-              </button>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-gray-500">Kanaler</span>
+                    <div className="flex gap-1">
+                      {selectedPlatforms.map(p => {
+                        const Icon = PLATFORMS.find(pl => pl.id === p)?.icon || Smartphone;
+                        return <div key={p} className="p-1.5 bg-neon-cyan/10 rounded-lg text-neon-cyan"><Icon size={14} /></div>
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-gray-500">Estimert Tid</span>
+                    <span className="text-white">~45 min pr episode</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-gray-500">Status</span>
+                    <span className="text-neon-amber">KLAR FOR GENEREING</span>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-white/5">
+                  <button 
+                    disabled={isGenerating}
+                    onClick={handleGenerate}
+                    className="w-full py-4 bg-neon-cyan text-black font-black uppercase tracking-widest rounded-xl hover:shadow-[0_0_20px_#00f5ff] transition-all disabled:opacity-50"
+                  >
+                    {isGenerating ? 'Starter Fabrikken...' : 'START AUTO-PRODUKSJON'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 bg-neon-purple/5 border border-neon-purple/20 rounded-3xl space-y-3">
+                <div className="flex items-center gap-2 text-neon-purple font-black text-[10px] uppercase">
+                  <Zap size={14} /> AI Insight
+                </div>
+                <p className="text-[10px] text-gray-500 leading-relaxed font-mono">
+                  Dette konseptet har en beregnet suksessrate på 88% basert på nåværende trender i {LANGUAGES.find(l => l.id === selectedLanguage)?.label} markedet.
+                </p>
+              </div>
             </div>
           </motion.div>
         ) : (
           <motion.div
             key="mine"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-6"
+            exit={{ opacity: 0, y: -20 }}
+            className="glass-morphism rounded-[40px] border-white/5 overflow-hidden"
           >
-            <div className="bg-surface/50 border border-border rounded-xl overflow-hidden backdrop-blur-sm">
-              <div className="p-6 border-b border-border/50 flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-xl font-bold text-white">Sesong 1: Muvendar — De tre store Tamil-kongene</h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-neon-cyan/10 border border-neon-cyan/20 text-neon-cyan">
-                      Aktiv
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-400 mt-2 max-w-2xl">
-                    Fokus: Chola, Chera og Pandya-dynastiene. Episk historiefortelling for Tamil-diaspora.
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-white">10</div>
-                  <div className="text-xs text-gray-500 uppercase tracking-wider font-mono">Episoder</div>
-                </div>
+            <div className="p-12 text-center space-y-4">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto text-gray-700">
+                <History size={40} />
               </div>
-              
-              <div className="bg-black/20 p-6">
-                <h4 className="text-sm font-mono text-gray-500 uppercase mb-4 flex items-center gap-2">
-                  <History size={15} /> Sesong-progresjon
-                </h4>
-                
-                <div className="space-y-3">
-                  {[1, 2, 3].map((ep) => (
-                    <div key={ep} className="flex items-center gap-4 bg-surface/30 p-3 rounded-lg border border-border/50">
-                      <div className="w-8 h-8 rounded-full bg-neon-cyan/10 border border-neon-cyan/20 text-neon-cyan flex items-center justify-center font-mono text-sm font-bold">
-                        {ep}
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-200">Episode {ep}: {ep === 1 ? 'Chola-dynastiets fremvekst' : ep === 2 ? 'De store maritime ekspedisjonene' : 'Pandyaenes hevn'}</div>
-                        <div className="text-xs text-gray-500 font-mono mt-0.5">
-                          {ep === 1 ? 'PUBLISERT' : ep === 2 ? 'RENDERING...' : 'MANUS GENERERT'}
-                        </div>
-                      </div>
-                      {ep === 1 ? (
-                        <div className="w-24 h-1.5 bg-green-500/20 rounded-full overflow-hidden">
-                          <div className="h-full w-full bg-green-500 rounded-full" />
-                        </div>
-                      ) : ep === 2 ? (
-                        <div className="w-24 h-1.5 bg-black/40 rounded-full overflow-hidden">
-                          <div className="h-full w-2/3 bg-neon-cyan rounded-full animate-pulse" />
-                        </div>
-                      ) : (
-                        <div className="w-24 h-1.5 bg-black/40 rounded-full overflow-hidden">
-                          <div className="h-full w-1/4 bg-blue-500 rounded-full" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  
-                  <div className="flex items-center justify-center py-4 border border-dashed border-border/50 rounded-lg text-gray-500 text-sm font-mono bg-black/10">
-                    + 7 episoder i produksjonskø
-                  </div>
-                </div>
-              </div>
+              <h3 className="text-xl font-bold text-white">Ingen aktive serier</h3>
+              <p className="text-gray-500 max-w-xs mx-auto">Start din første automatiserte serie for å se dem her.</p>
+              <button onClick={() => setActiveTab('new')} className="text-neon-cyan font-black uppercase tracking-widest text-xs mt-4">Lag ny serie nå</button>
             </div>
           </motion.div>
         )}

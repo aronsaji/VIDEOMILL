@@ -1,549 +1,241 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
-import { Flame, Video, RefreshCw, Plus, ExternalLink, ArrowUpRight, X, Monitor, Smartphone, Send, Heart, CheckCircle, Activity } from 'lucide-react';
+import { 
+  Flame, Video, RefreshCw, Plus, ExternalLink, ArrowUpRight, 
+  X, Monitor, Smartphone, Send, Heart, CheckCircle, Activity,
+  Globe, Zap, Sparkles, Filter, Search
+} from 'lucide-react';
 import type { TrendingTopic } from '../types';
 import { triggerProduction } from '../lib/api';
-
 
 const INITIAL_SOCIAL_ACCOUNTS = [
   { id: 'acc1', platform: 'youtube', handle: '@VideoMillOfficial', icon: Monitor },
   { id: 'acc2', platform: 'tiktok', handle: '@VideoMill.no', icon: Smartphone },
-  { id: 'acc3', platform: 'twitter', handle: '@videomill_tech', icon: Send },
-  { id: 'acc4', platform: 'instagram', handle: '@videomill_daily', icon: Heart },
+  { id: 'acc3', platform: 'instagram', handle: '@videomill_daily', icon: Heart },
 ];
 
 export default function TrendAnalyzer() {
-  const { trends, isLoading, fetchInitialData } = usePipelineStore();
-  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'youtube' | 'google' | 'instagram' | 'twitter' | 'snapchat'>('all');
-  const [countryFilter, setCountryFilter] = useState<string>('all');
-  const [languageFilter, setLanguageFilter] = useState<string>('all');
+  const { trends = [], isLoading, fetchInitialData, fetchTrends } = usePipelineStore();
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'youtube' | 'instagram' | 'snapchat'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
   
   const [selectedTrend, setSelectedTrend] = useState<TrendingTopic | null>(null);
-  
-  // Accounts & Modal State
-  const [accounts, setAccounts] = useState(INITIAL_SOCIAL_ACCOUNTS);
-  const [selectedChannels, setSelectedChannels] = useState<string[]>(['acc1', 'acc2']);
-  const [language, setLanguage] = useState('Norsk');
-  const [styleTone, setStyleTone] = useState('Auto');
-  const [targetAudience, setTargetAudience] = useState('Auto');
-  const [aiVoice, setAiVoice] = useState('🗣️ Nova (Female)');
-  const [videoFormat, setVideoFormat] = useState('📱 9:16 (Vertical)');
   const [isOrdering, setIsOrdering] = useState(false);
-  const [showConnectView, setShowConnectView] = useState(false);
-  const [isConnecting, setIsConnecting] = useState<string | null>(null);
-
-  // Derive unique countries and languages for filters
-  const countries = ['all', ...new Set(trends.map(t => t.country || (t.target_audience || '').split(' - ')[0]).filter(Boolean) as string[])];
-  const languages = ['all', ...new Set(trends.map(t => t.language || (t.target_audience || '').split(' - ')[1]).filter(Boolean) as string[])];
 
   useEffect(() => {
     fetchInitialData();
-  }, [fetchInitialData]);
-
-  // Set language in modal when a trend is selected
-  useEffect(() => {
-    if (selectedTrend?.language) {
-      setLanguage(selectedTrend.language);
-    }
-  }, [selectedTrend]);
+  }, []);
 
   const filteredTrends = trends.filter(t => {
-    const platformValue = (t.platform || '').toLowerCase();
-    
-    // Normalize platform names for better matching
-    let normalizedPlatform = platformValue;
-    if (platformValue.includes('youtube')) normalizedPlatform = 'youtube';
-    if (platformValue.includes('tiktok')) normalizedPlatform = 'tiktok';
-    if (platformValue.includes('snap')) normalizedPlatform = 'snapchat';
-    if (platformValue.includes('google')) normalizedPlatform = 'google';
-    if (platformValue.includes('twitter') || platformValue.includes(' x ')) normalizedPlatform = 'twitter';
-    
-    const matchesPlatform = platformFilter === 'all' || normalizedPlatform === platformFilter.toLowerCase();
-    
-    // Extract values from target_audience if fields are empty
-    const tCountry = t.country || (t.target_audience || '').split(' - ')[0] || '';
-    const tLanguage = t.language || (t.language_code || t.language) || (t.target_audience || '').split(' - ')[1] || '';
-
-    const matchesCountry = countryFilter === 'all' || tCountry.toLowerCase() === countryFilter.toLowerCase();
-    const matchesLanguage = languageFilter === 'all' || tLanguage.toLowerCase() === languageFilter.toLowerCase();
-    
-    return matchesPlatform && matchesCountry && matchesLanguage;
+    const matchesPlatform = platformFilter === 'all' || t.platform?.toLowerCase() === platformFilter;
+    const matchesSearch = (t.title || '').toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesPlatform && matchesSearch;
   });
 
-  const toggleChannel = (id: string) => {
-    setSelectedChannels(prev => 
-      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
-    );
-  };
-
-  const handleOrder = () => {
+  const handleStartProduction = async (trend: TrendingTopic) => {
     setIsOrdering(true);
+    const orderId = crypto.randomUUID();
     
-    // Resolve "Auto" values based on selected trend
-    const finalLanguage = language === 'Auto' ? (selectedTrend?.language || 'English') : language;
-    const finalStyle = styleTone === 'Auto' ? 'General' : styleTone;
-    const finalAudience = targetAudience === 'Auto' ? (selectedTrend?.country || 'Global') : targetAudience;
-    const platforms = accounts.filter(a => selectedChannels.includes(a.id)).map(a => a.platform);
-
-    triggerProduction({
-      action: 'TREND_START',
-      trend_id: selectedTrend?.id,
-      title: selectedTrend?.title || 'Auto Trend Video',
-      topic: selectedTrend?.tags[0] || 'Trend',
-      style_tone: finalStyle,
-      target_audience: finalAudience,
-      video_format: videoFormat,
-      ai_voice: aiVoice,
-      language: finalLanguage,
-      platforms: platforms
-    });
-
-    usePipelineStore.getState().addOrder({
-      title: selectedTrend?.title || 'Auto Trend Video',
-      topic: selectedTrend?.tags[0] || 'Trend',
-      style_tone: finalStyle,
-      target_audience: finalAudience,
-      video_format: videoFormat,
-      ai_voice: aiVoice,
-      language: finalLanguage,
-      platform_destinations: platforms as any,
-    });
-
-
-    setTimeout(() => {
-      setIsOrdering(false);
+    try {
+      await triggerProduction({
+        id: orderId,
+        video_id: orderId,
+        action: 'TREND_START',
+        trend_id: trend.id,
+        title: trend.title,
+        topic: trend.tags?.[0] || trend.title,
+        style_tone: '⚡ Engaging',
+        target_audience: trend.country || 'Global',
+        video_format: '📱 9:16 (Vertical)',
+        ai_voice: 'nb-NO-PernilleNeural',
+        language: trend.language || 'Norsk',
+        platforms: ['tiktok', 'youtube']
+      });
       setSelectedTrend(null);
-    }, 1500);
-  };
-
-  const handleConnectAccount = (platform: string, icon: any) => {
-    setIsConnecting(platform);
-    setTimeout(() => {
-      const newId = `acc_${Date.now()}`;
-      setAccounts(prev => [...prev, {
-        id: newId,
-        platform,
-        handle: `@din_konto_${platform}`,
-        icon
-      }]);
-      setSelectedChannels(prev => [...prev, newId]); // auto select
-      setIsConnecting(null);
-      setShowConnectView(false);
-    }, 1500);
+    } catch (err) {
+      console.error('Trend produksjon feilet:', err);
+    } finally {
+      setIsOrdering(false);
+    }
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Flame className="text-neon-amber" />
-            Trend Radar
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">AI-detected trends from TikTok, YouTube and X (Twitter)</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => fetchInitialData()}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono bg-white/5 hover:bg-white/10 text-gray-400 hover:text-gray-200 border border-border rounded-lg transition-colors"
+    <div className="space-y-10 max-w-7xl mx-auto pb-20">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 text-neon-cyan font-mono text-xs uppercase tracking-[0.3em]"
           >
-            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-            Scan Now
+            <Activity size={14} />
+            Global Intelligence
+          </motion.div>
+          <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">
+            Trend <span className="text-neon-cyan">Radar</span>
+          </h1>
+          <p className="text-gray-500 max-w-md">
+            Sanntids-analyse av hva som trender på sosiale medier akkurat nå.
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+            <input 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Søk i trender..."
+              className="bg-surface/50 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:border-neon-cyan/30 outline-none w-64 backdrop-blur-md"
+            />
+          </div>
+          <button 
+            onClick={() => fetchTrends()}
+            className="p-2.5 bg-white/5 text-gray-400 rounded-xl hover:bg-white/10 transition-all border border-white/5"
+          >
+            <RefreshCw size={20} className={isLoading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
 
-      <div className="space-y-4">
-        {/* Platform Filter */}
-        <div className="flex gap-2 border-b border-border pb-4 overflow-x-auto no-scrollbar">
-          {['all', 'tiktok', 'youtube', 'instagram', 'snapchat'].map((src) => (
-            <button
-              key={src}
-              onClick={() => setPlatformFilter(src as any)}
-              className={`px-4 py-1.5 rounded-full text-xs font-mono uppercase whitespace-nowrap transition-colors border ${
-                platformFilter === src 
-                  ? 'bg-neon-amber/10 border-neon-amber/30 text-neon-amber' 
-                  : 'bg-transparent border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'
-              }`}
-            >
-              {src}
-            </button>
-          ))}
-        </div>
-
-        {/* Country Filter Chips */}
-        <div className="space-y-2">
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Land:</span>
-          <div className="flex flex-wrap gap-2">
-            {countries.map(c => (
-              <button
-                key={c}
-                onClick={() => setCountryFilter(c)}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-all ${
-                  countryFilter === c 
-                    ? 'bg-neon-amber/20 border-neon-amber text-neon-amber shadow-[0_0_10px_rgba(255,170,0,0.2)]'
-                    : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10'
-                } border`}
-              >
-                {c === 'all' ? 'Alle Land' : c}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Language Filter Chips */}
-        <div className="space-y-2 mt-4">
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Språk:</span>
-          <div className="flex flex-wrap gap-2">
-            {languages.map(l => (
-              <button
-                key={l}
-                onClick={() => setLanguageFilter(l)}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-all ${
-                  languageFilter === l 
-                    ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                    : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10'
-                } border`}
-              >
-                {l === 'all' ? 'Alle Språk' : l}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Filter Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {['all', 'tiktok', 'youtube', 'instagram', 'snapchat'].map((p) => (
+          <button
+            key={p}
+            onClick={() => setPlatformFilter(p as any)}
+            className={`px-6 py-2.5 rounded-full text-xs font-black transition-all border uppercase tracking-widest ${
+              platformFilter === p 
+                ? 'bg-neon-cyan text-black border-neon-cyan shadow-[0_0_20px_rgba(0,245,255,0.3)]' 
+                : 'bg-white/5 text-gray-500 border-white/5 hover:border-white/10'
+            }`}
+          >
+            {p}
+          </button>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <AnimatePresence>
+      {/* Trends Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnimatePresence mode="popLayout">
           {filteredTrends.map((trend, i) => (
             <motion.div
-              key={trend.id}
-              initial={{ opacity: 0, scale: 0.95 }}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              exit={{ opacity: 0, scale: 0.9 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-surface/50 border border-border rounded-xl p-5 hover:border-neon-amber/30 transition-all group relative overflow-hidden cursor-pointer"
-              onClick={() => setSelectedTrend(trend)}
+              key={trend.id}
+              className="group glass-morphism rounded-3xl p-6 border-white/5 hover:border-neon-cyan/20 transition-all duration-500 relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-neon-amber/5 rounded-full blur-3xl group-hover:bg-neon-amber/10 transition-colors pointer-events-none" />
-              
-              <div className="flex justify-between items-start mb-3 relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase flex items-center gap-1.5 ${
-                    trend.platform === 'tiktok' ? 'bg-pink-500/15 text-pink-400 border border-pink-500/20' :
-                    trend.platform === 'youtube' ? 'bg-red-500/15 text-red-400 border border-red-500/20' :
-                    trend.platform === 'instagram' ? 'bg-purple-500/15 text-purple-400 border border-purple-500/20' :
-                    trend.platform === 'snapchat' ? 'bg-yellow-400/15 text-yellow-400 border border-yellow-400/20' :
-                    'bg-white/10 text-gray-300 border border-white/20'
-                  }`}>
-                    {trend.platform === 'youtube' && <Video size={12} />}
-                    {trend.platform === 'tiktok' && <Smartphone size={12} />}
-                    {trend.platform === 'snapchat' && <Activity size={12} />}
-                    {trend.platform === 'instagram' && <Heart size={12} />}
-                    {trend.platform}
-                  </span>
-                  {trend.country && (
-                    <span className="text-[10px] font-bold bg-white/5 text-gray-400 px-2 py-0.5 rounded border border-white/10 uppercase">
-                      🌍 {trend.country}
+              <div className="relative z-10 space-y-6">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-2 px-2 py-1 bg-neon-cyan/10 rounded-lg border border-neon-cyan/20">
+                    <Flame size={14} className="text-neon-cyan animate-pulse" />
+                    <span className="text-[10px] font-black text-neon-cyan uppercase tracking-tighter">
+                      {trend.viral_score}% Viral Score
                     </span>
-                  )}
-                  <span className="text-xs font-mono text-neon-amber bg-neon-amber/10 px-2 py-0.5 rounded border border-neon-amber/20 flex items-center gap-1">
-                    <ArrowUpRight size={12} />
-                    {trend.viral_score}% POPULARITY
-                  </span>
+                  </div>
+                  <div className="p-2 bg-white/5 rounded-lg text-gray-500 uppercase text-[10px] font-mono">
+                    {trend.platform}
+                  </div>
                 </div>
-                <button className="text-gray-500 hover:text-white transition-colors">
-                  <ExternalLink size={16} />
-                </button>
-              </div>
 
-              <div className="relative z-10">
-                <h3 className="text-lg font-bold text-gray-100 group-hover:text-white transition-colors leading-tight mb-2">
-                  {trend.title}
-                </h3>
-                <p className="text-sm text-gray-400 line-clamp-2 mb-4">
-                  {trend.description}
-                </p>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black text-white group-hover:text-neon-cyan transition-colors leading-tight">
+                    {trend.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                    {trend.description}
+                  </p>
+                </div>
 
-                <div className="flex flex-wrap gap-1.5 mb-5">
-                  {trend.tags.map(tag => (
-                    <span key={tag} className="text-[11px] font-mono bg-black/40 text-gray-500 px-2 py-1 rounded border border-white/5">
+                <div className="flex flex-wrap gap-2">
+                  {trend.tags?.slice(0, 3).map(tag => (
+                    <span key={tag} className="text-[9px] font-mono px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
                       #{tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex gap-2 mt-auto pt-2 border-t border-border/50">
+                <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-[10px] font-mono text-gray-600 uppercase">
+                    <Globe size={12} />
+                    <span>{trend.country || 'Global'}</span>
+                  </div>
                   <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedTrend(trend);
-                    }}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded-lg text-sm font-bold transition-all hover:shadow-[0_0_15px_rgba(0,245,255,0.15)]"
+                    onClick={() => setSelectedTrend(trend)}
+                    className="flex items-center gap-2 text-neon-cyan font-black text-xs uppercase tracking-tighter hover:gap-3 transition-all"
                   >
-                    <Plus size={16} />
-                    Lag video av trend
+                    Analyze <ArrowUpRight size={14} />
                   </button>
                 </div>
               </div>
+
+              {/* Hover Glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/0 to-neon-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             </motion.div>
           ))}
         </AnimatePresence>
-
-        {filteredTrends.length === 0 && !isLoading && (
-          <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl bg-surface/30">
-            <Flame className="mx-auto text-gray-600 mb-3" size={32} />
-            <h3 className="text-gray-400 font-mono text-sm">NO TRENDS DETECTED</h3>
-            <p className="text-xs text-gray-600 mt-1">Try adjusting your filters or wait for the next scan.</p>
-          </div>
-        )}
       </div>
 
-      {/* Order Modal */}
+      {/* Production Modal */}
       <AnimatePresence>
         {selectedTrend && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl">
             <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setSelectedTrend(null)}
-            />
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-surface border border-border w-full max-w-xl rounded-2xl shadow-2xl relative z-10 overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-xl glass-morphism rounded-[40px] p-10 border-white/10 relative"
             >
-              <div className="p-6 border-b border-border bg-black/20">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-xl font-bold text-white mb-1">Start Produksjon</h2>
-                    <p className="text-sm text-gray-400">Bestill video basert på "{selectedTrend.title}"</p>
+              <button 
+                onClick={() => setSelectedTrend(null)}
+                className="absolute top-8 right-8 p-2 bg-white/5 rounded-full text-gray-500 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="space-y-8">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-neon-cyan font-mono text-xs uppercase tracking-widest">
+                    <Sparkles size={14} />
+                    Trend Analysis Complete
                   </div>
-                  <button onClick={() => setSelectedTrend(null)} className="text-gray-500 hover:text-white transition-colors">
-                    <X size={20} />
+                  <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter leading-none">
+                    Start <span className="text-neon-cyan">Produksjon</span>
+                  </h2>
+                </div>
+
+                <div className="p-6 bg-white/5 rounded-2xl border border-white/5 space-y-4">
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-gray-500 uppercase">Valgt Trend</span>
+                    <span className="text-white font-bold">{selectedTrend.title}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-gray-500 uppercase">Målgruppe</span>
+                    <span className="text-neon-cyan">{selectedTrend.country || 'Global'}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-mono">
+                    <span className="text-gray-500 uppercase">Est. Viralitet</span>
+                    <span className="text-green-400 font-bold">HØY ({selectedTrend.viral_score}%)</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-xs text-gray-500 font-mono leading-relaxed italic">
+                    Ved å starte produksjonen vil våre agenter automatisk generere manus, tale og video basert på denne trenden.
+                  </p>
+                  <button 
+                    disabled={isOrdering}
+                    onClick={() => handleStartProduction(selectedTrend)}
+                    className="w-full py-5 bg-neon-cyan text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:shadow-[0_0_30px_#00f5ff] transition-all disabled:opacity-50 disabled:grayscale"
+                  >
+                    {isOrdering ? 'Starter Fabrikken...' : 'BEKREFT PRODUKSJON'}
                   </button>
                 </div>
-              </div>
-
-              <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                {!showConnectView ? (
-                  <>
-                    <div className="space-y-6">
-                      <div className="space-y-4 mb-6 pb-6 border-b border-border/50">
-                        <div className="space-y-2">
-                          <label className="text-[10px] uppercase font-bold text-gray-500">1. Style & Tone</label>
-                          <div className="flex flex-wrap gap-2">
-                            {['Auto', '⚡ Engaging', '📚 Informative', '😄 Humorous', '🎭 Dramatic', '✨ Inspiring', '🔥 Viral'].map(style => (
-                              <button
-                                key={style}
-                                onClick={() => setStyleTone(style)}
-                                className={`px-2 py-1 text-[10px] font-bold rounded-lg border transition-all ${
-                                  styleTone === style 
-                                    ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
-                                    : 'bg-black/40 border-border text-gray-400 hover:bg-white/5'
-                                }`}
-                              >
-                                {style}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-[10px] uppercase font-bold text-gray-500">2. Target Audience</label>
-                          <div className="flex flex-wrap gap-2">
-                            {['Auto', '🎮 Youth (18–25)', '👔 Adults (25–45)', '🏡 Seniors (45+)', '💻 Tech', '👨‍👩‍👧 Parents', '🎓 Students', '💼 Business', '💪 Health', '🎨 Creative', '🕹️ Gamers'].map(aud => (
-                              <button
-                                key={aud}
-                                onClick={() => setTargetAudience(aud)}
-                                className={`px-2 py-1 text-[10px] font-bold rounded-lg border transition-all ${
-                                  targetAudience === aud 
-                                    ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
-                                    : 'bg-black/40 border-border text-gray-400 hover:bg-white/5'
-                                }`}
-                              >
-                                {aud}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <label className="text-[10px] uppercase font-bold text-gray-500">3. AI Voice</label>
-                            <div className="flex flex-col gap-1.5">
-                              {['🗣️ Nova (Female)', '🗣️ Echo (Male)', '🗣️ Fable (Neutral)'].map(voice => (
-                                <button
-                                  key={voice}
-                                  onClick={() => setAiVoice(voice)}
-                                  className={`px-2 py-1.5 text-[10px] font-bold rounded border transition-all text-left ${
-                                    aiVoice === voice 
-                                      ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
-                                      : 'bg-black/40 border-border text-gray-400 hover:bg-white/5'
-                                  }`}
-                                >
-                                  {voice}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <label className="text-[10px] uppercase font-bold text-gray-500">4. Video Format</label>
-                            <div className="flex flex-col gap-1.5">
-                              {['📱 9:16 (Vertical)', '📺 16:9 (Horizontal)', '⬛ 1:1 (Square)'].map(format => (
-                                <button
-                                  key={format}
-                                  onClick={() => setVideoFormat(format)}
-                                  className={`px-2 py-1.5 text-[10px] font-bold rounded border transition-all text-left ${
-                                    videoFormat === format 
-                                      ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
-                                      : 'bg-black/40 border-border text-gray-400 hover:bg-white/5'
-                                  }`}
-                                >
-                                  {format}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <h3 className="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wider flex items-center gap-2">
-                        <Monitor size={16} className="text-neon-amber" />
-                        Språk & Publiseringskanaler
-                      </h3>
-                      
-                      <div className="mb-6">
-                        <label className="text-xs text-gray-500 mb-2 block">Velg videoens språk:</label>
-                        <div className="flex flex-wrap gap-2">
-                          {['Auto', 'Norsk', 'English', 'Tamil', 'Hindi', 'Español', 'Deutsch', 'Français'].map(lang => (
-                            <button
-                              key={lang}
-                              onClick={() => setLanguage(lang)}
-                              className={`px-3 py-1.5 text-[10px] font-bold rounded-lg border transition-all ${
-                                language === lang 
-                                  ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                                  : 'bg-black/40 border-border text-gray-400 hover:bg-white/5 hover:border-gray-500'
-                              }`}
-                            >
-                              {lang === 'Auto' && selectedTrend?.language ? `Auto (${selectedTrend.language})` : lang}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-gray-500 mb-4">Velg hvilke av dine tilkoblede kontoer videoen skal publiseres til automatisk.</p>
-                      
-                      <div className="space-y-2">
-                        {accounts.map((acc) => {
-                          const isActive = selectedChannels.includes(acc.id);
-                          return (
-                            <div 
-                              key={acc.id}
-                              onClick={() => toggleChannel(acc.id)}
-                              className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
-                                isActive ? 'bg-neon-cyan/10 border-neon-cyan text-white' : 'bg-white/5 border-border text-gray-400 hover:bg-white/10 hover:border-gray-600'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-lg ${isActive ? 'bg-neon-cyan/20 text-neon-cyan' : 'bg-black/40 text-gray-500'}`}>
-                                  <acc.icon size={18} />
-                                </div>
-                                <div>
-                                  <div className="font-bold text-sm">{acc.handle}</div>
-                                  <div className="text-[10px] uppercase font-bold text-gray-500">{acc.platform}</div>
-                                </div>
-                              </div>
-                              <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isActive ? 'bg-neon-cyan border-neon-cyan text-black' : 'border-gray-600'}`}>
-                                {isActive && <CheckCircle size={14} strokeWidth={3} />}
-                              </div>
-                            </div>
-                          )
-                        })}
-                        
-                        <button 
-                          onClick={() => setShowConnectView(true)}
-                          className="w-full flex items-center justify-center gap-2 p-3 mt-4 rounded-xl border border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition-colors"
-                        >
-                          <Plus size={16} />
-                          Koble til ny konto
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="pt-6 border-t border-border flex justify-end gap-3">
-                      <button 
-                        onClick={() => setSelectedTrend(null)}
-                        className="px-5 py-2.5 rounded-lg font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                      >
-                        Avbryt
-                      </button>
-                      <button 
-                        onClick={handleOrder}
-                        disabled={isOrdering || selectedChannels.length === 0}
-                        className={`px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg ${
-                          isOrdering || selectedChannels.length === 0
-                            ? 'bg-white/10 text-gray-500 cursor-not-allowed shadow-none'
-                            : 'bg-neon-cyan text-black hover:bg-neon-cyan/90 hover:shadow-[0_0_20px_rgba(0,245,255,0.4)]'
-                        }`}
-                      >
-                        {isOrdering ? (
-                          <RefreshCw size={18} className="animate-spin" />
-                        ) : (
-                          <Monitor size={18} />
-                        )}
-                        {isOrdering ? 'Sender ordre...' : 'Start Video Produksjon'}
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <h3 className="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wider">Koble til plattform</h3>
-                      <p className="text-xs text-gray-500 mb-4">Velg hvilken type konto du vil legge til i VideoMill.</p>
-                      
-                      <div className="grid grid-cols-2 gap-3">
-                        {[
-                          { p: 'youtube', label: 'YouTube', icon: Monitor, color: 'text-red-500' },
-                          { p: 'tiktok', label: 'TikTok', icon: Smartphone, color: 'text-white' },
-                          { p: 'instagram', label: 'Instagram', icon: Heart, color: 'text-pink-500' },
-                          { p: 'twitter', label: 'X (Twitter)', icon: Send, color: 'text-blue-400' },
-                        ].map(opt => (
-                          <button
-                            key={opt.p}
-                            onClick={() => handleConnectAccount(opt.p, opt.icon)}
-                            disabled={isConnecting !== null}
-                            className={`flex flex-col items-center gap-3 p-4 border border-border rounded-xl transition-all ${
-                              isConnecting === opt.p ? 'bg-white/10 border-gray-500' : 'bg-surface hover:bg-white/5'
-                            }`}
-                          >
-                            {isConnecting === opt.p ? (
-                              <RefreshCw size={24} className="animate-spin text-neon-cyan" />
-                            ) : (
-                              <opt.icon size={24} className={opt.color} />
-                            )}
-                            <span className="text-sm font-bold">{isConnecting === opt.p ? 'Godkjenner...' : opt.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-6 border-t border-border flex justify-end">
-                      <button 
-                        onClick={() => setShowConnectView(false)}
-                        disabled={isConnecting !== null}
-                        className="px-5 py-2.5 rounded-lg font-bold text-gray-400 hover:text-white transition-colors"
-                      >
-                        Tilbake
-                      </button>
-                    </div>
-                  </>
-                )}
               </div>
             </motion.div>
           </div>
