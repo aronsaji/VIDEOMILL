@@ -106,7 +106,7 @@ export default function Dashboard() {
                 <p className="text-white/70 max-w-sm mx-auto text-sm font-bold leading-relaxed uppercase tracking-widest italic">The production grid is currently idle. Initialize a new synthesis cycle at the Factory node.</p>
                 <button 
                   onClick={() => navigate('/factory')}
-                  className="mt-10 px-12 py-4 bg-neon-purple text-white hover:bg-neon-cyan hover:text-black rounded-[20px] font-black text-[12px] uppercase tracking-[0.3em] transition-all shadow-xl hover:shadow-neon-cyan/40"
+                  className="mt-10 px-12 py-4 bg-neon-purple text-white hover:bg-neon-cyan hover:text-black rounded-[20px] font-black text-[12px] uppercase tracking-[0.3em] transition-all shadow-md"
                 >
                   {t('dash.enter_factory')}
                 </button>
@@ -250,7 +250,7 @@ export default function Dashboard() {
               </div>
               <button 
                 onClick={() => navigate('/auto-series')}
-                className="w-full py-5 bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] rounded-[20px] hover:bg-neon-cyan hover:text-white transition-all shadow-xl hover:shadow-neon-cyan/20 flex items-center justify-center gap-3 group"
+                className="w-full py-6 bg-neon-cyan text-black font-black uppercase tracking-[0.3em] text-xs rounded-[24px] hover:bg-neon-purple hover:text-white transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-4 group"
               >
                 Launch Auto-Series Node
                 <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />

@@ -194,13 +194,13 @@ export default function TrendAnalyzer() {
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-cyan/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 
                 <div className="flex justify-between items-start mb-10">
-                  <div className="flex items-center gap-3 px-5 py-2.5 bg-neon-cyan/10 rounded-[18px] border border-neon-cyan/20 shadow-lg shadow-neon-cyan/5">
+                  <div className="flex items-center gap-3 px-5 py-2.5 bg-neon-cyan/5 rounded-[18px] border border-neon-cyan/10">
                     <Flame size={16} className="text-neon-cyan animate-pulse" />
                     <span className="text-[13px] font-black text-neon-cyan uppercase tracking-[0.2em] italic">
                       {trend.viral_score}% Viral Yield
                     </span>
                   </div>
-                  <div className="px-5 py-2.5 bg-white/5 rounded-xl text-white/90 uppercase text-[12px] font-black border border-white/5 tracking-widest italic group-hover:bg-neon-cyan/20 transition-colors">
+                  <div className="px-5 py-2.5 bg-white/5 rounded-xl text-white/90 uppercase text-[12px] font-black border border-white/5 tracking-widest italic group-hover:bg-neon-cyan/10 transition-colors">
                     {trend.platform}
                   </div>
                 </div>

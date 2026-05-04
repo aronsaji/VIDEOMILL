@@ -5,13 +5,15 @@
 @tailwind utilities;
 
 :root {
-  --bg-deep: #03040b; /* Base black */
-  --surface: #0a0c1f;
-  --neon-cyan: #00f5ff;
-  --neon-purple: #bc13fe;
-  --neon-pink: #ff00ff;
-  --neon-amber: #ffaa00;
-  --neon-green: #39ff14;
+  --background: #050505;
+  --surface: #0a0a0a;
+  --neon-purple: #7a0bc0;
+  --neon-cyan: #00b8c0;
+  --neon-pink: #c000c0;
+  --neon-amber: #c08000;
+  --neon-green: #00c060;
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
   --border: rgba(255, 255, 255, 0.05);
 }
 
