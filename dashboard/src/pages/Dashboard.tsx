@@ -186,7 +186,7 @@ export default function Dashboard() {
                 )}
               </div>
               <button 
-                onClick={() => fetchOrders()}
+                onClick={() => fetchInitialData()}
                 className="flex items-center gap-2 px-3 py-1.5 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded-lg font-mono text-xs uppercase transition-colors"
               >
                 <RefreshCw size={12} />

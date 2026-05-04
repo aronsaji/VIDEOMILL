@@ -1,0 +1,8 @@
+# Ignorer hemmeligheter
+.env
+.env.local
+.env.*.local
+*.local
+node_modules
+dist
+.vercel
