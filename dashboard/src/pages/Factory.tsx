@@ -1,43 +1,55 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Zap, User, Users, Sparkles, Wand2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Sparkles, Video, Languages, Mic, Wand2, 
+  Settings2, Smartphone, Send, Globe, Check,
+  AlertTriangle, Play, Users, MessageSquare
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { triggerProduction } from '../lib/api';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 const VOICE_MAP: Record<string, Record<string, string>> = {
-  'Norsk': { 'Mann': 'nb-NO-FinnNeural', 'Dame': 'nb-NO-PernilleNeural' },
-  'Engelsk': { 'Mann': 'en-US-AndrewNeural', 'Dame': 'en-US-AvaNeural' },
-  'Svensk': { 'Mann': 'sv-SE-MattiasNeural', 'Dame': 'sv-SE-SofieNeural' },
-  'Tamil': { 'Mann': 'ta-IN-ValluvarNeural', 'Dame': 'ta-IN-PallaviNeural' },
-  'Hindi': { 'Mann': 'hi-IN-MadhurNeural', 'Dame': 'hi-IN-SwararaNeural' },
+  'Norsk': {
+    'Female': 'nb-NO-PernilleNeural',
+    'Male': 'nb-NO-FinnNeural'
+  },
+  'English': {
+    'Female': 'en-US-AvaMultilingualNeural',
+    'Male': 'en-US-AndrewMultilingualNeural'
+  },
+  'Tamil': {
+    'Female': 'ta-IN-PallaviNeural',
+    'Male': 'ta-IN-ValluvarNeural'
+  }
 };
 
-const LANGUAGES = [
-  { name: 'Norsk', flag: '🇳🇴' },
-  { name: 'Engelsk', flag: '🇬🇧' },
-  { name: 'Svensk', flag: '🇸🇪' },
-  { name: 'Tamil', flag: '🇮🇳' },
-  { name: 'Hindi', flag: '🇮🇳' },
+const ADDITIONAL_VOICES = [
+  { id: 'en-US-AvaMultilingualNeural', label: 'Ava (Smooth Female)', lang: 'EN' },
+  { id: 'en-US-AndrewMultilingualNeural', label: 'Andrew (Deep Male)', lang: 'EN' },
+  { id: 'nb-NO-PernilleNeural', label: 'Pernille (Soft Norsk)', lang: 'NO' },
+  { id: 'nb-NO-FinnNeural', label: 'Finn (Strong Norsk)', lang: 'NO' },
+  { id: 'ta-IN-PallaviNeural', label: 'Pallavi (Tamil Female)', lang: 'TA' },
 ];
 
 export default function Factory() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const initialTopic = new URLSearchParams(location.search).get('topic') || '';
-
-  const [topic, setTopic] = useState(initialTopic);
-  const [gender, setGender] = useState<'Mann' | 'Dame'>('Dame');
+  const [topic, setTopic] = useState('');
+  const [gender, setGender] = useState<'Female' | 'Male'>('Female');
   const [language, setLanguage] = useState('Norsk');
   const [instructions, setInstructions] = useState('');
   const [isProducing, setIsProducing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Dialog Mode State
+  const [isDialogMode, setIsDialogMode] = useState(false);
+  const [secondaryVoice, setSecondaryVoice] = useState('nb-NO-FinnNeural');
 
   const handleStartProduction = async () => {
     if (!topic) return;
     setIsProducing(true);
     setError(null);
 
-    const selectedVoice = VOICE_MAP[language]?.[gender] || 'nb-NO-PernilleNeural';
+    const primaryVoice = VOICE_MAP[language]?.[gender] || 'nb-NO-PernilleNeural';
     const orderId = crypto.randomUUID();
 
     try {
@@ -47,10 +59,12 @@ export default function Factory() {
         action: 'MANUAL_START',
         title: topic,
         topic: topic,
-        style_tone: '⚡ Engaging',
+        style_tone: isDialogMode ? '🎭 Dialogue / Movie' : '⚡ Engaging',
         target_audience: 'Global',
         video_format: '📱 9:16 (Vertical)',
-        ai_voice: selectedVoice,
+        ai_voice: primaryVoice,
+        secondary_voice: isDialogMode ? secondaryVoice : null,
+        is_dialog: isDialogMode,
         platforms: ['tiktok', 'youtube'],
         language,
         custom_instructions: instructions
@@ -70,109 +84,127 @@ export default function Factory() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-20">
-      <div className="text-center space-y-4">
+      {/* Header */}
+      <div className="space-y-2">
         <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-cyan/10 border border-neon-cyan/20 text-neon-cyan text-xs font-mono uppercase tracking-widest"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-2 text-neon-cyan font-mono text-xs uppercase tracking-[0.3em]"
         >
-          <Zap size={14} />
-          AI Production Factory v14.5
+          <Wand2 size={14} />
+          Creative Studio
         </motion.div>
-        <h1 className="text-5xl font-black text-white tracking-tight">Hva skal vi skape i dag?</h1>
-        <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-          Skriv inn et tema eller en idé, så tar vår AI seg av resten – fra manus og tale til klipping og musikk.
-        </p>
+        <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter">
+          The <span className="text-neon-cyan">Factory</span>
+        </h1>
+        <p className="text-gray-500 max-w-md">Konseptualiser og start din neste virale suksess her.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-12">
-        {/* Main Input Area */}
-        <div className="lg:col-span-8 space-y-8">
-          <motion.div 
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="glass-morphism rounded-[2.5rem] p-10 relative overflow-hidden group shadow-2xl"
-          >
-            {/* Decorative background glow inside the card */}
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-neon-cyan/5 rounded-full blur-[60px] group-hover:bg-neon-cyan/10 transition-all duration-700" />
-            
-            <div className="space-y-8 relative z-10">
-              <div className="space-y-4">
-                <label className="text-xs font-mono text-neon-cyan uppercase tracking-[0.2em] flex items-center gap-3">
-                  <Sparkles size={14} />
-                  Video-tema eller Overskrift
-                </label>
-                <input 
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="Hva vil du at AI-en skal skape?"
-                  className="w-full bg-black/40 border border-white/5 rounded-2xl px-8 py-6 text-2xl text-white placeholder:text-gray-700 focus:border-neon-cyan/30 focus:bg-black/60 transition-all outline-none"
-                />
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Editor */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="glass-morphism rounded-[40px] p-10 border-white/5 space-y-8">
+            <div className="space-y-4">
+              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Video Tema / Tema</label>
+              <input 
+                value={topic}
+                onChange={e => setTopic(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-neon-cyan/50 outline-none transition-all font-bold text-xl placeholder:text-gray-700"
+                placeholder="Eks: Mysteriet om de forsvunne skipene..."
+              />
+            </div>
 
-              <div className="space-y-4">
-                <label className="text-xs font-mono text-gray-500 uppercase tracking-[0.2em]">Spesielle instrukser</label>
-                <textarea 
-                  value={instructions}
-                  onChange={(e) => setInstructions(e.target.value)}
-                  placeholder="F.eks: 'Gjør stemmen ekstra entusiastisk og bruk mye energi'..."
-                  rows={4}
-                  className="w-full bg-black/40 border border-white/5 rounded-2xl px-8 py-5 text-white placeholder:text-gray-700 focus:border-neon-cyan/30 focus:bg-black/60 transition-all outline-none resize-none"
-                />
+            <div className="space-y-4">
+              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Karakter & Dialog Modus</label>
+              <div 
+                onClick={() => setIsDialogMode(!isDialogMode)}
+                className={`p-6 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${isDialogMode ? 'bg-neon-cyan/5 border-neon-cyan/30' : 'bg-black/20 border-white/5'}`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-xl ${isDialogMode ? 'bg-neon-cyan text-black' : 'bg-white/5 text-gray-500'}`}>
+                    <Users size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white uppercase italic">Dialog Modus</h3>
+                    <p className="text-[10px] text-gray-500 font-mono">Lag filmer med flere karakterer som snakker sammen.</p>
+                  </div>
+                </div>
+                <div className={`w-12 h-6 rounded-full relative transition-colors ${isDialogMode ? 'bg-neon-cyan' : 'bg-white/10'}`}>
+                  <motion.div 
+                    animate={{ x: isDialogMode ? 24 : 4 }}
+                    className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-lg"
+                  />
+                </div>
               </div>
             </div>
-          </motion.div>
 
-          <div className="flex items-center justify-between p-6 glass-morphism rounded-3xl border-neon-cyan/10">
-            <div className="flex items-center gap-4 text-neon-cyan/60 text-xs font-mono tracking-widest uppercase">
-              <ShieldCheck size={20} className="text-neon-cyan" />
-              <span>Full automatisering: Manus • Stemme • Klipping • Musikk</span>
+            <div className="space-y-4">
+              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] ml-2">Skreddersydde Instruksjoner</label>
+              <textarea 
+                value={instructions}
+                onChange={e => setInstructions(e.target.value)}
+                rows={4}
+                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-neon-cyan/50 outline-none transition-all leading-relaxed placeholder:text-gray-700"
+                placeholder={isDialogMode ? "Beskriv dialogen. Eks: 'Kongen er sint, Rådgiveren er rolig...'" : "Legg til spesielle ønsker for manus eller stil..."}
+              />
             </div>
           </div>
         </div>
 
         {/* Sidebar Controls */}
-        <div className="lg:col-span-4 space-y-6">
-          <motion.div 
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            className="glass-morphism rounded-[2rem] p-8 space-y-10"
-          >
-            <div className="space-y-6">
-              <label className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.3em]">Stemme-Karakter</label>
-              <div className="grid grid-cols-2 gap-3">
-                {['Dame', 'Mann'].map((g) => (
+        <div className="space-y-6">
+          <div className="glass-morphism rounded-[32px] p-8 border-white/5 space-y-8">
+            {/* Primary Voice */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em]">Hovedstemme</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {['Female', 'Male'].map(g => (
                   <button
                     key={g}
                     onClick={() => setGender(g as any)}
-                    className={`flex flex-col items-center justify-center gap-3 py-6 rounded-2xl border transition-all duration-500 ${
-                      gender === g 
-                        ? 'bg-neon-cyan/10 border-neon-cyan/50 text-neon-cyan shadow-[0_0_20px_rgba(0,245,255,0.1)]'
-                        : 'bg-black/20 border-white/5 text-gray-600 hover:border-white/10'
-                    }`}
+                    className={`py-3 rounded-xl text-xs font-black uppercase tracking-widest border transition-all ${gender === g ? 'bg-neon-cyan text-black border-neon-cyan shadow-[0_0_15px_rgba(0,245,255,0.3)]' : 'bg-white/5 text-gray-500 border-white/5'}`}
                   >
-                    {g === 'Dame' ? <User size={24} /> : <Users size={24} />}
-                    <span className="text-xs font-black uppercase tracking-widest">{g}</span>
+                    {g}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-4">
-              <label className="text-xs font-mono text-gray-500 uppercase tracking-widest">Målspråk</label>
-              <div className="grid grid-cols-2 gap-2">
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.name}
-                    onClick={() => setLanguage(lang.name)}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all ${
-                      language === lang.name 
-                        ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan'
-                        : 'bg-black/20 border-white/5 text-gray-500 hover:border-white/10'
-                    }`}
+            {/* Secondary Voice (Only in Dialog Mode) */}
+            <AnimatePresence>
+              {isDialogMode && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-4 overflow-hidden"
+                >
+                  <h3 className="text-[10px] font-mono text-neon-cyan uppercase tracking-[0.2em]">Stemme Karakter 2</h3>
+                  <select 
+                    value={secondaryVoice}
+                    onChange={(e) => setSecondaryVoice(e.target.value)}
+                    className="w-full bg-black/40 border border-neon-cyan/20 rounded-xl px-4 py-3 text-xs text-white outline-none"
                   >
-                    <span>{lang.flag}</span>
-                    <span className="text-xs font-bold">{lang.name}</span>
+                    {ADDITIONAL_VOICES.map(v => (
+                      <option key={v.id} value={v.id} className="bg-surface text-white">
+                        [{v.lang}] {v.label}
+                      </option>
+                    ))}
+                  </select>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="space-y-4 pt-6 border-t border-white/5">
+              <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em]">Produksjonsspråk</h3>
+              <div className="flex flex-wrap gap-2">
+                {Object.keys(VOICE_MAP).map(lang => (
+                  <button
+                    key={lang}
+                    onClick={() => setLanguage(lang)}
+                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase border transition-all ${language === lang ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-white/5 text-gray-600'}`}
+                  >
+                    {lang}
                   </button>
                 ))}
               </div>
@@ -192,28 +224,26 @@ export default function Factory() {
             <button
               onClick={handleStartProduction}
               disabled={!topic || isProducing}
-              className={`w-full py-5 rounded-2xl flex items-center justify-center gap-3 font-black text-lg transition-all shadow-2xl ${
-                !topic || isProducing
-                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                  : 'bg-neon-cyan text-black hover:scale-[1.02] active:scale-95 shadow-neon-cyan/20'
-              }`}
+              className="w-full py-5 bg-neon-cyan text-black font-black uppercase tracking-[0.2em] rounded-2xl hover:shadow-[0_0_30px_#00f5ff] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-3"
             >
               {isProducing ? (
                 <>
-                  <Zap size={20} className="animate-spin" />
-                  STARTER...
+                  <RefreshCw className="animate-spin" size={20} />
+                  Starter Fabrikken...
                 </>
               ) : (
                 <>
-                  <Wand2 size={20} />
-                  START FABRIKKEN
-                  <ArrowRight size={20} />
+                  <Send size={18} />
+                  Start Produksjon
                 </>
               )}
             </button>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+// Missing import added for completeness
+import { RefreshCw } from 'lucide-react';
