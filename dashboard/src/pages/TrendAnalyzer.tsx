@@ -12,6 +12,8 @@ import { triggerProduction } from '../lib/api';
 export default function TrendAnalyzer() {
   const { trends = [], isLoading, fetchInitialData, fetchTrends } = usePipelineStore();
   const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'youtube' | 'instagram' | 'snapchat'>('all');
+  const [countryFilter, setCountryFilter] = useState('all');
+  const [languageFilter, setLanguageFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   
   const [selectedTrend, setSelectedTrend] = useState<TrendingTopic | null>(null);
@@ -21,10 +23,16 @@ export default function TrendAnalyzer() {
     fetchInitialData();
   }, [fetchInitialData]);
 
+  // Extract unique countries and languages for filters
+  const countries = Array.from(new Set(trends.map(t => t.country).filter(Boolean))).sort();
+  const languages = Array.from(new Set(trends.map(t => t.language).filter(Boolean))).sort();
+
   const filteredTrends = trends.filter(t => {
     const matchesPlatform = platformFilter === 'all' || t.platform?.toLowerCase() === platformFilter;
+    const matchesCountry = countryFilter === 'all' || t.country === countryFilter;
+    const matchesLanguage = languageFilter === 'all' || t.language === languageFilter;
     const matchesSearch = (t.title || '').toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesPlatform && matchesSearch;
+    return matchesPlatform && matchesCountry && matchesLanguage && matchesSearch;
   });
 
   const handleStartProduction = async (trend: TrendingTopic) => {
@@ -79,6 +87,26 @@ export default function TrendAnalyzer() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <div className="flex gap-4">
+            <select 
+              value={countryFilter}
+              onChange={e => setCountryFilter(e.target.value)}
+              className="bg-white/[0.02] border border-white/5 rounded-[18px] px-6 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-gray-500 hover:text-white transition-all appearance-none cursor-pointer min-w-[140px]"
+            >
+              <option value="all">ALL_REGIONS</option>
+              {countries.map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+            </select>
+
+            <select 
+              value={languageFilter}
+              onChange={e => setLanguageFilter(e.target.value)}
+              className="bg-white/[0.02] border border-white/5 rounded-[18px] px-6 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-gray-500 hover:text-white transition-all appearance-none cursor-pointer min-w-[140px]"
+            >
+              <option value="all">ALL_LANGUAGES</option>
+              {languages.map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
+            </select>
+          </div>
+
           <div className="relative group min-w-[320px]">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 group-hover:text-neon-cyan transition-colors" size={18} />
             <input 

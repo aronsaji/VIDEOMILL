@@ -1,19 +1,51 @@
-import React, { useState } from 'react';
-import { Settings as SettingsIcon, Database, Link, Bot, Shield, Save } from 'lucide-react';
+import { Settings as SettingsIcon, Database, Link, Bot, Shield, Save, Globe } from 'lucide-react';
 import { SecureAction } from '../components/SecureAction';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Settings() {
+  const { language, setLanguage, t } = useLanguage();
+
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <SettingsIcon className="text-gray-400" />
-          Innstillinger
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">Konfigurer VideoMill Pipelinen og integrasjoner</p>
+    <div className="space-y-12 max-w-5xl mx-auto pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="space-y-4">
+          <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
+            <SettingsIcon className="text-neon-purple" size={40} />
+            {t('nav.settings')}
+          </h1>
+          <p className="text-sm text-gray-500 font-bold uppercase tracking-widest italic opacity-70">Global System Protocol & Configuration</p>
+        </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-10">
+        {/* Language Selection */}
+        <section className="glass-ultra rounded-[40px] p-10 border border-white/5 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Globe size={80} className="text-neon-cyan" />
+          </div>
+          <div className="flex items-center gap-4 mb-8 border-b border-white/5 pb-6">
+            <Globe size={20} className="text-neon-cyan" />
+            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Language Architecture</h2>
+          </div>
+          <div className="flex gap-6">
+            {[
+              { id: 'no', label: '🇳🇴 Norsk (Bokmål)', flag: 'NO' },
+              { id: 'en', label: '🇬🇧 English (Global)', flag: 'EN' }
+            ].map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => setLanguage(lang.id as any)}
+                className={`px-10 py-5 rounded-[24px] text-xs font-black transition-all border uppercase tracking-[0.2em] italic flex items-center gap-4 ${
+                  language === lang.id 
+                    ? 'bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.2)]' 
+                    : 'bg-white/5 text-gray-600 border-white/5 hover:border-white/20 hover:text-white'
+                }`}
+              >
+                {lang.label}
+              </button>
+            ))}
+          </div>
+        </section>
         {/* Supabase Settings */}
         <section className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-4 border-b border-border/50 pb-3">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Video, Library, Settings, 
@@ -6,21 +6,38 @@ import {
   Radio, Zap, Layers, History
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Logo from './Logo';
-
-const NAV_ITEMS = [
-  { path: '/', label: 'Command Center', icon: LayoutDashboard, color: 'text-neon-purple' },
-  { path: '/factory', label: 'The Factory', icon: Video, color: 'text-neon-cyan' },
-  { path: '/auto-series', label: 'Auto Series', icon: Radio, color: 'text-neon-pink' },
-  { path: '/trends', label: 'Trend Radar', icon: TrendingUp, color: 'text-neon-amber' },
-  { path: '/agents', label: 'AI Agents', icon: Cpu, color: 'text-neon-green' },
-  { path: '/archive', label: 'Archive', icon: History, color: 'text-gray-400' },
-  { path: '/settings', label: 'Settings', icon: Settings, color: 'text-gray-500' },
-];
+import { supabase } from '../lib/supabase';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Layout() {
+  const { t } = useLanguage();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const location = useLocation();
+
+  const NAV_ITEMS = [
+    { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard, color: 'text-neon-purple' },
+    { path: '/factory', label: t('nav.factory'), icon: Video, color: 'text-neon-cyan' },
+    { path: '/auto-series', label: t('nav.auto_series'), icon: Radio, color: 'text-neon-pink' },
+    { path: '/trends', label: t('nav.trends'), icon: TrendingUp, color: 'text-neon-amber' },
+    { path: '/agents', label: t('nav.agents'), icon: Cpu, color: 'text-neon-green' },
+    { path: '/archive', label: t('nav.archive'), icon: History, color: 'text-gray-400' },
+    { path: '/settings', label: t('nav.settings'), icon: Settings, color: 'text-gray-500' },
+  ];
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const avatarUrl = user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${user?.email || 'Guest'}`;
 
   return (
     <div className="min-h-screen bg-background text-white font-sans selection:bg-neon-purple selection:text-white relative overflow-hidden">
@@ -96,13 +113,24 @@ export default function Layout() {
             })}
           </nav>
 
-          {/* Toggle Button */}
-          <button 
-            onClick={() => setSidebarOpen(!isSidebarOpen)}
-            className="p-6 text-gray-600 hover:text-neon-cyan transition-colors flex justify-center"
-          >
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          {/* Bottom Actions */}
+          <div className="px-4 py-6 space-y-4">
+             <button 
+              onClick={() => supabase.auth.signOut()}
+              className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-600 hover:text-red-500 hover:bg-red-500/5 transition-all group"
+            >
+              <X size={20} className="group-hover:rotate-90 transition-transform" />
+              {isSidebarOpen && <span className="font-bold text-xs uppercase tracking-widest">{t('nav.sign_out')}</span>}
+            </button>
+
+            <button 
+              onClick={() => setSidebarOpen(!isSidebarOpen)}
+              className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-gray-700 hover:text-neon-cyan transition-colors group"
+            >
+              {isSidebarOpen ? <Menu size={20} /> : <Menu size={20} className="mx-auto" />}
+              {isSidebarOpen && <span className="font-bold text-xs uppercase tracking-widest">{t('nav.collapse')}</span>}
+            </button>
+          </div>
         </motion.aside>
 
         {/* Main Viewport */}
@@ -121,7 +149,7 @@ export default function Layout() {
               </div>
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-neon-purple to-neon-pink p-[1px]">
                 <div className="w-full h-full rounded-full bg-background flex items-center justify-center overflow-hidden">
-                   <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" className="w-8 h-8" />
+                   <img src={avatarUrl} alt="avatar" className="w-8 h-8 object-cover" />
                 </div>
               </div>
             </div>

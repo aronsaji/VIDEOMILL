@@ -20,7 +20,7 @@ body {
   font-family: 'Outfit', sans-serif;
   -webkit-font-smoothing: antialiased;
   background-color: var(--bg-deep);
-  color: #94a3b8; /* Muted Slate 400 for secondary text */
+  color: #f1f5f9; /* Near white for maximum readability across the app */
   overflow-x: hidden;
 }
 

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePipelineStore } from '../store/pipelineStore';
+import { useLanguage } from '../contexts/LanguageContext';
 import type { Order, OrderStatus } from '../types';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; glow: string; icon: any }> = {
@@ -20,6 +21,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; glow: string
 };
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { orders = [], trends = [], fetchInitialData, fetchOrders, isLoading } = usePipelineStore();
 
@@ -37,10 +39,10 @@ export default function Dashboard() {
       {/* Tactical Telemetry Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Network Integrity', value: 'OPTIMAL', icon: Shield, color: 'text-neon-green', detail: 'Encrypted_Link_1' },
-          { label: 'Neural Activity', value: activeProductions.length, icon: Cpu, color: 'text-neon-purple', detail: 'Active_Nodes' },
-          { label: 'Cognition Rate', value: '98.4%', icon: Sparkles, color: 'text-neon-cyan', detail: 'Sync_Stable' },
-          { label: 'Data Velocity', value: '4.2GB/S', icon: Database, color: 'text-neon-amber', detail: 'Burst_Active' },
+          { label: t('dash.network_integrity'), value: 'OPTIMAL', icon: Shield, color: 'text-neon-green', detail: 'Encrypted_Link_1' },
+          { label: t('dash.neural_activity'), value: activeProductions.length, icon: Cpu, color: 'text-neon-purple', detail: t('common.active_nodes') },
+          { label: t('dash.cognition_rate'), value: '98.4%', icon: Sparkles, color: 'text-neon-cyan', detail: t('common.stable') },
+          { label: t('dash.data_velocity'), value: '4.2GB/S', icon: Database, color: 'text-neon-amber', detail: 'Burst_Active' },
         ].map((stat, i) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -76,16 +78,16 @@ export default function Dashboard() {
             <div className="space-y-1">
               <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
                 <Radio className="text-neon-purple animate-pulse" size={28} />
-                Operations <span className="text-neon-purple">Hub</span>
+                {t('dash.operations_hub')}
               </h2>
               <div className="flex items-center gap-3">
                  <div className="h-[1px] w-12 bg-neon-purple/50" />
-                 <span className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Live Production Stream</span>
+                 <span className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{t('dash.live_stream')}</span>
               </div>
             </div>
             <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 backdrop-blur-md">
                <Layers size={14} className="text-neon-purple" />
-               <span className="text-[10px] font-black font-mono text-white uppercase tracking-widest">{activeProductions.length} Active Nodes</span>
+               <span className="text-[10px] font-black font-mono text-white uppercase tracking-widest">{activeProductions.length} {t('common.active_nodes')}</span>
             </div>
           </div>
 
@@ -100,13 +102,13 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-neon-purple/5 rounded-full blur-xl" />
                   <Video size={48} className="relative z-10" />
                 </div>
-                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-3">System Standby</h3>
+                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-3">{t('dash.system_standby')}</h3>
                 <p className="text-gray-500 max-w-sm mx-auto text-xs font-medium leading-relaxed uppercase tracking-widest italic">The production grid is currently idle. Initialize a new synthesis cycle at the Factory node.</p>
                 <button 
                   onClick={() => navigate('/factory')}
                   className="mt-10 px-12 py-4 bg-white text-black hover:bg-neon-purple hover:text-white rounded-[20px] font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl hover:shadow-neon-purple/20"
                 >
-                  Enter Factory Core
+                  {t('dash.enter_factory')}
                 </button>
               </motion.div>
             ) : (
