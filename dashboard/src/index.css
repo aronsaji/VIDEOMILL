@@ -5,17 +5,17 @@
 @tailwind utilities;
 
 :root {
-  --bg-deep: #020617; /* Obsidian Slate */
-  --surface: #0f172a;
-  --neon-cyan: #fbbf24; /* Amber Gold */
-  --neon-purple: #f59e0b; /* Solid Gold */
-  --neon-pink: #f43f5e;
-  --neon-amber: #fbbf24;
-  --neon-green: #22c55e;
-  --border: rgba(255, 255, 255, 0.1);
+  --bg-deep: #03040b; /* Base black */
+  --surface: #0a0c1f;
+  --neon-cyan: #00f5ff;
+  --neon-purple: #bc13fe;
+  --neon-pink: #ff00ff;
+  --neon-amber: #ffaa00;
+  --neon-green: #39ff14;
+  --border: rgba(255, 255, 255, 0.05);
 }
 
-/* HIGH CONTRAST OVERRIDES - OBSIDIAN GOLD EDITION */
+/* HIGH CONTRAST OVERRIDES - NEON RESTORATION */
 .text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800 { 
   color: #ffffff !important; 
   font-weight: 800 !important; 
@@ -29,8 +29,9 @@ body {
   margin: 0;
   font-family: 'Outfit', sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: var(--bg-deep);
-  color: #ffffff; /* Pure white for maximum readability */
+  background: radial-gradient(circle at 50% 50%, #0a0b1e 0%, #030303 100%);
+  background-attachment: fixed;
+  color: #ffffff;
   overflow-x: hidden;
 }
 
@@ -63,11 +64,11 @@ body {
 }
 
 .neon-glow-purple {
-  filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.3));
+  filter: drop-shadow(0 0 2px rgba(188, 19, 254, 0.3));
 }
 
 .neon-glow-cyan {
-  filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.3));
+  filter: drop-shadow(0 0 2px rgba(0, 245, 255, 0.3));
 }
 
 /* Custom Scrollbar */
@@ -76,21 +77,21 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, var(--neon-purple), var(--neon-amber));
+  background: linear-gradient(to bottom, var(--neon-purple), var(--neon-pink));
   border-radius: 10px;
 }
 
 /* Buttons */
 .btn-cyber {
   @apply relative overflow-hidden px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all duration-300;
-  background: linear-gradient(45deg, var(--neon-purple), var(--neon-amber));
-  color: #000000; /* Black text on gold buttons for maximum contrast */
-  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
+  background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink));
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(188, 19, 254, 0.2);
 }
 
 .btn-cyber:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 15px rgba(188, 19, 254, 0.3);
 }
 
 .btn-cyber:active {

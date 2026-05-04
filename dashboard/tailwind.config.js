@@ -8,9 +8,9 @@ export default {
     extend: {
       colors: {
         white: '#ffffff',
-        background: '#020617', // Obsidian Black-Blue
-        surface: '#0f172a',    // Slate Dark
-        border: 'rgba(255, 255, 255, 0.1)',
+        background: '#020617', // Obsidian Slate Base
+        surface: '#0f172a',
+        border: 'rgba(255, 255, 255, 0.05)',
         gray: {
           400: '#ffffff',
           500: '#f8fafc',
@@ -18,11 +18,11 @@ export default {
           700: '#e2e8f0',
         },
         neon: {
-          cyan: '#fbbf24', // Amber Gold
-          purple: '#f59e0b', // Solid Gold
-          pink: '#f43f5e',
-          amber: '#fbbf24',
-          green: '#22c55e',
+          cyan: '#00f5ff',
+          purple: '#bc13fe',
+          pink: '#ff00ff',
+          amber: '#ffaa00',
+          green: '#39ff14',
         }
       },
       fontFamily: {
