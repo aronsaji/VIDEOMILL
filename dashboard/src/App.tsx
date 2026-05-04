@@ -1,4 +1,6 @@
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { usePipelineStore } from './store/pipelineStore';
 import { Layout } from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AutoSeries from './pages/AutoSeries';
