@@ -229,6 +229,19 @@ export default function Dashboard() {
                         <span className="text-xs font-mono text-gray-600">{order.error_type}</span>
                       )}
                       <StatusBadge status={order.status} />
+                      {order.status === 'failed' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            usePipelineStore.getState().retryOrder(order);
+                          }}
+                          className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg transition-colors flex items-center gap-1 text-[10px] uppercase font-bold"
+                          title="Retry production"
+                        >
+                          <RefreshCw size={10} />
+                          Retry
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 ))}

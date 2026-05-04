@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
-import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader, Send } from 'lucide-react';
+import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader, Send, RefreshCw } from 'lucide-react';
 import { triggerProduction } from '../lib/api';
 import type { OrderStatus } from '../types';
 
@@ -290,7 +290,7 @@ export default function Orders() {
                       {order.video_id}
                     </td>
                     <td className="p-4">
-                      <p className="text-sm font-medium text-gray-200">{order.title}</p>
+                      <p className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors">{order.title}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{order.category}</p>
                     </td>
                     <td className="p-4">
@@ -303,14 +303,29 @@ export default function Orders() {
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        {order.status === 'published' && <CheckCircle2 size={14} className="text-green-400" />}
-                        {order.status === 'failed' && <AlertTriangle size={14} className="text-red-400" />}
-                        {order.status === 'queued' && <Clock size={14} className="text-gray-400" />}
-                        {['script_generation', 'rendering', 'uploading'].includes(order.status) && <Loader size={14} className="text-neon-cyan animate-spin" />}
-                        <span className="text-xs font-mono text-gray-300 capitalize">
-                          {order.status.replace('_', ' ')}
-                        </span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          {order.status === 'published' && <CheckCircle2 size={14} className="text-green-400" />}
+                          {order.status === 'failed' && <AlertTriangle size={14} className="text-red-400" />}
+                          {order.status === 'queued' && <Clock size={14} className="text-gray-400" />}
+                          {['script_generation', 'rendering', 'uploading'].includes(order.status) && <Loader size={14} className="text-neon-cyan animate-spin" />}
+                          <span className="text-xs font-mono text-gray-300 capitalize">
+                            {order.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        
+                        {order.status === 'failed' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              usePipelineStore.getState().retryOrder(order);
+                            }}
+                            className="flex items-center gap-1.5 px-2 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded text-[10px] font-bold uppercase transition-all"
+                          >
+                            <RefreshCw size={10} />
+                            Retry
+                          </button>
+                        )}
                       </div>
                     </td>
                     <td className="p-4 text-right text-xs font-mono text-gray-500">

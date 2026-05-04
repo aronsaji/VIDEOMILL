@@ -51,9 +51,9 @@ const formatASSTime = (seconds) => {
 };
 
 const generateAnimatedASS = (timestamps, outputFile) => {
-  // ASS header
+  // ASS header - Optimalisert for Viral 9:16 Format
   let ass = `[Script Info]
-Title: VideoMill Animated Subtitles
+Title: VideoMill Viral Captions
 ScriptType: v4.00+
 WrapStyle: 0
 ScaledBorderAndShadow: yes
@@ -62,30 +62,34 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial Black,24,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,2,1,10,50,50,80,1
+Style: Default,Arial Black,70,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,2,0,1,4,0,10,50,50,960,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `;
 
-  // Legg til dialog-linjer med karaoke-effekt (ord-for-ord)
-  for (let i = 0; i < timestamps.length; i++) {
-    const item = timestamps[i];
-    const startSec = item.offset / 10000000; // Konverter 100ns til sekunder
-    const endSec = (item.offset + item.duration) / 10000000;
+  // Grupper ord i små bolker (1-3 ord) for å unngå at skjermen fylles
+  const wordsPerLine = 3;
+  for (let i = 0; i < timestamps.length; i += wordsPerLine) {
+    const chunk = timestamps.slice(i, i + wordsPerLine);
+    const startSec = chunk[0].offset / 10000000;
+    const endSec = (chunk[chunk.length - 1].offset + chunk[chunk.length - 1].duration) / 10000000;
     
     const start = formatASSTime(startSec);
     const end = formatASSTime(endSec);
     
-    // Karaoke-effekt: {\k<duration in centiseconds>}
-    const durationCS = Math.round(item.duration / 100000); // 100ns til centisekunder
-    const text = `{\\k${durationCS}}${item.text.toUpperCase()}`;
+    // Lag karaoke-effekt for denne linjen
+    let text = "";
+    chunk.forEach(word => {
+      const durationCS = Math.round(word.duration / 100000);
+      text += `{\\k${durationCS}}${word.text.toUpperCase()} `;
+    });
     
-    ass += `Dialogue: 0,${start},${end},Default,,0,0,0,,${text}\n`;
+    ass += `Dialogue: 0,${start},${end},Default,,0,0,0,,{\\fscx110\\fscy110}${text.trim()}\n`;
   }
   
   fs.writeFileSync(outputFile, ass);
-  console.log("✅ Animerte ASS-undertekster generert!");
+  console.log("✅ Virale undertekster generert!");
 };
 
 const downloadFile = (url, dest, retries = 3) => {
@@ -371,16 +375,16 @@ const fullText = scenes.map(s => s.narration).join('. ');
 
   // 6. Sluttmiks
   const finalOutput = `${videoDir}/final.mp4`;
-  const style = "FontName=Arial Black,FontSize=24,PrimaryColour=&H00FFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Alignment=10,MarginV=80";
   
   console.log("🎞️ Sluttmiksing...");
   
   // Bruk ASS hvis tilgjengelig, ellers SRT
   let subtitleFilter;
   if (fs.existsSync(assFile)) {
-    subtitleFilter = `subtitles='${assFile.replace(/\\/g, '/').replace(':', '\\:')}':force_style='${style}'`;
+    subtitleFilter = `subtitles='${assFile.replace(/\\/g, '/').replace(':', '\\:')}'`;
   } else if (fs.existsSync(srtFile)) {
-    subtitleFilter = `subtitles='${srtFile.replace(/\\/g, '/').replace(':', '\\:')}':force_style='${style}'`;
+    const srtStyle = "FontName=Arial Black,FontSize=24,PrimaryColour=&H00FFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Alignment=2,MarginV=80";
+    subtitleFilter = `subtitles='${srtFile.replace(/\\/g, '/').replace(':', '\\:')}':force_style='${srtStyle}'`;
   } else {
     subtitleFilter = null;
   }

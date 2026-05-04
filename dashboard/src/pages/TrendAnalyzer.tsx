@@ -15,7 +15,7 @@ const INITIAL_SOCIAL_ACCOUNTS = [
 
 export default function TrendAnalyzer() {
   const { trends, isLoading, fetchInitialData } = usePipelineStore();
-  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'youtube' | 'google' | 'instagram' | 'twitter'>('all');
+  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'youtube' | 'google' | 'instagram' | 'twitter' | 'snapchat'>('all');
   const [countryFilter, setCountryFilter] = useState<string>('all');
   const [languageFilter, setLanguageFilter] = useState<string>('all');
   
@@ -50,11 +50,20 @@ export default function TrendAnalyzer() {
 
   const filteredTrends = trends.filter(t => {
     const platformValue = (t.platform || '').toLowerCase();
-    const matchesPlatform = platformFilter === 'all' || platformValue === platformFilter.toLowerCase();
+    
+    // Normalize platform names for better matching
+    let normalizedPlatform = platformValue;
+    if (platformValue.includes('youtube')) normalizedPlatform = 'youtube';
+    if (platformValue.includes('tiktok')) normalizedPlatform = 'tiktok';
+    if (platformValue.includes('snap')) normalizedPlatform = 'snapchat';
+    if (platformValue.includes('google')) normalizedPlatform = 'google';
+    if (platformValue.includes('twitter') || platformValue.includes(' x ')) normalizedPlatform = 'twitter';
+    
+    const matchesPlatform = platformFilter === 'all' || normalizedPlatform === platformFilter.toLowerCase();
     
     // Extract values from target_audience if fields are empty
     const tCountry = t.country || (t.target_audience || '').split(' - ')[0] || '';
-    const tLanguage = t.language || (t.target_audience || '').split(' - ')[1] || '';
+    const tLanguage = t.language || (t.language_code || t.language) || (t.target_audience || '').split(' - ')[1] || '';
 
     const matchesCountry = countryFilter === 'all' || tCountry.toLowerCase() === countryFilter.toLowerCase();
     const matchesLanguage = languageFilter === 'all' || tLanguage.toLowerCase() === languageFilter.toLowerCase();

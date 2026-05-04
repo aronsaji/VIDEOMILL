@@ -29,6 +29,7 @@ interface StoreState {
   fetchInitialData: () => Promise<void>;
   subscribeToChanges: () => void;
   addOrder: (orderData: Partial<Order>) => void;
+  retryOrder: (order: Order) => Promise<boolean>;
 }
 
 export const usePipelineStore = create<StoreState>((set, get) => ({
@@ -76,6 +77,32 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
       } catch (err: any) {
         console.error('Error inserting order:', err);
       }
+    }
+  },
+
+  retryOrder: async (order: Order) => {
+    try {
+      const { triggerProduction } = await import('../lib/api');
+      const success = await triggerProduction({
+        action: 'retry',
+        retry_video_id: order.video_id,
+        video_id: order.video_id,
+        topic: order.topic || order.title,
+        language: order.language || 'Norsk',
+        platform: Array.isArray(order.platform_destinations) ? order.platform_destinations[0] : 'tiktok'
+      });
+
+      if (success) {
+        const { orders } = get();
+        set({ 
+          orders: orders.map(o => o.id === order.id ? { ...o, status: 'queued', progress: 0, sub_status: 'Retry startet...' } : o) 
+        });
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Retry failed:', err);
+      return false;
     }
   },
 
