@@ -7,26 +7,27 @@
 :root {
   --background: #050505;
   --surface: #0a0a0a;
-  --neon-purple: #7a0bc0;
-  --neon-cyan: #00b8c0;
-  --neon-pink: #c000c0;
-  --neon-amber: #c08000;
-  --neon-green: #00c060;
-  --text-primary: #ffffff;
-  --text-secondary: #888888;
-  --border: rgba(255, 255, 255, 0.05);
+  --neon-purple: #6b09a3;
+  --neon-cyan: #008fa3;
+  --neon-pink: #a300a3;
+  --neon-amber: #a36a00;
+  --neon-green: #00a352;
+  --text-primary: #cbd5e1;
+  --text-secondary: #64748b;
+  --border: rgba(255, 255, 255, 0.03);
 }
 
-/* HIGH CONTRAST OVERRIDES - NEON RESTORATION */
+/* TACTICAL LEGIBILITY - MATTE EDITION */
 .text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800 { 
-  color: #ffffff !important; 
-  font-weight: 800 !important; 
+  color: var(--text-primary) !important; 
+  font-weight: 700 !important; 
 }
-.text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-xs {
-  color: #ffffff !important;
-  font-weight: 900 !important;
+.text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-xs {
+  color: var(--text-primary) !important;
+  font-weight: 800 !important;
   font-size: 15px !important;
   letter-spacing: 0.05em !important;
+  opacity: 0.9 !important;
 }
 
 body {
@@ -120,12 +121,13 @@ body {
   .text-gray-700 { color: #e2e8f0 !important; font-weight: 700 !important; }
   .text-gray-800 { color: #cbd5e1 !important; font-weight: 700 !important; }
   
-  /* Force all small tactical text to be bright and legible */
-  .text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-xs {
-    color: #ffffff !important;
-    font-weight: 900 !important;
+  /* Force all small tactical text to be bright and legible - MATTE EDITION */
+  .text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-xs {
+    color: var(--text-primary) !important;
+    font-weight: 800 !important;
     font-size: 15px !important;
     letter-spacing: 0.05em !important;
+    opacity: 0.9 !important;
   }
 }
 
