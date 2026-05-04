@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
 import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader, RefreshCw, Film } from 'lucide-react';
@@ -6,7 +6,7 @@ import { triggerProduction } from '../lib/api';
 import type { OrderStatus } from '../types';
 
 export default function Orders() {
-  const { orders } = usePipelineStore();
+  const { orders = [], fetchOrders } = usePipelineStore();
   const [showForm, setShowForm] = useState(false);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   
@@ -20,9 +20,13 @@ export default function Orders() {
   const [language, setLanguage] = useState('Norsk');
   const [instructions, setInstructions] = useState('');
 
+  // Hent ordrer når siden lastes
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
   const handleCreateOrder = async () => {
     if (!topic) return;
-
     const success = await triggerProduction({
       action: 'MANUAL_START',
       title: topic,
@@ -37,22 +41,19 @@ export default function Orders() {
     });
 
     if (success) {
-      usePipelineStore.getState().addOrder({
-        title: topic,
-        topic: topic,
-        status: 'queued',
-        platform_destinations: platforms.map(p => p.toLowerCase().split(' ')[0]) as any,
-      });
       setShowForm(false);
       setTopic('');
+      fetchOrders(); // Hent på nytt for å se den nye ordren
     } else {
       alert('Kunne ikke koble til n8n-serveren. Kontroller at den kjører!');
     }
   };
 
+  // Sikkerhets-sjekk for orders array
+  const safeOrders = Array.isArray(orders) ? orders : [];
   const filteredOrders = statusFilter === 'all' 
-    ? orders 
-    : orders.filter(o => o.status === statusFilter);
+    ? safeOrders 
+    : safeOrders.filter(o => o.status === statusFilter);
 
   return (
     <div className="space-y-6 max-w-6xl pb-20">
@@ -64,13 +65,22 @@ export default function Orders() {
           </h1>
           <p className="text-sm text-gray-500 mt-1">Full oversikt over dine AI-genererte videoer</p>
         </div>
-        <button 
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-5 py-2.5 bg-neon-cyan text-black rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(0,245,255,0.3)] hover:scale-105"
-        >
-          <Plus size={18} />
-          Opprett Video
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => fetchOrders()}
+            className="p-2.5 bg-white/5 text-gray-400 rounded-xl hover:bg-white/10 transition-all border border-white/5"
+            title="Oppdater liste"
+          >
+            <RefreshCw size={18} />
+          </button>
+          <button 
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-neon-cyan text-black rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(0,245,255,0.3)] hover:scale-105"
+          >
+            <Plus size={18} />
+            Opprett Video
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -93,7 +103,7 @@ export default function Orders() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-mono text-neon-cyan/70 uppercase">Spesielle instrukser</label>
-                  <textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-neon-cyan/50 transition-all resize-none" placeholder="F.eks: 'Bruk en dramatisk stemme og vis mye natur'..." />
+                  <textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-neon-cyan/50 transition-all resize-none" placeholder="F.eks: 'Bruk en dramatisk stemme'..." />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -119,7 +129,7 @@ export default function Orders() {
         )}
       </AnimatePresence>
 
-      <div className="bg-surface/30 border border-white/5 rounded-2xl backdrop-blur-md overflow-hidden">
+      <div className="bg-surface/30 border border-white/5 rounded-2xl backdrop-blur-md overflow-hidden min-h-[300px]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -132,21 +142,22 @@ export default function Orders() {
             </thead>
             <tbody>
               {filteredOrders.map((order) => {
+                if (!order) return null;
                 const isWorking = ['script_generation', 'rendering', 'uploading'].includes(order.status);
                 return (
-                  <tr key={order.id} className="border-b border-white/5 hover:bg-neon-cyan/[0.03] transition-all group">
+                  <tr key={order.id || order.video_id} className="border-b border-white/5 hover:bg-neon-cyan/[0.03] transition-all group">
                     <td className="p-5">
                       <span className={`font-mono text-xs ${isWorking ? 'text-neon-cyan animate-pulse' : 'text-gray-500'}`}>
-                        {order.video_id}
+                        {order.video_id || 'Generating...'}
                       </span>
                     </td>
                     <td className="p-5">
                       <div className="space-y-1">
                         <p className={`text-sm font-bold transition-colors ${isWorking ? 'text-neon-cyan' : 'text-white group-hover:text-neon-cyan'}`}>
-                          {order.title}
+                          {order.title || order.topic}
                         </p>
                         <div className="flex gap-2">
-                          {order.platform_destinations.map(p => (
+                          {(order.platform_destinations || []).map(p => (
                             <span key={p} className="text-[9px] font-mono px-1.5 py-0.5 bg-white/5 text-gray-500 rounded uppercase">{p}</span>
                           ))}
                         </div>
@@ -163,7 +174,7 @@ export default function Orders() {
                             <Loader size={14} className="text-neon-cyan animate-spin" />
                           )}
                           <span className={`text-xs font-mono uppercase ${order.status === 'failed' ? 'text-red-400' : 'text-gray-300'}`}>
-                            {order.status.replace('_', ' ')}
+                            {(order.status || 'queued').replace('_', ' ')}
                           </span>
                         </div>
                         
@@ -189,7 +200,7 @@ export default function Orders() {
                       </div>
                     </td>
                     <td className="p-5 text-right font-mono text-[10px] text-gray-500">
-                      {new Date(order.created_at).toLocaleString('nb-NO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      {order.created_at ? new Date(order.created_at).toLocaleString('nb-NO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Nylig'}
                     </td>
                   </tr>
                 );
