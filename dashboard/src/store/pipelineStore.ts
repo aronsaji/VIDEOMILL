@@ -59,7 +59,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     try {
       // Hent uten sortering fra database for å unngå 400-feil
       const { data, error } = await supabase
-        .from('trends')
+        .from('trending_topics')
         .select('*')
         .limit(50);
 
@@ -114,7 +114,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     const channel = supabase
       .channel('db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => get().fetchOrders())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'trends' }, () => get().fetchTrends())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, () => get().fetchTrends())
       .subscribe();
 
     return () => {
