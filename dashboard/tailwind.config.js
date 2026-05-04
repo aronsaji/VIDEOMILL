@@ -7,22 +7,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        white: '#e2e8f0', // Dimmed off-white for better eye comfort
-        background: '#030303',
-        surface: '#080808',
-        border: 'rgba(255, 255, 255, 0.03)',
+        white: '#ffffff',
+        background: '#020617', // Obsidian Black-Blue
+        surface: '#0f172a',    // Slate Dark
+        border: 'rgba(255, 255, 255, 0.1)',
         gray: {
-          400: '#f1f5f9', // Near white - for the most important sub-labels
-          500: '#e2e8f0', // Very light - for primary descriptions
-          600: '#cbd5e1', // Light - for secondary labels
-          700: '#94a3b8', // Medium - for background elements
+          400: '#ffffff',
+          500: '#f8fafc',
+          600: '#f1f5f9',
+          700: '#e2e8f0',
         },
         neon: {
-          cyan: '#00f5ff',
-          purple: '#bc13fe',
-          pink: '#ff00ff',
-          amber: '#ffaa00',
-          green: '#39ff14',
+          cyan: '#fbbf24', // Amber Gold
+          purple: '#f59e0b', // Solid Gold
+          pink: '#f43f5e',
+          amber: '#fbbf24',
+          green: '#22c55e',
         }
       },
       fontFamily: {

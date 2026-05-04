@@ -68,7 +68,7 @@ export default function Layout() {
                   <div className="flex flex-col">
                     <Logo size="sm" />
                     <div className="mt-2 text-[8px] font-black text-neon-cyan uppercase tracking-tighter opacity-80">
-                      v4.2 VERIFIED_GRID
+                      v4.2 OBSIDIAN_GOLD
                     </div>
                   </div>
                 </motion.div>
