@@ -25,7 +25,7 @@
 .text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-xs {
   color: var(--text-primary) !important;
   font-weight: 800 !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
   letter-spacing: 0.05em !important;
   opacity: 0.9 !important;
 }
@@ -37,7 +37,6 @@ body {
   -webkit-font-smoothing: antialiased;
   background-image: radial-gradient(circle at 50% 50%, #0c0c1a 0%, #050505 100%);
   background-attachment: fixed;
-  font-size: 16px;
   overflow-x: hidden;
 }
 
@@ -121,11 +120,11 @@ body {
   .text-gray-700 { color: #e2e8f0 !important; font-weight: 700 !important; }
   .text-gray-800 { color: #cbd5e1 !important; font-weight: 700 !important; }
   
-  /* Force all small tactical text to be bright and legible - MATTE EDITION */
+  /* Force only micro-text to be legible - 14px MATTE EDITION */
   .text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-xs {
     color: var(--text-primary) !important;
     font-weight: 800 !important;
-    font-size: 15px !important;
+    font-size: 14px !important;
     letter-spacing: 0.05em !important;
     opacity: 0.9 !important;
   }
