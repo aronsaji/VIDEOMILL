@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:ital,wght@0,400;0,800;1,400;1,800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -22,20 +22,26 @@
   color: #ffffff !important; 
   font-weight: 800 !important; 
 }
-.text-\[9px\], .text-\[10px\], .text-xs {
+.text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-xs {
   color: #ffffff !important;
   font-weight: 900 !important;
-  font-size: 11px !important;
+  font-size: 15px !important;
+  letter-spacing: 0.05em !important;
 }
 
 body {
-  margin: 0;
-  font-family: 'Outfit', sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  background: radial-gradient(circle at 50% 50%, #0a0b1e 0%, #030303 100%);
+  background-image: radial-gradient(circle at 50% 50%, #0c0c1a 0%, #050505 100%);
   background-attachment: fixed;
-  color: #ffffff;
+  font-size: 16px;
   overflow-x: hidden;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
 }
 
 /* Glassmorphism Ultra */
@@ -114,11 +120,12 @@ body {
   .text-gray-700 { color: #e2e8f0 !important; font-weight: 700 !important; }
   .text-gray-800 { color: #cbd5e1 !important; font-weight: 700 !important; }
   
-  /* Force all small tactical text to be bright */
-  .text-\[9px\], .text-\[10px\], .text-xs {
+  /* Force all small tactical text to be bright and legible */
+  .text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-xs {
     color: #ffffff !important;
-    letter-spacing: 0.1em !important;
-    font-weight: 800 !important;
+    font-weight: 900 !important;
+    font-size: 15px !important;
+    letter-spacing: 0.05em !important;
   }
 }
 
