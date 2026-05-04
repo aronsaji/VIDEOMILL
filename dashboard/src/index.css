@@ -5,13 +5,14 @@
 @tailwind utilities;
 
 :root {
-  --background: #030303;
-  --surface: #0a0a0a;
-  --brand-1: #00f5ff; /* Vibrant Neon Cyan */
-  --brand-2: #9d4edd; /* Vibrant Neon Purple */
+  --background: #020205;
+  --surface: #0a0a12;
+  --brand-1: #00f5ff; 
+  --brand-2: #bc13fe; /* Original Neon Purple */
   --text-main: #ffffff;
-  --text-muted: #888888;
-  --border-color: rgba(255, 255, 255, 0.05);
+  --text-muted: #888899;
+  --neon-purple: #bc13fe;
+  --neon-cyan: #00f5ff;
 }
 
 body {
@@ -35,15 +36,16 @@ p, span, div {
   font-size: 14px;
 }
 
-/* Standard Card */
+/* Standard Card with Depth */
 .card-standard {
-  @apply bg-white/[0.02] border border-white/5 rounded-[24px] p-6 transition-all duration-500 relative overflow-hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  @apply bg-white/[0.02] border border-white/5 rounded-[32px] p-8 transition-all duration-700 relative overflow-hidden backdrop-blur-xl;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .card-standard:hover {
-  @apply bg-white/[0.04];
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  @apply bg-white/[0.04] border-white/10;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  transform: translateY(-4px);
 }
 
 /* Standard Button (Base) */

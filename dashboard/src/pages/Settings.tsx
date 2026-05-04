@@ -9,8 +9,8 @@ export default function Settings() {
     <div className="space-y-12 max-w-5xl mx-auto pb-20">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-4">
-          <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
-            <SettingsIcon className="text-brand-1" size={40} />
+          <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
+            <SettingsIcon className="text-brand-1" size={32} />
             SYSTEM <span className="text-brand-1">SETTINGS</span>
           </h1>
           <p className="text-[13px] text-gray-500 font-bold uppercase tracking-widest italic opacity-70">Global System Protocol & Configuration</p>
@@ -22,7 +22,7 @@ export default function Settings() {
         <section className="card-standard">
           <div className="flex items-center gap-4 mb-8 border-b border-white/5 pb-6">
             <Globe size={20} className="text-brand-1" />
-            <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">Language Architecture</h2>
+            <h2 className="text-lg font-black text-white italic uppercase tracking-tighter">Language Architecture</h2>
           </div>
           <div className="flex gap-6">
             {[

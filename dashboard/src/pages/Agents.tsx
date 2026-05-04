@@ -81,7 +81,7 @@ export default function Agents() {
             Autonomous Command Hierarchy v2.0
           </motion.div>
           <div className="space-y-2">
-            <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
+            <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">
               AI <span className="text-brand-2">Commanders</span>
             </h1>
             <div className="flex items-center gap-4">
@@ -143,7 +143,7 @@ export default function Agents() {
                 <div className="space-y-4">
                   <div className="flex flex-col gap-1">
                     <span className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-[0.4em] italic">{agent.name}_SUBSYSTEM</span>
-                    <h3 className="text-3xl font-black text-white group-hover:text-brand-2 transition-colors italic uppercase tracking-tighter leading-none">{agent.title}</h3>
+                    <h3 className="text-2xl font-black text-white group-hover:text-brand-2 transition-colors italic uppercase tracking-tighter leading-none">{agent.title}</h3>
                   </div>
                   <p className="text-[14px] text-gray-500 leading-relaxed font-bold italic uppercase tracking-tight opacity-80">
                     "{agent.description}"
@@ -220,27 +220,27 @@ export default function Agents() {
                 <ShieldCheck size={20} />
                 Protocol Integrity Verified
               </div>
-              <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">Global <span className="text-brand-2">Status</span></h2>
+              <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">Global <span className="text-brand-2">Status</span></h2>
             </div>
             
             <div className="space-y-10">
-              {/* Progress Gauges */}
+              {/* Segment Meters */}
               {[
-                { label: 'Autonomous Load', value: '94.2%', color: 'from-brand-2/50 to-brand-2', glow: 'shadow-brand-2/30' },
-                { label: 'Neural Efficiency', value: 'MAXIMUM', color: 'from-brand-2 to-brand-2/50', glow: 'shadow-brand-2/30' },
+                { label: 'Autonomous Load', value: '92%' },
+                { label: 'Neural Efficiency', value: '100%' },
               ].map((gauge, i) => (
-                <div key={i} className="space-y-4">
-                  <div className="flex justify-between text-[11px] font-black font-mono uppercase tracking-[0.4em] italic">
-                    <span className="text-gray-600">{gauge.label}</span>
-                    <span className="text-brand-2">{gauge.value}</span>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest italic opacity-70">{gauge.label}</span>
+                    <span className="text-xs font-mono font-bold text-brand-2">{gauge.value}</span>
                   </div>
-                  <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden p-[2px] border border-white/5">
-                    <motion.div 
-                      initial={{ width: 0 }} 
-                      animate={{ width: i === 0 ? '94.2%' : '100%' }} 
-                      transition={{ duration: 1.5, delay: 0.5 }}
-                      className={`h-full bg-gradient-to-r ${gauge.color} rounded-full ${gauge.glow} shadow-xl`} 
-                    />
+                  <div className="flex gap-1">
+                    {[...Array(12)].map((_, j) => (
+                      <div 
+                        key={j} 
+                        className={`segment-meter-block ${j < (i === 0 ? 10 : 12) ? 'bg-brand-2 shadow-[0_0_8px_rgba(188,19,254,0.5)]' : 'bg-white/5'}`} 
+                      />
+                    ))}
                   </div>
                 </div>
               ))}

@@ -42,11 +42,12 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-background text-white font-sans selection:bg-neon-purple selection:text-white relative overflow-hidden">
-      {/* Dynamic Background Particles */}
+      {/* Dynamic Background Particles - REINFORCED */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-cyber-grid opacity-30" />
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-neon-purple/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neon-cyan/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute inset-0 bg-cyber-grid opacity-20" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-2/15 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand-1/15 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-background/50" />
       </div>
 
       <div className="relative z-10 flex h-screen overflow-hidden">
@@ -65,10 +66,27 @@ export default function Layout() {
                   animate={{ opacity: 1, x: 0 }} 
                   exit={{ opacity: 0, x: -20 }}
                 >
-                  <div className="flex flex-col">
-                    <Logo size="sm" />
-                    <div className="mt-2 text-[8px] font-black text-neon-cyan uppercase tracking-tighter opacity-80">
-                      v4.2 DEEP_SPACE
+                  {/* Operator Profile Section */}
+                  <div className="p-6 border-b border-white/5 mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-zinc-900 border border-brand-2/30 overflow-hidden relative group">
+                        <img 
+                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-fIaMjUpIG-hmKh9K9cou9riV2WyqOnY7VWcrRdy2sf6MJLtaTdBw2la_-cCf1gv7qRV_yIWjrLOH994sIaJOPef_VjRx4NstoNc6GxtdSBpH5LblFzyh4ns4517-p5xWRlHrpzH2-txtsrNYH0aq-hUDzS_3eV36cw0YqElns9rwV23faJTkUVEbbBAOvbSWHHuqJ4lNUhKqxsMFp63sfvyMN96xJv6klnHEXOl78wUGC0g2xizBqfkbvLhhFhre7--hnk4JWB-e" 
+                          alt="OPERATOR_01" 
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                        />
+                        <div className="absolute inset-0 bg-brand-2/10 pointer-events-none" />
+                      </div>
+                      <div>
+                        <div className="text-brand-2 font-black font-['Space_Grotesk'] text-sm uppercase tracking-tighter italic">OPERATOR_01</div>
+                        <div className="text-[10px] text-gray-500 uppercase tracking-widest font-black italic opacity-70 flex items-center gap-1">
+                          <div className="w-1 h-1 rounded-full bg-brand-1 animate-pulse" />
+                          System Online
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 px-3 py-1 bg-brand-2/10 border border-brand-2/20 text-[10px] text-brand-2 font-black font-mono rounded inline-block uppercase tracking-[0.2em] italic">
+                      AI_STRENGTH_98%
                     </div>
                   </div>
                 </motion.div>
@@ -104,15 +122,17 @@ export default function Layout() {
                   {isActive && (
                     <motion.div 
                       layoutId="nav-active"
-                      className="absolute inset-0 bg-gradient-to-r from-neon-purple/10 to-transparent rounded-2xl"
+                      className={`absolute inset-0 bg-gradient-to-r ${item.color.replace('text-', 'from-')}/15 to-transparent rounded-2xl border-l-2 ${item.color.replace('text-', 'border-')}`}
                     />
                   )}
-                  <item.icon size={20} className={`relative z-10 transition-colors ${isActive ? item.color : 'group-hover:text-white'}`} />
+                  <item.icon size={20} className={`relative z-10 transition-all duration-500 ${isActive ? item.color + ' scale-110 drop-shadow-[0_0_8px_rgba(0,245,255,0.5)]' : 'group-hover:text-white'}`} />
                   {isSidebarOpen && (
-                    <span className="relative z-10 font-bold text-xs uppercase tracking-widest">{item.label}</span>
+                    <span className={`relative z-10 font-black text-[13px] uppercase tracking-widest italic transition-colors ${isActive ? 'text-white' : 'text-gray-500'}`}>
+                      {item.label}
+                    </span>
                   )}
                   {isActive && isSidebarOpen && (
-                    <div className={`ml-auto w-1.5 h-1.5 rounded-full ${item.color.replace('text-', 'bg-')} animate-pulse`} />
+                    <div className={`ml-auto w-2 h-2 rounded-full ${item.color.replace('text-', 'bg-')} shadow-[0_0_10px_currentColor] animate-pulse`} />
                   )}
                 </Link>
               );
@@ -161,10 +181,13 @@ export default function Layout() {
             </div>
           </header>
 
-          <div className="p-10 relative z-10">
+          {/* Scanline Overlay */}
+          <div className="absolute inset-0 scanline z-[60] pointer-events-none opacity-50" />
+          
+          <main className="relative z-10 p-4 md:p-8">
             <Outlet />
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

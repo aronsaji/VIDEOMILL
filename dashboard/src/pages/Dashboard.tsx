@@ -13,7 +13,7 @@ import type { Order, OrderStatus } from '../types';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; glow: string; icon: any }> = {
   queued:           { label: 'BUFFERING',      color: 'text-gray-500',      glow: 'shadow-gray-500/10',     icon: Clock },
-  script_generation:{ label: 'COGNITION',      color: 'text-brand-1',       glow: 'shadow-brand-1/20',      icon: Cpu },
+  script_generation:{ label: 'COGNITION',      color: 'text-brand-2',       glow: 'shadow-brand-2/20',      icon: Cpu },
   rendering:        { label: 'SYNTHESIS',      color: 'text-brand-1',       glow: 'shadow-brand-1/30',      icon: Zap },
   uploading:        { label: 'UPLOADING',      color: 'text-brand-1',       glow: 'shadow-brand-1/20',      icon: Send },
   published:        { label: 'DEPLOYED',       color: 'text-brand-1',       glow: 'shadow-brand-1/30',      icon: CheckCircle2 },
@@ -40,50 +40,52 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: t('dash.network_integrity'), value: 'OPTIMAL', icon: Shield, color: 'text-brand-1', detail: 'Encrypted_Link_1' },
-          { label: t('dash.neural_activity'), value: activeProductions.length, icon: Cpu, color: 'text-brand-1', detail: t('common.active_nodes') },
-          { label: t('dash.cognition_rate'), value: '98.4%', icon: Sparkles, color: 'text-brand-1', detail: t('common.stable') },
+          { label: t('dash.neural_activity'), value: activeProductions.length, icon: Cpu, color: 'text-brand-2', detail: t('common.active_nodes') },
+          { label: t('dash.cognition_rate'), value: '98.4%', icon: Sparkles, color: 'text-brand-2', detail: t('common.stable') },
           { label: t('dash.data_velocity'), value: '4.2GB/S', icon: Database, color: 'text-brand-1', detail: 'Burst_Active' },
         ].map((stat, i) => (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            key={stat.label}
-            className="glass-ultra rounded-[32px] p-8 group relative overflow-hidden border border-white/5 hover:border-white/10 transition-all cursor-crosshair"
-          >
-            <div className={`absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-all duration-500 transform group-hover:rotate-12 ${stat.color}`}>
-              <stat.icon size={80} />
+          <div key={i} className="card-standard group hover:border-brand-2/30 transition-all duration-500 overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+              <Activity size={40} className={`text-${stat.color}`} />
             </div>
-            <div className="space-y-3 relative z-10">
-              <div className="flex items-center justify-between">
-                <p className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.4em]">{stat.label}</p>
-                <div className="w-1 h-1 bg-white/20 rounded-full" />
+            <div className="space-y-4 relative z-10">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] italic">{stat.label}</span>
+                <div className={`w-2 h-2 rounded-full bg-${stat.color} animate-pulse shadow-[0_0_8px_${stat.color}]`} />
               </div>
-              <h3 className={`text-4xl font-black italic uppercase tracking-tighter ${stat.color} leading-none`}>
-                {stat.value}
-              </h3>
-              <div className="flex items-center gap-2 pt-1">
-                 <div className={`w-1 h-1 rounded-full bg-current ${stat.color} animate-pulse`} />
-                 <span className="text-[11px] font-mono text-gray-600 uppercase tracking-widest">{stat.detail}</span>
+              <div className="text-3xl font-black text-white italic tracking-tighter uppercase">{stat.value}</div>
+              <div className="flex gap-1">
+                {[...Array(12)].map((_, j) => (
+                  <div 
+                    key={j} 
+                    className={`segment-meter-block ${j < stat.val ? `bg-${stat.color} shadow-[0_0_8px_rgba(var(--${stat.color}-rgb),0.5)]` : 'bg-white/5'}`} 
+                  />
+                ))}
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Operations Hub: Live Production Line */}
         <div className="lg:col-span-8 space-y-8">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter flex items-center gap-4">
-                <Radio className="text-brand-1 animate-pulse" size={28} />
-                Operations <span className="text-brand-1">Hub</span>
-              </h2>
-              <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-brand-2 shadow-[0_0_8px_#bc13fe]"></div>
+                <span className="font-mono text-[10px] font-black text-brand-2 uppercase tracking-[0.3em] italic">Autonomous Neural Force Active</span>
+              </div>
+              <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">
+                COMMAND <span className="text-brand-2">CENTER</span>
+              </h1>
+              <p className="text-[13px] text-gray-500 font-bold uppercase tracking-widest italic opacity-70">The Non-Stop Viral Engine Control Interface</p>
+            </div>
+            
+            <div className="flex items-center gap-4">
                  <div className="h-[1px] w-12 bg-brand-1/50" />
                  <span className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{t('dash.live_stream')}</span>
-              </div>
             </div>
             <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 backdrop-blur-md">
                <Layers size={14} className="text-brand-1" />
@@ -152,16 +154,16 @@ export default function Dashboard() {
                     <div className="space-y-2 pt-4">
                       <div className="flex justify-between text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.2em]">
                         <span className="flex items-center gap-2">
-                           <div className="w-1 h-1 bg-brand-1 rounded-full animate-pulse" />
+                           <div className="w-1.5 h-1.5 bg-brand-2 rounded-full animate-pulse" />
                            Synthesis Process
                         </span>
-                        <span className="text-brand-1">{order.progress || 10}% Complete</span>
+                        <span className="text-brand-2">{order.progress || 10}% Complete</span>
                       </div>
                       <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/5">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${order.progress || 10}%` }}
-                          className="h-full bg-brand-1 shadow-[0_0_15px_rgba(0,245,255,0.4)]" 
+                          className="h-full bg-gradient-to-r from-brand-2 to-brand-1 shadow-[0_0_15px_rgba(188,19,254,0.4)]" 
                         />
                       </div>
                     </div>

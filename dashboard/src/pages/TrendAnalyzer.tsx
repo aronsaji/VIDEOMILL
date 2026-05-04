@@ -78,7 +78,7 @@ export default function TrendAnalyzer() {
             Global Intelligence Stream v4.2
           </motion.div>
           <div className="space-y-2">
-            <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
+            <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">
               Trend <span className="text-brand-1">Radar</span>
             </h1>
             <div className="flex items-center gap-4">
@@ -203,7 +203,7 @@ export default function TrendAnalyzer() {
                 </div>
 
                 <div className="space-y-5 flex-1">
-                  <h3 className="text-3xl font-black text-white group-hover:text-brand-1 transition-colors leading-[1.05] italic uppercase tracking-tighter">
+                  <h3 className="text-2xl font-black text-white group-hover:text-brand-1 transition-colors leading-[1.05] italic uppercase tracking-tighter">
                     {trend.title}
                   </h3>
                   <p className="text-[14px] text-gray-500 line-clamp-3 leading-relaxed font-bold italic uppercase tracking-tight opacity-80">
@@ -271,7 +271,7 @@ export default function TrendAnalyzer() {
                     <Terminal size={18} />
                     Extraction Protocol Initialized
                   </div>
-                  <h2 className="text-5xl lg:text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
+                  <h2 className="text-4xl lg:text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
                     Trigger <span className="text-brand-1">Synthesis</span>
                   </h2>
                 </div>

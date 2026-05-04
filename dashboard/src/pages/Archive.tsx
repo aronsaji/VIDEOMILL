@@ -34,19 +34,15 @@ export default function Archive() {
     <div className="space-y-10 max-w-7xl mx-auto pb-20">
       {/* Header & Controls */}
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-        <div className="space-y-3">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-brand-1 font-mono text-[13px] uppercase tracking-[0.4em]"
-          >
-            <Database size={14} />
-            Data Repository
-          </motion.div>
-          <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-brand-1 shadow-[0_0_8px_#00f5ff]"></div>
+            <span className="font-mono text-[10px] font-black text-brand-1 uppercase tracking-[0.3em] italic">Data Integrity Active</span>
+          </div>
+          <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">
             Media <span className="text-brand-1">Archive</span>
           </h1>
-          <p className="text-gray-500 max-w-md font-medium">Historical record of all neural production cycles and distribution logs.</p>
+          <p className="text-[13px] text-gray-500 font-bold uppercase tracking-widest italic opacity-70">Historical record of neural production cycles & distribution logs.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-4">
@@ -154,10 +150,10 @@ export default function Archive() {
                     </td>
                     <td className="px-10 py-8 text-right">
                        <div className="flex flex-col items-end">
-                          <span className="text-[13px] font-black text-gray-600 font-mono group-hover:text-white transition-colors">
+                          <span className="text-[12px] font-black text-gray-600 font-mono group-hover:text-white transition-colors">
                             {order.created_at ? new Date(order.created_at).toLocaleDateString() : '---'}
                           </span>
-                          <span className="text-[11px] font-mono text-gray-700 uppercase tracking-widest">
+                          <span className="text-[10px] font-mono text-gray-700 uppercase tracking-widest">
                             {order.created_at ? new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'UTC_NULL'}
                           </span>
                        </div>
