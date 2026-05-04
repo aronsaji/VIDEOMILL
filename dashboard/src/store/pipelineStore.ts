@@ -3,9 +3,11 @@ import { supabase } from '../lib/supabase';
 import type { Order, OrderStatus } from '../types';
 
 interface PipelineState {
-  orders: Order[];
+  orders: any[];
   trends: any[];
-  loading: boolean;
+  isInitialLoaded: boolean;
+  isLoading: boolean;
+  error: string | null;
   fetchOrders: () => Promise<void>;
   fetchTrends: () => Promise<void>;
   fetchInitialData: () => Promise<void>;
@@ -18,15 +20,23 @@ interface PipelineState {
 export const usePipelineStore = create<PipelineState>((set, get) => ({
   orders: [],
   trends: [],
-  loading: false,
+  isInitialLoaded: false,
+  isLoading: false,
+  error: null,
 
   fetchInitialData: async () => {
-    set({ loading: true });
-    await Promise.all([
-      get().fetchOrders(),
-      get().fetchTrends()
-    ]);
-    set({ loading: false });
+    set({ isLoading: true });
+    try {
+      await Promise.all([
+        get().fetchOrders(),
+        get().fetchTrends()
+      ]);
+      set({ isInitialLoaded: true });
+    } catch (err) {
+      set({ error: 'Kunne ikke hente initial data' });
+    } finally {
+      set({ isLoading: false });
+    }
   },
 
   fetchOrders: async () => {

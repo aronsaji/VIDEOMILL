@@ -70,13 +70,28 @@ function getStageStatus(order: Order, stageIndex: number): 'done' | 'active' | '
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { orders = [], trends = [], addOrder, fetchOrders } = usePipelineStore();
-  const [orderingId, setOrderingId] = useState<string | null>(null);
-  const [trendLanguage, setTrendLanguage] = useState('Auto');
+  const { 
+    orders = [], 
+    trends = [], 
+    fetchInitialData, 
+    fetchOrders,
+    isInitialLoaded 
+  } = usePipelineStore();
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    // Hent ALT med en gang dashboardet lastes
+    fetchInitialData();
+    
+    // Sett opp et intervall som sjekker for nye ordrer hvert 10. sekund
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [fetchInitialData, fetchOrders]);
+
+  const [orderingId, setOrderingId] = useState<string | null>(null);
+  const [trendLanguage, setTrendLanguage] = useState('Auto');
 
   const handleQuickOrder = async (trend: any) => {
     if (orderingId) return;
@@ -94,13 +109,7 @@ export default function Dashboard() {
       });
  
       if (success) {
-        addOrder({
-          title: trend.title,
-          topic: (trend.tags && trend.tags[0]) || 'Trend',
-          platform_destinations: ['tiktok', 'youtube', 'snapchat'],
-          language: finalLanguage,
-          target_audience: trend.country || 'Global',
-        });
+        // Optimistic update handled by local state or refetch in production
         fetchOrders();
       } else {
         alert('Kunne ikke starte n8n-pipelinen. Sjekk om n8n kjører!');
@@ -115,8 +124,11 @@ export default function Dashboard() {
   // Sikre data
   const safeOrders = Array.isArray(orders) ? orders : [];
   const safeTrends = Array.isArray(trends) ? trends : [];
-
-  const activeOrder = safeOrders.find(o => ['script_generation', 'rendering', 'uploading'].includes(o.status)) || safeOrders[0];
+  
+  // Finn den aktive ordren (den som kjører, eller den nyeste)
+  const activeOrder = safeOrders.find(o => 
+    ['script_generation', 'rendering', 'uploading', 'queued'].includes(o.status)
+  ) || safeOrders[0] || null;
   const recentOrders = safeOrders.slice(0, 8);
 
   const stats = {
