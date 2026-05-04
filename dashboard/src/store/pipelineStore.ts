@@ -12,6 +12,7 @@ interface PipelineState {
   subscribeToChanges: () => () => void;
 }
 
+// Skuddsikker store som fungerer på alle Zustand-versjoner
 export const usePipelineStore = create<PipelineState>((set, get) => ({
   orders: [],
   loading: false,
@@ -23,25 +24,29 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(50); // Henter de 50 siste for å være rask
+        .limit(100);
 
-      if (error) throw error;
-      set({ orders: data || [] });
+      if (error) {
+        console.error('Supabase error:', error);
+        set({ orders: [], loading: false });
+        return;
+      }
+      
+      // Sikrer at data alltid er en array
+      set({ orders: data || [], loading: false });
     } catch (err) {
-      console.error('Feil ved henting av ordre:', err);
-    } finally {
-      set({ loading: false });
+      console.error('Kritisk feil ved henting:', err);
+      set({ orders: [], loading: false });
     }
   },
 
-  addOrder: (order) => {
-    // Vi henter fra DB i stedet for å stole på lokal state for å unngå "ghosts"
+  addOrder: () => {
     get().fetchOrders();
   },
 
   updateOrder: (videoId, updates) => {
     set((state) => ({
-      orders: state.orders.map((o) => 
+      orders: (state.orders || []).map((o) => 
         o.video_id === videoId ? { ...o, ...updates } : o
       ),
     }));
@@ -57,8 +62,6 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
         topic: order.topic,
         language: order.language || 'Norsk'
       });
-      
-      // Oppdater status lokalt med en gang for feedback
       get().updateOrder(order.video_id, { status: 'queued' });
     } catch (err) {
       console.error('Retry feilet:', err);
@@ -66,20 +69,15 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   },
 
   subscribeToChanges: () => {
-    console.log('📡 Starter real-time overvåking av ordrer...');
-    
     const channel = supabase
-      .channel('public:orders')
+      .channel('orders-realtime')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'orders' }, 
-        (payload) => {
-          console.log('🔄 DB Endring oppdaget:', payload);
-          get().fetchOrders(); // Hent alt på nytt for å være 100% sikker
+        () => {
+          get().fetchOrders();
         }
       )
-      .subscribe((status) => {
-        console.log('🔌 Supabase status:', status);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
