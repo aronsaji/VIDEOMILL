@@ -1,0 +1,2 @@
+Dersom du ser denne filen i terminalen din, så skriver jeg til riktig mappe!
+Mappen er: C:\Users\saji_\Downloads\VideoMill\NY_VIDEOMILL_V2\videomill\dashboard\src\pages\
