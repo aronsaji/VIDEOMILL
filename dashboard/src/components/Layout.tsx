@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity, LayoutDashboard, Settings, Video, Film, Library, List, Bot, LogIn } from 'lucide-react';
+import { Activity, LayoutDashboard, Settings, Video, Film, Library, List, Bot, LogIn, Sparkles, History } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 
@@ -34,9 +34,9 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
         <nav className="flex flex-col gap-4 flex-1 mt-4">
           <SidebarIcon icon={LayoutDashboard} to="/" active={location.pathname === '/'} />
+          <SidebarIcon icon={Sparkles} to="/factory" active={location.pathname === '/factory'} />
           <SidebarIcon icon={Film} to="/auto-series" active={location.pathname === '/auto-series'} />
-          <SidebarIcon icon={Library} to="/library" active={location.pathname === '/library'} />
-          <SidebarIcon icon={List} to="/orders" active={location.pathname === '/orders'} />
+          <SidebarIcon icon={History} to="/orders" active={location.pathname === '/orders'} />
           <SidebarIcon icon={Activity} to="/trends" active={location.pathname === '/trends'} />
           <SidebarIcon icon={Bot} to="/agents" active={location.pathname === '/agents'} />
         </nav>
@@ -48,15 +48,13 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col relative">
-        {/* Background Grid Effect */}
-        <div 
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
-            backgroundSize: '40px 40px'
-          }}
-        />
+      <div className="flex-1 flex flex-col relative bg-[#050505]">
+        {/* Background Decorative Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-neon-cyan/5 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neon-purple/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute inset-0 bg-grid-pattern opacity-[0.05]" />
+        </div>
 
         {/* Top Header */}
         <motion.header

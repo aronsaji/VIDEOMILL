@@ -1,22 +1,20 @@
 import { usePipelineStore } from '../store/pipelineStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Play, ArrowUpRight, Flame, CheckCircle2, Clock, AlertTriangle, Loader, RefreshCw, Smartphone, Monitor, Send, Heart, Video } from 'lucide-react';
+import { Activity, Play, ArrowUpRight, Flame, CheckCircle2, Clock, AlertTriangle, Loader, RefreshCw, Smartphone, Monitor, Send, Heart, Video, Sparkles, Wand2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Order, OrderStatus } from '../types';
 import React, { useState, useEffect } from 'react';
-import { triggerProduction } from '../lib/api';
-
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  queued:           { label: 'Queued',           color: 'text-gray-400',      bg: 'bg-gray-400/10 border-gray-400/20',      icon: Clock },
-  script_generation:{ label: 'Scripting',         color: 'text-blue-400',      bg: 'bg-blue-400/10 border-blue-400/20',      icon: Loader },
-  rendering:        { label: 'Rendering',          color: 'text-neon-cyan',     bg: 'bg-neon-cyan/10 border-neon-cyan/20',    icon: Loader },
-  uploading:        { label: 'Uploading',          color: 'text-purple-400',    bg: 'bg-purple-400/10 border-purple-400/20',  icon: Loader },
-  published:        { label: 'Published',          color: 'text-green-400',     bg: 'bg-green-400/10 border-green-400/20',    icon: CheckCircle2 },
-  analyzing:        { label: 'Analyzing',          color: 'text-neon-amber',    bg: 'bg-neon-amber/10 border-neon-amber/20',  icon: Loader },
-  optimizing:       { label: 'Optimizing',         color: 'text-pink-400',      bg: 'bg-pink-400/10 border-pink-400/20',      icon: Loader },
-  failed:           { label: 'Failed',             color: 'text-red-400',       bg: 'bg-red-400/10 border-red-400/20',        icon: AlertTriangle },
-  needs_attention:  { label: 'Needs Attention',    color: 'text-neon-amber',    bg: 'bg-neon-amber/10 border-neon-amber/20',  icon: AlertTriangle },
+  queued:           { label: 'Køet',             color: 'text-gray-400',      bg: 'bg-gray-400/10 border-gray-400/20',      icon: Clock },
+  script_generation:{ label: 'Skriver Manus',     color: 'text-blue-400',      bg: 'bg-blue-400/10 border-blue-400/20',      icon: Loader },
+  rendering:        { label: 'Rendrer Video',     color: 'text-neon-cyan',     bg: 'bg-neon-cyan/10 border-neon-cyan/20',    icon: Loader },
+  uploading:        { label: 'Laster opp',       color: 'text-purple-400',    bg: 'bg-purple-400/10 border-purple-400/20',  icon: Loader },
+  published:        { label: 'Publisert',        color: 'text-green-400',     bg: 'bg-green-400/10 border-green-400/20',    icon: CheckCircle2 },
+  analyzing:        { label: 'Analyserer',       color: 'text-neon-amber',    bg: 'bg-neon-amber/10 border-neon-amber/20',  icon: Loader },
+  optimizing:       { label: 'Optimaliserer',    color: 'text-pink-400',      bg: 'bg-pink-400/10 border-pink-400/20',      icon: Loader },
+  failed:           { label: 'Feilet',           color: 'text-red-400',       bg: 'bg-red-400/10 border-red-400/20',        icon: AlertTriangle },
+  needs_attention:  { label: 'Trenger hjelp',    color: 'text-neon-amber',    bg: 'bg-neon-amber/10 border-neon-amber/20',  icon: AlertTriangle },
 };
 
 function StatusBadge({ status }: { status: OrderStatus }) {
@@ -28,44 +26,11 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   };
   const Icon = cfg.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 font-mono text-xs px-2 py-1 rounded border ${cfg.color} ${cfg.bg}`}>
-      <Icon size={11} className={!['queued', 'published', 'failed', 'needs_attention'].includes(status) ? 'animate-spin' : ''} />
+    <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] px-2 py-0.5 rounded border ${cfg.color} ${cfg.bg}`}>
+      <Icon size={10} className={!['queued', 'published', 'failed', 'needs_attention'].includes(status) ? 'animate-spin' : ''} />
       {cfg.label}
     </span>
   );
-}
-
-function PipelineStage({ step, label, status, detail }: { step: number; label: string; status: 'done' | 'active' | 'pending'; detail?: string }) {
-  return (
-    <div className={`flex items-center gap-4 p-3 rounded-lg border transition-all duration-500 ${
-      status === 'active' ? 'border-neon-cyan/40 bg-neon-cyan/5 shadow-[0_0_20px_rgba(0,245,255,0.05)]' :
-      status === 'done' ? 'border-green-500/30 bg-green-500/5' :
-      'border-border bg-black/20'
-    }`}>
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold flex-shrink-0 ${
-        status === 'active' ? 'bg-neon-cyan text-background' :
-        status === 'done' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-        'bg-white/5 text-gray-600 border border-border'
-      }`}>
-        {status === 'active' ? <span className="animate-pulse">{step}</span> : status === 'done' ? '✓' : step}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm font-mono font-medium ${
-          status === 'active' ? 'text-neon-cyan' : status === 'done' ? 'text-green-400' : 'text-gray-600'
-        }`}>{label}</p>
-        {detail && <p className="text-xs text-gray-500 mt-0.5 truncate">{detail}</p>}
-      </div>
-      {status === 'active' && <div className="w-2 h-2 rounded-full bg-neon-cyan animate-ping flex-shrink-0" />}
-    </div>
-  );
-}
-
-function getStageStatus(order: Order, stageIndex: number): 'done' | 'active' | 'pending' {
-  const stages: OrderStatus[] = ['queued', 'script_generation', 'rendering', 'uploading', 'published'];
-  const currentIndex = stages.indexOf(order.status);
-  if (stageIndex < currentIndex) return 'done';
-  if (stageIndex === currentIndex) return 'active';
-  return 'pending';
 }
 
 export default function Dashboard() {
@@ -75,312 +40,163 @@ export default function Dashboard() {
     trends = [], 
     fetchInitialData, 
     fetchOrders,
-    isInitialLoaded,
     error: storeError 
   } = usePipelineStore();
 
   useEffect(() => {
-    // Hent ALT med en gang dashboardet lastes
     fetchInitialData();
-    
-    // Sett opp et intervall som sjekker for nye ordrer hvert 10. sekund
-    const interval = setInterval(() => {
-      fetchOrders();
-    }, 10000);
-
+    const interval = setInterval(() => fetchOrders(), 5000);
     return () => clearInterval(interval);
   }, [fetchInitialData, fetchOrders]);
 
-  const [orderingId, setOrderingId] = useState<string | null>(null);
-  const [trendLanguage, setTrendLanguage] = useState('Auto');
+  const activeOrders = Array.isArray(orders) 
+    ? orders.filter(o => ['queued', 'script_generation', 'rendering', 'uploading'].includes(o.status))
+    : [];
 
-  const handleQuickOrder = async (trend: any) => {
-    if (orderingId) return;
-    setOrderingId(trend.id);
-    const finalLanguage = trendLanguage === 'Auto' ? (trend.language || 'English') : trendLanguage;
-
-    try {
-      const success = await triggerProduction({
-        action: 'FORCE_START',
-        trend_id: trend.id,
-        title: trend.title,
-        topic: (trend.tags && trend.tags[0]) || 'Trend',
-        language: finalLanguage,
-        platforms: ['tiktok', 'youtube', 'snapchat']
-      });
- 
-      if (success) {
-        // Optimistic update handled by local state or refetch in production
-        fetchOrders();
-      } else {
-        alert('Kunne ikke starte n8n-pipelinen. Sjekk om n8n kjører!');
-      }
-    } catch (err) {
-      console.error('Fetch error:', err);
-    } finally {
-      setOrderingId(null);
-    }
+  const handleProduceTrend = (trend: any) => {
+    navigate(`/factory?topic=${encodeURIComponent(trend.title || trend.topic)}`);
   };
-
-  // Sikre data
-  const safeOrders = Array.isArray(orders) ? orders : [];
-  const safeTrends = Array.isArray(trends) ? trends : [];
-  
-  // Finn den aktive ordren (den som kjører, eller den nyeste)
-  const activeOrder = safeOrders.find(o => 
-    ['script_generation', 'rendering', 'uploading', 'queued'].includes(o.status)
-  ) || safeOrders[0] || null;
-  const recentOrders = safeOrders.slice(0, 8);
-
-  const stats = {
-    queued: safeOrders.filter(o => o && o.status === 'queued').length,
-    processing: safeOrders.filter(o => o && ['script_generation', 'rendering', 'uploading'].includes(o.status)).length,
-    published: safeOrders.filter(o => o && o.status === 'published').length,
-    failed: safeOrders.filter(o => o && (o.status === 'failed' || o.status === 'needs_attention')).length,
-  };
-
-  if (storeError) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 p-10 bg-red-500/5 border border-red-500/20 rounded-3xl">
-        <AlertTriangle size={50} className="text-red-500" />
-        <div className="text-center space-y-2">
-          <h2 className="text-xl font-bold text-white">Tilkoblingsfeil</h2>
-          <p className="text-gray-400 font-mono text-sm max-w-md">{storeError}</p>
-        </div>
-        <button 
-          onClick={() => fetchInitialData()}
-          className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all border border-white/10"
-        >
-          Prøv på nytt
-        </button>
-      </div>
-    );
-  }
-
-  if (!isInitialLoaded && safeOrders.length === 0 && safeTrends.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <Loader size={40} className="text-neon-cyan animate-spin" />
-        <p className="text-gray-400 font-mono text-sm animate-pulse tracking-widest uppercase">Initialiserer VideoMill Production Line...</p>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">🌍 VideoMill Factory</h1>
-        <p className="text-sm text-gray-500 mt-1">Global viral content engine — live production overview</p>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'In Queue', value: stats.queued, color: 'text-gray-400', border: 'border-gray-400/20' },
-          { label: 'Processing', value: stats.processing, color: 'text-neon-cyan', border: 'border-neon-cyan/20' },
-          { label: 'Published', value: stats.published, color: 'text-green-400', border: 'border-green-500/20' },
-          { label: 'Failed', value: stats.failed, color: 'text-red-400', border: 'border-red-500/20' },
-        ].map(stat => (
-          <div key={stat.label} className={`bg-surface/50 border ${stat.border} rounded-xl p-4 backdrop-blur-sm`}>
-            <p className="text-xs font-mono text-gray-500 uppercase">{stat.label}</p>
-            <p className={`text-3xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 space-y-6">
-          <div className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-neon-cyan via-blue-500 to-purple-600" />
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="font-mono text-sm text-gray-400 uppercase flex items-center gap-2">
-                  <Activity size={15} className="text-neon-cyan" />
-                  Live Production Line
-                </h2>
-                {activeOrder && (
-                  <div className="mt-2">
-                    <h3 className="text-lg font-bold text-white">{activeOrder.title}</h3>
-                    <p className="text-xs text-neon-cyan font-mono mt-0.5">{activeOrder.video_id} // {(activeOrder.platform_destinations || []).join(' + ').toUpperCase()}</p>
-                  </div>
-                )}
-              </div>
-              <button 
-                onClick={() => fetchInitialData()}
-                className="flex items-center gap-2 px-3 py-1.5 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded-lg font-mono text-xs uppercase transition-colors"
-              >
-                <RefreshCw size={12} />
-                Refresh
-              </button>
-            </div>
-
-            {activeOrder ? (
-              <div className="space-y-2">
-                <PipelineStage step={1} label="TREND INGESTION" status={getStageStatus(activeOrder, 0)} detail="RSS + Google Trends" />
-                <PipelineStage step={2} label="AI SCRIPTING" status={getStageStatus(activeOrder, 1)} detail={activeOrder.status === 'script_generation' ? activeOrder.sub_status || '' : ''} />
-                <PipelineStage step={3} label="VIDEO RENDERING" status={getStageStatus(activeOrder, 2)} detail={activeOrder.status === 'rendering' ? activeOrder.sub_status || '' : 'Edge-TTS + FFmpeg'} />
-                <PipelineStage step={4} label="DISTRIBUTION" status={getStageStatus(activeOrder, 3)} detail="Upload to platforms" />
-              </div>
-            ) : (
-              <div className="text-center py-12 text-gray-600 font-mono text-sm">
-                WAITING FOR NEW TREND SIGNAL...
-              </div>
-            )}
-
-            {activeOrder && (
-              <div className="mt-4 space-y-1.5">
-                <div className="flex justify-between text-xs font-mono text-gray-500">
-                  <span>Progress</span>
-                  <span className="text-neon-cyan">{activeOrder.progress || 0}%</span>
-                </div>
-                <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-neon-cyan to-blue-500 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${activeOrder.progress || 0}%` }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm">
-            <h2 className="font-mono text-sm text-gray-400 uppercase mb-4">Production Queue</h2>
-            <div className="space-y-1">
-              <AnimatePresence>
-                {recentOrders.map((order, i) => {
-                  if (!order) return null;
-                  return (
-                    <motion.div
-                      key={order.id || order.video_id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="flex items-center justify-between py-3 px-2 border-b border-border/50 hover:bg-white/3 rounded transition-colors cursor-pointer group"
-                    >
-                      <div className="min-w-0 flex-1 mr-4">
-                        <p className="text-sm text-gray-200 font-medium truncate group-hover:text-white transition-colors">{order.title}</p>
-                        <p className="text-xs font-mono text-gray-600 mt-0.5">{order.video_id} · {order.created_at ? new Date(order.created_at).toLocaleTimeString('nb-NO') : 'Just now'}</p>
-                      </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <StatusBadge status={order.status} />
-                        {order.status === 'failed' && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              usePipelineStore.getState().retryOrder(order);
-                            }}
-                            className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg transition-colors flex items-center gap-1 text-[10px] uppercase font-bold"
-                          >
-                            <RefreshCw size={10} />
-                            Retry
-                          </button>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-              {recentOrders.length === 0 && <p className="text-center py-10 text-gray-600 font-mono text-xs">No videos in queue</p>}
-            </div>
-          </div>
+    <div className="space-y-10 pb-20">
+      {/* Top Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-white tracking-tight">Command Center</h1>
+          <p className="text-gray-500 mt-1">Full kontroll over VideoMill produksjonslinje.</p>
         </div>
+        <button 
+          onClick={() => navigate('/factory')}
+          className="flex items-center gap-3 px-8 py-4 bg-neon-cyan text-black rounded-2xl font-black shadow-[0_0_30px_rgba(0,245,255,0.2)] hover:scale-105 transition-all group"
+        >
+          <Wand2 size={20} className="group-hover:rotate-12 transition-transform" />
+          START NY PRODUKSJON
+        </button>
+      </div>
 
-        <div className="bg-surface/50 border border-border rounded-xl p-6 backdrop-blur-sm flex flex-col">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-mono text-sm text-gray-400 uppercase flex items-center gap-2">
-              <Flame size={15} className="text-neon-amber" />
-              Top Trend Radar
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column: Trend Radar */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Activity className="text-neon-cyan" />
+              Trend Radar
             </h2>
-            <span className="text-xs font-mono bg-neon-amber/10 text-neon-amber border border-neon-amber/20 px-2 py-0.5 rounded">
-              LIVE
-            </span>
+            <div className="px-3 py-1 bg-neon-cyan/10 border border-neon-cyan/20 rounded-full text-[10px] font-mono text-neon-cyan">
+              LIVE UPDATES
+            </div>
           </div>
 
-          <div className="mb-6 grid grid-cols-3 gap-2">
-            {[
-              { id: 'Auto', label: 'Auto', emoji: '🌍' },
-              { id: 'Norsk', label: 'Norsk', emoji: '🇳🇴' },
-              { id: 'English', label: 'English', emoji: '🇬🇧' },
-              { id: 'Tamil', label: 'Tamil', emoji: '🇮🇳' },
-              { id: 'Hindi', label: 'Hindi', emoji: '🇮🇳' },
-              { id: 'Español', label: 'Español', emoji: '🇪🇸' },
-            ].map(lang => (
-              <button
-                key={lang.id}
-                onClick={() => setTrendLanguage(lang.id)}
-                className={`flex flex-col items-center justify-center py-2 rounded-lg border transition-all duration-300 ${
-                  trendLanguage === lang.id 
-                    ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                    : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20 hover:text-gray-300'
-                }`}
+          <div className="grid grid-cols-1 gap-4">
+            {trends.slice(0, 6).map((trend, i) => (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                key={trend.id || i}
+                className="group bg-surface/40 border border-white/5 rounded-2xl p-5 hover:border-neon-cyan/30 transition-all cursor-pointer relative overflow-hidden"
+                onClick={() => handleProduceTrend(trend)}
               >
-                <span className="text-base mb-0.5">{lang.emoji}</span>
-                <span className="text-[10px] font-bold uppercase tracking-tighter">{lang.label}</span>
-              </button>
+                <div className="flex items-start justify-between relative z-10">
+                  <div className="space-y-2 flex-1 pr-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-neon-cyan bg-neon-cyan/5 px-2 py-0.5 rounded border border-neon-cyan/10">
+                        {trend.category || 'TRENDING'}
+                      </span>
+                      {trend.viral_score > 80 && (
+                        <span className="flex items-center gap-1 text-[10px] font-mono text-neon-amber">
+                          <Flame size={12} fill="currentColor" />
+                          VIRAL POTENTIAL
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-bold text-white group-hover:text-neon-cyan transition-colors line-clamp-1">
+                      {trend.title || trend.topic}
+                    </h3>
+                  </div>
+                  <button className="p-3 bg-neon-cyan/10 text-neon-cyan rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-neon-cyan hover:text-black">
+                    <Wand2 size={18} />
+                  </button>
+                </div>
+              </motion.div>
             ))}
           </div>
+        </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-            <AnimatePresence>
-              {safeTrends.filter(t => {
-                if (trendLanguage === 'Auto') return true;
-                const dbLangField = t.language || '';
-                const dbAudienceField = t.target_audience || '';
-                const extractedLang = dbLangField || dbAudienceField.split(' - ')[1] || '';
-                return extractedLang.trim().toLowerCase() === trendLanguage.trim().toLowerCase();
-              })
-                .sort((a, b) => (b.viral_score || 0) - (a.viral_score || 0))
-                .slice(0, 10)
-                .map((trend, i) => (
-                <motion.div
-                  key={trend.id}
-                  onClick={() => handleQuickOrder(trend)}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                  className="p-3 border border-border rounded-lg bg-black/20 hover:border-neon-amber/40 transition-all group cursor-pointer relative"
+        {/* Right Column: Live Production */}
+        <div className="lg:col-span-5 space-y-6">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Video className="text-neon-amber" />
+            Live Fabrikk-linje
+          </h2>
+
+          <div className="bg-surface/30 border border-white/5 rounded-3xl p-6 min-h-[400px] backdrop-blur-md relative overflow-hidden">
+            <AnimatePresence mode="popLayout">
+              {activeOrders.length === 0 ? (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center h-full py-20 text-center space-y-4"
                 >
-                  <div className="flex justify-between items-start mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-gray-600">#{i + 1}</span>
-                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded uppercase flex items-center gap-1 ${
-                        trend.platform === 'tiktok' ? 'bg-pink-500/15 text-pink-400' :
-                        trend.platform === 'youtube' ? 'bg-red-500/15 text-red-400' :
-                        trend.platform === 'instagram' ? 'bg-purple-500/15 text-purple-400' :
-                        trend.platform === 'snapchat' ? 'bg-yellow-400/15 text-yellow-400' :
-                        'bg-blue-500/15 text-blue-400'
-                      }`}>
-                        {trend.platform}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-0.5 text-neon-amber font-mono text-xs bg-neon-amber/10 px-1.5 rounded">
-                      <ArrowUpRight size={12} />
-                      {trend.viral_score || 0}%
-                    </div>
+                  <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-gray-700">
+                    <Clock size={32} />
                   </div>
-                  <p className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors line-clamp-1">{trend.title}</p>
-                  
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex flex-wrap gap-1">
-                      {(trend.tags || []).slice(0, 2).map(tag => (
-                        <span key={tag} className="text-[10px] font-mono bg-white/5 text-gray-500 px-1.5 py-0.5 rounded border border-white/5">#{tag}</span>
-                      ))}
-                    </div>
-                    <button 
-                      disabled={orderingId === trend.id}
-                      className="flex items-center gap-1.5 text-[10px] font-bold text-neon-cyan bg-neon-cyan/10 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100"
-                    >
-                      {orderingId === trend.id ? 'Sending...' : '1-Click Order'}
-                    </button>
+                  <div className="space-y-1">
+                    <p className="text-gray-400 font-bold">Venter på nye ordre...</p>
+                    <p className="text-xs text-gray-600">Start fabrikken for å se magien skje.</p>
                   </div>
                 </motion.div>
-              ))}
+              ) : (
+                <div className="space-y-4">
+                  {activeOrders.map((order) => (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      key={order.id}
+                      className="bg-black/40 border border-white/5 rounded-2xl p-4 space-y-3"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <p className="text-sm font-bold text-white line-clamp-1">{order.title || order.topic}</p>
+                          <StatusBadge status={order.status} />
+                        </div>
+                        <span className="text-[10px] font-mono text-gray-600">
+                          {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      
+                      <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ 
+                            width: order.status === 'rendering' ? '60%' : 
+                                   order.status === 'uploading' ? '90%' : '20%' 
+                          }}
+                          className="h-full bg-neon-cyan shadow-[0_0_10px_#00f5ff]"
+                        />
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </AnimatePresence>
-            {safeTrends.length === 0 && <p className="text-center py-10 text-gray-600 font-mono text-xs">No trends available</p>}
+            
+            {/* Background Decoration */}
+            <div className="absolute bottom-0 right-0 p-4 opacity-10 pointer-events-none">
+              <RefreshCw size={120} className="animate-spin-slow" />
+            </div>
           </div>
         </div>
       </div>
+
+      {storeError && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-red-500/20 border border-red-500/50 backdrop-blur-xl px-6 py-3 rounded-2xl flex items-center gap-3 text-red-200 shadow-2xl z-50">
+          <AlertTriangle size={18} />
+          <span className="text-sm font-bold">Tilkoblingsfeil: Kunne ikke hente live-data</span>
+        </div>
+      )}
     </div>
   );
 }

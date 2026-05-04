@@ -14,7 +14,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   failed:           { label: 'Feilet',          color: 'text-red-400',       bg: 'bg-red-400/10' },
 };
 
-export default function Orders() {
+export default function Archive() {
   const { orders = [], fetchOrders } = usePipelineStore();
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');

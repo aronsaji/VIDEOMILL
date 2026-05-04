@@ -1,39 +1,56 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function Logo({ size = 'md', hideText = false }: { size?: 'sm' | 'md' | 'lg', hideText?: boolean }) {
-  const sizeClasses = {
-    sm: 'w-6 h-6',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12'
+export default function Logo({ size = 'md', hideText = false }: { size?: 'sm' | 'md' | 'lg'; hideText?: boolean }) {
+  const sizes = {
+    sm: { box: 'w-8 h-8', text: 'text-lg', icon: 16 },
+    md: { box: 'w-10 h-10', text: 'text-2xl', icon: 20 },
+    lg: { box: 'w-16 h-16', text: 'text-4xl', icon: 32 },
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <div className={`relative ${sizeClasses[size]}`}>
-        {/* Animated outer ring */}
+    <div className="flex items-center gap-3 group select-none">
+      <div className={`relative ${sizes[size].box}`}>
+        {/* Outer rotating ring */}
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0 rounded-xl border-2 border-neon-cyan/40 border-t-transparent border-b-neon-cyan"
+          className="absolute inset-0 border-2 border-dashed border-neon-cyan/30 rounded-lg"
         />
         
-        {/* Pulsing inner play button */}
+        {/* Inner pulsing core */}
         <motion.div
-          animate={{ scale: [1, 1.05, 1], boxShadow: ["0 0 10px rgba(0,245,255,0.2)", "0 0 20px rgba(0,245,255,0.5)", "0 0 10px rgba(0,245,255,0.2)"] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-1.5 bg-neon-cyan/10 rounded-lg flex items-center justify-center backdrop-blur-sm border border-neon-cyan/30"
+          animate={{ 
+            scale: [1, 1.1, 1],
+            opacity: [0.7, 1, 0.7],
+            rotate: [0, 90, 180, 270, 360]
+          }}
+          transition={{ 
+            duration: 4, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+          className="absolute inset-2 bg-gradient-to-br from-neon-cyan to-blue-600 rounded-md shadow-[0_0_15px_rgba(0,245,255,0.5)] flex items-center justify-center"
         >
-          <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-neon-cyan border-b-[5px] border-b-transparent ml-1" />
+          <div className="w-1/2 h-1/2 bg-white/20 rounded-full blur-[2px]" />
         </motion.div>
+
+        {/* Floating particles around logo */}
+        <motion.div
+          animate={{ y: [-2, 2, -2] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -top-1 -right-1 w-2 h-2 bg-neon-amber rounded-full shadow-[0_0_8px_#ffaa00] blur-[1px]"
+        />
       </div>
+
       {!hideText && (
-        <div className="flex flex-col justify-center">
-          <h1 className={`font-bold tracking-tight text-white leading-none ${size === 'lg' ? 'text-3xl mb-1' : 'text-xl mb-0.5'}`}>
-            VIDEOMILL
-          </h1>
-          <p className={`font-mono text-neon-cyan leading-none ${size === 'lg' ? 'text-xs' : 'text-[10px]'}`}>
-            NON-STOP VIRAL ENGINE
-          </p>
+        <div className="flex flex-col leading-none">
+          <span className={`${sizes[size].text} font-black tracking-tighter text-white`}>
+            VIDEO<span className="text-neon-cyan italic">MILL</span>
+          </span>
+          <span className="text-[10px] font-mono text-neon-cyan/50 tracking-[0.3em] uppercase">
+            Factory OS
+          </span>
         </div>
       )}
     </div>

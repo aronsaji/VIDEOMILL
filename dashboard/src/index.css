@@ -1,11 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-deep: #050505;
+  --surface: #0a0a0a;
+  --neon-cyan: #00f5ff;
+  --neon-purple: #bc13fe;
+  --neon-amber: #ffaa00;
+  --border: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-deep);
+  color: #e0e0e0;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-cyan);
+}
+
 @layer base {
-  body {
-    @apply bg-background text-gray-200 antialiased font-sans;
+  html {
+    @apply antialiased text-gray-200;
   }
+}
+
+/* Global Background Effects */
+.bg-grid-pattern {
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+.glass-morphism {
+  @apply backdrop-blur-xl bg-white/[0.02] border border-white/5;
+}
+
+.neon-shadow-cyan {
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.15);
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500;
+}
+
+/* Animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+/* Button & Interactive styles */
+.btn-primary {
+  @apply relative overflow-hidden bg-neon-cyan text-black px-6 py-3 rounded-xl font-bold transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(0,245,255,0.3)];
+}
+
+.btn-secondary {
+  @apply bg-white/5 border border-white/10 text-gray-300 px-6 py-3 rounded-xl font-bold transition-all hover:bg-white/10 hover:border-white/20;
+}
+
+/* Card Hover Effects */
+.card-hover {
+  @apply transition-all duration-300 hover:border-neon-cyan/30 hover:bg-white/[0.04] hover:shadow-[0_0_30px_rgba(0,245,255,0.05)];
 }
