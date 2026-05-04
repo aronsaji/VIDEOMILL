@@ -1,99 +1,138 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
-import type { Database } from '../types/database';
+import type { Order, TrendingTopic } from '../types';
 
-type Video = Database['public']['Tables']['videos']['Row'];
-type Trend = Database['public']['Tables']['trending_topics']['Row'];
+const IS_MOCK = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
 
-interface PipelineState {
-  videos: Video[];
-  trends: Trend[];
+const MOCK_ORDERS: Order[] = [
+  {
+    id: '1', video_id: 'VM-8291', title: 'AI overtaking software jobs in 2026',
+    topic: 'AI Jobs', category: 'Tech', visual_style: 'cyber', style_tone: 'Informative', target_audience: 'Tech', video_format: '9:16 (Vertical)', ai_voice: 'nova', language: 'Norsk',
+    duration: 60, platform_destinations: ['tiktok', 'shorts'], custom_instructions: null,
+    status: 'rendering', error_type: null, retry_count: 0, progress: 65,
+    sub_status: 'Stitching clips with FFmpeg...', script: null, video_url: null,
+    thumbnail_url: null, metadata: null, user_id: 'sys', created_at: new Date(Date.now() - 120000).toISOString(), updated_at: new Date().toISOString()
+  },
+];
+
+const MOCK_TRENDS: TrendingTopic[] = [
+  { id: 't1', title: 'OpenAI GPT-5 announced', description: 'GPT-5 is reportedly 10x smarter than GPT-4.', tags: ['ai', 'tech'], platform: 'youtube', viral_score: 98, active: true, created_at: new Date().toISOString(), language: 'English', country: 'USA' },
+];
+
+interface StoreState {
+  orders: Order[];
+  trends: TrendingTopic[];
   isLoading: boolean;
-  error: string | null;
   fetchInitialData: () => Promise<void>;
   subscribeToChanges: () => void;
+  addOrder: (orderData: Partial<Order>) => void;
 }
 
-export const usePipelineStore = create<PipelineState>((set, get) => ({
-  videos: [],
+export const usePipelineStore = create<StoreState>((set, get) => ({
+  orders: [],
   trends: [],
   isLoading: false,
-  error: null,
+
+  addOrder: async (orderData) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || 'guest-user';
+
+    const newOrder: Order = {
+      id: Math.random().toString(36).substring(7),
+      video_id: `VM-${Math.floor(Math.random() * 1000) + 8000}`,
+      title: orderData.title || 'Automated Trend Video',
+      topic: orderData.topic || '',
+      category: orderData.category || 'Tech',
+      visual_style: orderData.visual_style || 'cyber',
+      style_tone: orderData.style_tone || 'Auto',
+      target_audience: orderData.target_audience || 'Auto',
+      video_format: orderData.video_format || 'Auto',
+      ai_voice: orderData.ai_voice || 'nova',
+      language: orderData.language || 'Norsk',
+      duration: 60,
+      platform_destinations: orderData.platform_destinations || ['tiktok', 'youtube'],
+      status: 'queued',
+      progress: 0,
+      retry_count: 0,
+      user_id: userId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      ...orderData
+    } as Order;
+
+    set(state => ({ orders: [newOrder, ...state.orders] }));
+
+    if (!IS_MOCK) {
+      try {
+        const { id, custom_instructions, ...orderWithoutId } = newOrder;
+        const { error } = await supabase.from('orders').insert(orderWithoutId as any);
+        if (error) {
+          console.error('Failed to insert order to Supabase:', error);
+          alert('DATABASE ERROR:\n' + error.message + '\n\nDetails: ' + error.details);
+        }
+      } catch (err: any) {
+        console.error('Error inserting order:', err);
+        alert('CRITICAL ERROR:\n' + (err.message || String(err)));
+      }
+    }
+  },
 
   fetchInitialData: async () => {
     set({ isLoading: true });
+    if (IS_MOCK) {
+      set({ orders: MOCK_ORDERS, trends: MOCK_TRENDS, isLoading: false });
+      return;
+    }
     try {
-      // Mock Data Fallback if no real keys
-      const currentUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-      if (currentUrl.includes('placeholder')) {
-        set({
-          videos: [
-            { id: '1', video_id: 'VM-8291', title: 'The Future of AI in 2026', topic: 'AI', status: 'scripting', sub_status: 'Genererer manus med Groq', progress: 15, platform: 'tiktok', aspect_ratio: '9:16', language: 'nb', target_audience: 'Tech', views: 0, video_url: null, metadata: null, created_at: new Date().toISOString(), user_id: 'sys' },
-            { id: '2', video_id: 'VM-8290', title: 'Top 5 Crypto Trends', topic: 'Crypto', status: 'complete', sub_status: 'Publisert', progress: 100, platform: 'youtube', aspect_ratio: '16:9', language: 'en', target_audience: 'Finance', views: 12500, video_url: 'https://example.com/vid2', metadata: null, created_at: new Date(Date.now() - 3600000).toISOString(), user_id: 'sys' }
-          ],
-          trends: [
-            { id: '1', title: 'GPT-6 Release Leaks', description: 'Rumors about next generation AI models', category: 'tech', viral_score: 95, heat_level: 'fire', growth_stat: '+400% this hour', tags: ['ai', 'openai', 'leak'], platform: 'youtube', target_audience: 'Tech', active: true, status: 'pending', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: '2', title: 'SpaceX Mars Landing Date', description: 'Elon Musk confirms new target date', category: 'science', viral_score: 88, heat_level: 'hot', growth_stat: '+150% today', tags: ['spacex', 'mars', 'elon'], platform: 'tiktok', target_audience: 'Space Enthusiasts', active: true, status: 'processing', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-          ],
-          isLoading: false
-        });
-        return;
+      const [ordersRes, trendsRes] = await Promise.all([
+        supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50),
+        supabase.from('trending_topics').select('*').eq('active', true).order('viral_score', { ascending: false }).limit(20),
+      ]);
+      const orders = ordersRes.data || [];
+      let trends: TrendingTopic[] = trendsRes.data || [];
+      
+      if (trends.length === 0) {
+        trends = MOCK_TRENDS;
       }
 
-      const [videosResp, trendsResp] = await Promise.all([
-        supabase.from('videos').select('*').order('created_at', { ascending: false }).limit(50),
-        supabase.from('trending_topics').select('*').eq('active', true).order('viral_score', { ascending: false }).limit(20)
-      ]);
-
-      if (videosResp.error) throw videosResp.error;
-      if (trendsResp.error) throw trendsResp.error;
-
-      set({
-        videos: videosResp.data || [],
-        trends: trendsResp.data || [],
-        isLoading: false
+      set({ 
+        orders: orders.length > 0 ? orders as Order[] : MOCK_ORDERS, 
+        trends: trends as TrendingTopic[], 
+        isLoading: false 
       });
-    } catch (error: any) {
-      set({ error: error.message, isLoading: false });
+    } catch (e) {
+      console.error('Fetch error:', e);
+      set({ orders: MOCK_ORDERS, trends: MOCK_TRENDS, isLoading: false });
     }
   },
 
   subscribeToChanges: () => {
-    const currentUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-    if (currentUrl.includes('placeholder')) return; // Skip subscription if using mock data
-
+    if (IS_MOCK) return;
     try {
-      // Subscribe to videos
-      supabase
-        .channel('public:videos')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'videos' }, (payload) => {
-          const currentVideos = get().videos;
+      supabase.channel('db-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+          const { orders } = get();
           if (payload.eventType === 'INSERT') {
-            set({ videos: [payload.new as Video, ...currentVideos] });
+            set({ orders: [payload.new as Order, ...orders] });
           } else if (payload.eventType === 'UPDATE') {
-            set({ videos: currentVideos.map(v => v.id === payload.new.id ? payload.new as Video : v) });
+            set({ orders: orders.map(o => o.id === payload.new.id ? payload.new as Order : o) });
           } else if (payload.eventType === 'DELETE') {
-            set({ videos: currentVideos.filter(v => v.id !== payload.old.id) });
+            set({ orders: orders.filter(o => o.id !== (payload.old as Order).id) });
           }
         })
-        .subscribe();
-
-      // Subscribe to trends
-      supabase
-        .channel('public:trending_topics')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, (payload) => {
-          const currentTrends = get().trends;
+          const { trends } = get();
           if (payload.eventType === 'INSERT') {
-            set({ trends: [...currentTrends, payload.new as Trend].sort((a,b) => b.viral_score - a.viral_score) });
+            set({ trends: [...trends, payload.new as TrendingTopic].sort((a, b) => b.viral_score - a.viral_score) });
           } else if (payload.eventType === 'UPDATE') {
-            set({ trends: currentTrends.map(t => t.id === payload.new.id ? payload.new as Trend : t).filter(t => t.active) });
+            set({ trends: trends.map(t => t.id === payload.new.id ? payload.new as TrendingTopic : t) });
           } else if (payload.eventType === 'DELETE') {
-            set({ trends: currentTrends.filter(t => t.id !== payload.old.id) });
+            set({ trends: trends.filter(t => t.id !== (payload.old as TrendingTopic).id) });
           }
         })
         .subscribe();
     } catch (e) {
       console.error('Subscription error:', e);
     }
-  }
+  },
 }));
