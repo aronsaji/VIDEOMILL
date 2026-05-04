@@ -8,6 +8,7 @@ interface PipelineState {
   loading: boolean;
   fetchOrders: () => Promise<void>;
   fetchTrends: () => Promise<void>;
+  fetchInitialData: () => Promise<void>; // Denne manglet!
   addOrder: (order: Partial<Order>) => void;
   updateOrder: (videoId: string, updates: Partial<Order>) => void;
   retryOrder: (order: Order) => Promise<void>;
@@ -18,6 +19,16 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   orders: [],
   trends: [],
   loading: false,
+
+  // Samlefunksjon som App.tsx forventer
+  fetchInitialData: async () => {
+    set({ loading: true });
+    await Promise.all([
+      get().fetchOrders(),
+      get().fetchTrends()
+    ]);
+    set({ loading: false });
+  },
 
   fetchOrders: async () => {
     try {
@@ -52,7 +63,6 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   },
 
   addOrder: (order) => {
-    // Vi trigger en ny henting for å være synkronisert med DB
     get().fetchOrders();
   },
 
