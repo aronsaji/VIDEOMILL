@@ -1,22 +1,12 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import type { Order, TrendingTopic } from '../types';
+import { triggerProduction } from '../lib/api';
 
 const IS_MOCK = !import.meta.env.VITE_SUPABASE_URL || 
                  import.meta.env.VITE_SUPABASE_URL.includes('placeholder') ||
                  !import.meta.env.VITE_SUPABASE_ANON_KEY ||
                  import.meta.env.VITE_SUPABASE_ANON_KEY.includes('ANON_KEY_HER');
-
-const MOCK_ORDERS: Order[] = [
-  {
-    id: '1', video_id: 'VM-8291', title: 'AI overtaking software jobs in 2026',
-    topic: 'AI Jobs', category: 'Tech', visual_style: 'cyber', style_tone: 'Informative', target_audience: 'Tech', video_format: '9:16 (Vertical)', ai_voice: 'nova', language: 'Norsk',
-    duration: 60, platform_destinations: ['tiktok', 'shorts'], custom_instructions: null,
-    status: 'rendering', error_type: null, retry_count: 0, progress: 65,
-    sub_status: 'Stitching clips with FFmpeg...', script: null, video_url: null,
-    thumbnail_url: null, metadata: null, user_id: 'sys', created_at: new Date(Date.now() - 120000).toISOString(), updated_at: new Date().toISOString()
-  },
-];
 
 const MOCK_TRENDS: TrendingTopic[] = [
   { id: 't1', title: 'OpenAI GPT-5 announced', description: 'GPT-5 is reportedly 10x smarter than GPT-4.', tags: ['ai', 'tech'], platform: 'youtube', viral_score: 98, active: true, created_at: new Date().toISOString(), language: 'English', country: 'USA' },
@@ -28,7 +18,7 @@ interface StoreState {
   isLoading: boolean;
   fetchInitialData: () => Promise<void>;
   subscribeToChanges: () => void;
-  addOrder: (orderData: Partial<Order>) => void;
+  addOrder: (orderData: Partial<Order>) => Promise<void>;
   retryOrder: (order: Order) => Promise<boolean>;
 }
 
@@ -38,51 +28,14 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
   isLoading: false,
 
   addOrder: async (orderData) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    const userId = user?.id || 'guest-user';
-
-    const newOrder: Order = {
-      id: Math.random().toString(36).substring(7),
-      video_id: `VM-${Math.floor(Math.random() * 1000) + 8000}`,
-      title: orderData.title || 'Automated Trend Video',
-      topic: orderData.topic || '',
-      category: orderData.category || 'Tech',
-      visual_style: orderData.visual_style || 'cyber',
-      style_tone: orderData.style_tone || 'Auto',
-      target_audience: orderData.target_audience || 'Auto',
-      video_format: orderData.video_format || 'Auto',
-      ai_voice: orderData.ai_voice || 'nova',
-      language: orderData.language || 'Norsk',
-      duration: 60,
-      platform_destinations: orderData.platform_destinations || ['tiktok', 'youtube'],
-      status: 'queued',
-      progress: 0,
-      retry_count: 0,
-      user_id: userId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      ...orderData
-    } as Order;
-
-    const currentOrders = get().orders || [];
-    set({ orders: [newOrder, ...currentOrders] });
-
-    if (!IS_MOCK) {
-      try {
-        const { id, custom_instructions, ...orderWithoutId } = newOrder;
-        const { error } = await supabase.from('orders').insert(orderWithoutId as any);
-        if (error) {
-          console.error('Failed to insert order to Supabase:', error);
-        }
-      } catch (err: any) {
-        console.error('Error inserting order:', err);
-      }
-    }
+    // Just trigger production - n8n will handle DB insert
+    // Or if you want dashboard to insert, we can add it here.
+    // For now, we trust the pipeline to update the DB and our poll to pick it up.
+    console.log('Starting production for:', orderData.title);
   },
 
   retryOrder: async (order: Order) => {
     try {
-      const { triggerProduction } = await import('../lib/api');
       const success = await triggerProduction({
         action: 'retry',
         retry_video_id: order.video_id,
@@ -93,10 +46,7 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
       });
 
       if (success) {
-        const { orders } = get();
-        set({ 
-          orders: orders.map(o => o.id === order.id ? { ...o, status: 'queued', progress: 0, sub_status: 'Retry startet...' } : o) 
-        });
+        console.log('Retry triggered successfully');
         return true;
       }
       return false;
@@ -109,7 +59,7 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
   fetchInitialData: async () => {
     set({ isLoading: true });
     if (IS_MOCK) {
-      set({ orders: MOCK_ORDERS, trends: MOCK_TRENDS, isLoading: false });
+      set({ orders: [], trends: MOCK_TRENDS, isLoading: false });
       return;
     }
     try {
@@ -117,6 +67,7 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
         supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50),
         supabase.from('trending_topics').select('*').eq('active', true).order('viral_score', { ascending: false }).limit(20),
       ]);
+      
       const orders = ordersRes.data || [];
       let trends: TrendingTopic[] = trendsRes.data || [];
       
@@ -125,13 +76,13 @@ export const usePipelineStore = create<StoreState>((set, get) => ({
       }
 
       set({ 
-        orders: orders.length > 0 ? orders as Order[] : MOCK_ORDERS, 
+        orders: orders as Order[], 
         trends: trends as TrendingTopic[], 
         isLoading: false 
       });
     } catch (e) {
       console.error('Fetch error:', e);
-      set({ orders: MOCK_ORDERS, trends: MOCK_TRENDS, isLoading: false });
+      set({ orders: [], trends: MOCK_TRENDS, isLoading: false });
     }
   },
 

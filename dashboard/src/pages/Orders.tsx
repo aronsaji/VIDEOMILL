@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
-import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader, Send, RefreshCw } from 'lucide-react';
+import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader, RefreshCw, Film } from 'lucide-react';
 import { triggerProduction } from '../lib/api';
 import type { OrderStatus } from '../types';
 
@@ -23,7 +23,6 @@ export default function Orders() {
   const handleCreateOrder = async () => {
     if (!topic) return;
 
-    // 1. Send to n8n
     const success = await triggerProduction({
       action: 'MANUAL_START',
       title: topic,
@@ -38,21 +37,14 @@ export default function Orders() {
     });
 
     if (success) {
-      // 2. Save to local state / Supabase
       usePipelineStore.getState().addOrder({
         title: topic,
         topic: topic,
-        style_tone: styleTone,
-        target_audience: targetAudience,
-        video_format: videoFormat,
-        ai_voice: aiVoice,
+        status: 'queued',
         platform_destinations: platforms.map(p => p.toLowerCase().split(' ')[0]) as any,
-        language,
-        custom_instructions: instructions,
       });
       setShowForm(false);
       setTopic('');
-      setInstructions('');
     } else {
       alert('Kunne ikke koble til n8n-serveren. Kontroller at den kjører!');
     }
@@ -63,282 +55,150 @@ export default function Orders() {
     : orders.filter(o => o.status === statusFilter);
 
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 max-w-6xl pb-20">
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <ShoppingCart className="text-neon-cyan" />
-            Ordre & Bestillinger
+            <Film className="text-neon-cyan" />
+            Produksjonskø & Arkiv
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Administrer videokøen og opprett nye manuelle bestillinger</p>
+          <p className="text-sm text-gray-500 mt-1">Full oversikt over dine AI-genererte videoer</p>
         </div>
         <button 
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30 rounded-lg text-sm font-medium transition-colors shadow-[0_0_15px_rgba(0,245,255,0.1)] hover:shadow-[0_0_20px_rgba(0,245,255,0.2)]"
+          className="flex items-center gap-2 px-5 py-2.5 bg-neon-cyan text-black rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(0,245,255,0.3)] hover:scale-105"
         >
-          <Plus size={16} />
-          Ny Bestilling
+          <Plus size={18} />
+          Opprett Video
         </button>
       </div>
 
       <AnimatePresence>
         {showForm && (
           <motion.div
-            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-            animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
-            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-            className="overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-surface/80 border border-neon-cyan/20 rounded-2xl p-6 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.5)]"
           >
-            <div className="bg-surface/80 border border-border rounded-xl p-6 backdrop-blur-sm relative">
-              <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-neon-cyan to-blue-500" />
-              <h2 className="text-lg font-bold text-white mb-4">Opprett ny videobestilling</h2>
-              
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-                <div className="space-y-6">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-gray-400">TEMA / TITTELL</label>
-                    <input value={topic} onChange={e => setTopic(e.target.value)} type="text" placeholder="F.eks: Top 5 AI Tools in 2026" className="w-full bg-black/40 border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all" />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-mono text-gray-400">1. STYLE & TONE</label>
-                      <div className="flex flex-wrap gap-2">
-                        {['⚡ Engaging', '📚 Informative', '😄 Humorous', '🎭 Dramatic', '✨ Inspiring', '🔥 Viral'].map(style => (
-                          <button
-                            key={style}
-                            type="button"
-                            onClick={() => setStyleTone(style)}
-                            className={`px-3 py-1.5 text-[11px] font-medium rounded-lg border transition-all ${
-                              styleTone === style 
-                                ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                                : 'bg-black/40 border-border text-gray-400 hover:bg-white/5 hover:border-gray-500'
-                            }`}
-                          >
-                            {style}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-mono text-gray-400">2. TARGET AUDIENCE</label>
-                      <div className="flex flex-wrap gap-2">
-                        {['🎮 Youth (18–25)', '👔 Adults (25–45)', '🏡 Seniors (45+)', '💻 Tech', '👨‍👩‍👧 Parents', '🎓 Students', '💼 Business', '💪 Health', '🎨 Creative', '🕹️ Gamers'].map(aud => (
-                          <button
-                            key={aud}
-                            type="button"
-                            onClick={() => setTargetAudience(aud)}
-                            className={`px-3 py-1.5 text-[11px] font-medium rounded-lg border transition-all ${
-                              targetAudience === aud 
-                                ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                                : 'bg-black/40 border-border text-gray-400 hover:bg-white/5 hover:border-gray-500'
-                            }`}
-                          >
-                            {aud}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-mono text-gray-400">3. AI VOICE</label>
-                      <div className="flex flex-wrap gap-2">
-                        {['🗣️ Nova (Female)', '🗣️ Echo (Male)', '🗣️ Fable (Neutral)', '🗣️ Onyx (Deep Male)', '🗣️ Alloy (Neutral)', '🗣️ Shimmer (Female)'].map(voice => (
-                          <button
-                            key={voice}
-                            type="button"
-                            onClick={() => setAiVoice(voice)}
-                            className={`px-3 py-1.5 text-[11px] font-medium rounded-lg border transition-all ${
-                              aiVoice === voice 
-                                ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                                : 'bg-black/40 border-border text-gray-400 hover:bg-white/5 hover:border-gray-500'
-                            }`}
-                          >
-                            {voice}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-mono text-gray-400">4. VIDEO FORMAT</label>
-                      <div className="flex flex-wrap gap-2">
-                        {['📱 9:16 (Vertical)', '📺 16:9 (Horizontal)', '⬛ 1:1 (Square)'].map(format => (
-                          <button
-                            key={format}
-                            type="button"
-                            onClick={() => setVideoFormat(format)}
-                            className={`px-3 py-1.5 text-[11px] font-medium rounded-lg border transition-all ${
-                              videoFormat === format 
-                                ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                                : 'bg-black/40 border-border text-gray-400 hover:bg-white/5 hover:border-gray-500'
-                            }`}
-                          >
-                            {format}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-border/50">
-                    <div className="space-y-2">
-                      <label className="text-xs font-mono text-gray-400">PLATTFORMER</label>
-                      <div className="flex flex-wrap gap-2">
-                        {['TikTok', 'YouTube Shorts', 'Instagram Reels'].map(p => {
-                          const isActive = platforms.includes(p);
-                          return (
-                            <button
-                              key={p}
-                              type="button"
-                              onClick={() => setPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])}
-                              className={`px-3 py-1.5 text-[11px] font-medium rounded-lg border transition-all ${
-                                isActive
-                                  ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                                  : 'bg-black/40 border-border text-gray-400 hover:bg-white/5 hover:border-gray-500'
-                              }`}
-                            >
-                              {p}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="text-xs font-mono text-gray-400">SPRÅK</label>
-                      <div className="flex flex-wrap gap-2">
-                        {['Norsk', 'Engelsk', 'Svensk'].map(lang => (
-                          <button
-                            key={lang}
-                            type="button"
-                            onClick={() => setLanguage(lang)}
-                            className={`px-3 py-1.5 text-[11px] font-medium rounded-lg border transition-all ${
-                              language === lang 
-                                ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_10px_rgba(0,245,255,0.2)]'
-                                : 'bg-black/40 border-border text-gray-400 hover:bg-white/5 hover:border-gray-500'
-                            }`}
-                          >
-                            {lang}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-gray-400">EKSTRA INSTRUKSJONER (PROMPT)</label>
-                    <textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={3} placeholder="Instruksjoner for AI script generator..." className="w-full bg-black/40 border border-border rounded-lg px-4 py-2 text-white focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all resize-none"></textarea>
-                  </div>
+            <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+              <Plus size={20} className="text-neon-cyan" />
+              Ny Videobestilling
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-neon-cyan/70 uppercase">Tittel / Tema</label>
+                  <input value={topic} onChange={e => setTopic(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-neon-cyan/50 transition-all" placeholder="Hva skal videoen handle om?" />
                 </div>
-
-                <div className="flex justify-end gap-3 pt-2">
-                  <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">Avbryt</button>
-                  <button type="button" onClick={handleCreateOrder} className="px-6 py-2 bg-neon-cyan text-black rounded-lg text-sm font-bold hover:bg-neon-cyan/90 transition-colors flex items-center gap-2">
-                    Start Produksjon
-                  </button>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-neon-cyan/70 uppercase">Spesielle instrukser</label>
+                  <textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-neon-cyan/50 transition-all resize-none" placeholder="F.eks: 'Bruk en dramatisk stemme og vis mye natur'..." />
                 </div>
-              </form>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-4">
+                    <label className="text-xs font-mono text-gray-500 uppercase">Stemme</label>
+                    <select value={aiVoice} onChange={e => setAiVoice(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white">
+                       {['🗣️ Nova (Female)', '🗣️ Echo (Male)', '🗣️ Onyx (Deep)'].map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                 </div>
+                 <div className="space-y-4">
+                    <label className="text-xs font-mono text-gray-500 uppercase">Språk</label>
+                    <select value={language} onChange={e => setLanguage(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white">
+                       {['Norsk', 'Engelsk', 'Svensk'].map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                 </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-white/5">
+              <button onClick={() => setShowForm(false)} className="px-6 py-2 text-sm text-gray-400 hover:text-white transition-colors">Avbryt</button>
+              <button onClick={handleCreateOrder} className="px-8 py-2 bg-neon-cyan text-black rounded-xl font-bold hover:scale-105 transition-all">Start Produksjon</button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="bg-surface/50 border border-border rounded-xl backdrop-blur-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center gap-4">
-          <Filter size={16} className="text-gray-500" />
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {['all', 'queued', 'rendering', 'published', 'failed'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status as any)}
-                className={`px-3 py-1 rounded-full text-xs font-mono capitalize transition-colors border ${
-                  statusFilter === status 
-                    ? 'bg-white/10 border-white/20 text-white' 
-                    : 'bg-transparent border-transparent text-gray-500 hover:text-gray-300'
-                }`}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
-        </div>
-
+      <div className="bg-surface/30 border border-white/5 rounded-2xl backdrop-blur-md overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border/50 text-xs font-mono text-gray-500 bg-black/20">
-                <th className="p-4 font-normal">Video ID</th>
-                <th className="p-4 font-normal">Tittel / Tema</th>
-                <th className="p-4 font-normal">Plattformer</th>
-                <th className="p-4 font-normal">Status</th>
-                <th className="p-4 font-normal text-right">Opprettet</th>
+              <tr className="border-b border-white/5 text-[10px] font-mono text-gray-500 uppercase tracking-widest bg-black/20">
+                <th className="p-5 font-medium">Video ID</th>
+                <th className="p-5 font-medium">Video Detaljer</th>
+                <th className="p-5 font-medium">Status & Fremdrift</th>
+                <th className="p-5 font-medium text-right">Tidspunkt</th>
               </tr>
             </thead>
             <tbody>
-              <AnimatePresence>
-                {filteredOrders.map((order, i) => (
-                  <motion.tr 
-                    key={order.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="border-b border-border/50 hover:bg-white/5 transition-colors group cursor-pointer"
-                  >
-                    <td className="p-4 text-sm font-mono text-gray-400 group-hover:text-neon-cyan transition-colors">
-                      {order.video_id}
+              {filteredOrders.map((order) => {
+                const isWorking = ['script_generation', 'rendering', 'uploading'].includes(order.status);
+                return (
+                  <tr key={order.id} className="border-b border-white/5 hover:bg-neon-cyan/[0.03] transition-all group">
+                    <td className="p-5">
+                      <span className={`font-mono text-xs ${isWorking ? 'text-neon-cyan animate-pulse' : 'text-gray-500'}`}>
+                        {order.video_id}
+                      </span>
                     </td>
-                    <td className="p-4">
-                      <p className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors">{order.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{order.category}</p>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-1">
-                        {order.platform_destinations.map(p => (
-                          <span key={p} className="text-[10px] font-mono uppercase px-1.5 py-0.5 bg-white/5 text-gray-400 rounded">
-                            {p.substring(0, 2)}
-                          </span>
-                        ))}
+                    <td className="p-5">
+                      <div className="space-y-1">
+                        <p className={`text-sm font-bold transition-colors ${isWorking ? 'text-neon-cyan' : 'text-white group-hover:text-neon-cyan'}`}>
+                          {order.title}
+                        </p>
+                        <div className="flex gap-2">
+                          {order.platform_destinations.map(p => (
+                            <span key={p} className="text-[9px] font-mono px-1.5 py-0.5 bg-white/5 text-gray-500 rounded uppercase">{p}</span>
+                          ))}
+                        </div>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
+                    <td className="p-5">
+                      <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
-                          {order.status === 'published' && <CheckCircle2 size={14} className="text-green-400" />}
-                          {order.status === 'failed' && <AlertTriangle size={14} className="text-red-400" />}
-                          {order.status === 'queued' && <Clock size={14} className="text-gray-400" />}
-                          {['script_generation', 'rendering', 'uploading'].includes(order.status) && <Loader size={14} className="text-neon-cyan animate-spin" />}
-                          <span className="text-xs font-mono text-gray-300 capitalize">
+                          {order.status === 'complete' || order.status === 'published' ? (
+                            <CheckCircle2 size={14} className="text-green-400" />
+                          ) : order.status === 'failed' ? (
+                            <AlertTriangle size={14} className="text-red-400" />
+                          ) : (
+                            <Loader size={14} className="text-neon-cyan animate-spin" />
+                          )}
+                          <span className={`text-xs font-mono uppercase ${order.status === 'failed' ? 'text-red-400' : 'text-gray-300'}`}>
                             {order.status.replace('_', ' ')}
                           </span>
                         </div>
                         
+                        {isWorking && (
+                          <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
+                            <motion.div 
+                              className="h-full bg-neon-cyan shadow-[0_0_10px_#00f5ff]"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${order.progress || 10}%` }}
+                            />
+                          </div>
+                        )}
+
                         {order.status === 'failed' && (
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              usePipelineStore.getState().retryOrder(order);
-                            }}
-                            className="flex items-center gap-1.5 px-2 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded text-[10px] font-bold uppercase transition-all"
+                            onClick={() => usePipelineStore.getState().retryOrder(order)}
+                            className="flex items-center gap-1.5 w-fit px-3 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-[10px] font-bold uppercase transition-all"
                           >
                             <RefreshCw size={10} />
-                            Retry
+                            Prøv Igjen
                           </button>
                         )}
                       </div>
                     </td>
-                    <td className="p-4 text-right text-xs font-mono text-gray-500">
+                    <td className="p-5 text-right font-mono text-[10px] text-gray-500">
                       {new Date(order.created_at).toLocaleString('nb-NO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           {filteredOrders.length === 0 && (
-            <div className="p-12 text-center text-gray-500 font-mono text-sm">
-              Ingen bestillinger funnet for dette filteret.
+            <div className="p-20 text-center text-gray-600 font-mono text-sm">
+              Ingen videoer i denne kategorien.
             </div>
           )}
         </div>
