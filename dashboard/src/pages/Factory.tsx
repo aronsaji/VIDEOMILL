@@ -275,10 +275,17 @@ export default function Factory() {
               </motion.div>
             )}
 
+            <button 
+              onClick={() => navigate('/trends')} 
+              className="text-[13px] font-black text-brand-1 uppercase tracking-[0.3em] hover:text-white transition-colors border-b border-brand-1/20 pb-0.5"
+            >
+              Query_All
+            </button>
+
             <button
               onClick={handleStartProduction}
               disabled={!topic || isProducing}
-              className="w-full py-6 bg-neon-cyan text-black font-black uppercase tracking-[0.3em] text-xs rounded-[24px] hover:bg-neon-purple hover:text-white transition-all shadow-md disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-4 group"
+              className="btn-standard w-full py-6 text-base"
             >
               {isProducing ? (
                 <>

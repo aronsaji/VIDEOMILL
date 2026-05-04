@@ -12,8 +12,7 @@ const AGENT_CONFIG = {
     name: 'COO',
     title: 'Chief Operating Officer',
     icon: TrendingUp,
-    color: 'text-neon-cyan',
-    glow: 'shadow-neon-cyan/20',
+    color: 'text-brand-1',
     description: 'Operational efficiency, production KPIs, and resource allocation.',
     schedule: 'Daily @ 02:00',
   },
@@ -21,8 +20,7 @@ const AGENT_CONFIG = {
     name: 'CFO',
     title: 'Chief Financial Officer',
     icon: DollarSign,
-    color: 'text-neon-green',
-    glow: 'shadow-neon-green/20',
+    color: 'text-brand-1',
     description: 'Financial oversight, ROI optimization, and budget synthesis.',
     schedule: 'Daily @ 02:00',
   },
@@ -30,8 +28,7 @@ const AGENT_CONFIG = {
     name: 'Marketing',
     title: 'Marketing Director',
     icon: Eye,
-    color: 'text-neon-purple',
-    glow: 'shadow-neon-purple/20',
+    color: 'text-brand-2',
     description: 'Trend analysis, multi-platform strategy, and metadata engineering.',
     schedule: 'Every 4 Hours',
   },
@@ -39,8 +36,7 @@ const AGENT_CONFIG = {
     name: 'Watchdog',
     title: 'Production Monitor',
     icon: Radar,
-    color: 'text-neon-amber',
-    glow: 'shadow-neon-amber/20',
+    color: 'text-brand-2',
     description: 'Real-time monitoring and automated failure recovery protocols.',
     schedule: 'Every 10 Minutes',
   },
@@ -48,8 +44,7 @@ const AGENT_CONFIG = {
     name: 'Social',
     title: 'Engagement Agent',
     icon: MessageSquare,
-    color: 'text-neon-pink',
-    glow: 'shadow-neon-pink/20',
+    color: 'text-brand-1',
     description: 'Autonomous neural response to community engagement signals.',
     schedule: 'Real-time',
   },
@@ -58,7 +53,6 @@ const AGENT_CONFIG = {
     title: 'Auto Distribution',
     icon: Upload,
     color: 'text-white',
-    glow: 'shadow-white/20',
     description: 'Automated multi-channel deployment upon asset finalization.',
     schedule: 'Event-driven',
   },
@@ -87,12 +81,12 @@ export default function Agents() {
             Autonomous Command Hierarchy v2.0
           </motion.div>
           <div className="space-y-2">
-            <h1 className="text-7xl font-black text-white italic uppercase tracking-tighter leading-none">
-              AI <span className="text-neon-purple">Commanders</span>
+            <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
+              AI <span className="text-brand-2">Commanders</span>
             </h1>
             <div className="flex items-center gap-4">
-               <div className="h-[1px] w-24 bg-neon-purple/50" />
-               <p className="text-gray-500 font-bold uppercase tracking-[0.2em] text-[10px] italic">Strategic Neural Management Layer</p>
+               <div className="h-[1px] w-16 bg-brand-2/50" />
+               <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] italic">Strategic Neural Management Layer</p>
             </div>
           </div>
         </div>
@@ -132,12 +126,12 @@ export default function Agents() {
             >
               {/* Dynamic Status Tag */}
               <div className="absolute top-12 right-12 flex items-center gap-3 px-5 py-2 bg-black/40 rounded-full border border-white/5">
-                <span className={`text-[10px] font-black font-mono uppercase tracking-[0.2em] ${isActive ? 'text-neon-cyan' : 'text-gray-700'}`}>
+                <span className={`text-[10px] font-black font-mono uppercase tracking-[0.2em] ${isActive ? 'text-brand-1' : 'text-gray-700'}`}>
                    {isActive ? 'Live' : 'Off'}
                 </span>
                 <span className="relative flex h-2 w-2">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isActive ? 'bg-neon-cyan' : 'bg-gray-800'}`}></span>
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isActive ? 'bg-neon-cyan' : 'bg-gray-900'}`}></span>
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isActive ? 'bg-brand-1' : 'bg-gray-800'}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isActive ? 'bg-brand-1' : 'bg-gray-900'}`}></span>
                 </span>
               </div>
 

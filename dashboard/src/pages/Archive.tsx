@@ -4,14 +4,14 @@ import { usePipelineStore } from '../store/pipelineStore';
 import { History, RefreshCw, CheckCircle2, AlertTriangle, Loader, Search, Filter, Database, ArrowUpRight } from 'lucide-react';
 import type { OrderStatus } from '../types';
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; shadow: string }> = {
-  queued:           { label: 'Queued',           color: 'text-gray-400',      bg: 'bg-gray-400/10',    shadow: 'shadow-none' },
-  script_generation:{ label: 'Drafting',         color: 'text-blue-400',      bg: 'bg-blue-400/10',    shadow: 'shadow-blue-400/20' },
-  rendering:        { label: 'Synthesizing',     color: 'text-neon-cyan',     bg: 'bg-neon-cyan/10',   shadow: 'shadow-neon-cyan/20' },
-  uploading:        { label: 'Broadcasting',     color: 'text-neon-purple',   bg: 'bg-neon-purple/10', shadow: 'shadow-neon-purple/20' },
-  complete:         { label: 'Archived',         color: 'text-neon-green',    bg: 'bg-neon-green/10',  shadow: 'shadow-neon-green/20' },
-  published:        { label: 'Released',         color: 'text-neon-green',    bg: 'bg-neon-green/10',  shadow: 'shadow-neon-green/20' },
-  failed:           { label: 'Corrupted',        color: 'text-red-400',       bg: 'bg-red-400/10',     shadow: 'shadow-red-400/20' },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  queued:           { label: 'Queued',           color: 'text-gray-400',      bg: 'bg-white/5' },
+  script_generation:{ label: 'Drafting',         color: 'text-brand-1',      bg: 'bg-brand-1/10' },
+  rendering:        { label: 'Synthesizing',     color: 'text-brand-1',      bg: 'bg-brand-1/10' },
+  uploading:        { label: 'Broadcasting',     color: 'text-brand-2',      bg: 'bg-brand-2/10' },
+  complete:         { label: 'Archived',         color: 'text-brand-1',      bg: 'bg-brand-1/10' },
+  published:        { label: 'Released',         color: 'text-brand-1',      bg: 'bg-brand-1/10' },
+  failed:           { label: 'Corrupted',        color: 'text-red-400',       bg: 'bg-red-400/10' },
 };
 
 export default function Archive() {
@@ -44,7 +44,7 @@ export default function Archive() {
             Data Repository
           </motion.div>
           <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-            Media <span className="text-neon-cyan">Archive</span>
+            Media <span className="text-brand-1">Archive</span>
           </h1>
           <p className="text-gray-500 max-w-md font-medium">Historical record of all neural production cycles and distribution logs.</p>
         </div>
@@ -74,9 +74,9 @@ export default function Archive() {
           <button
             key={s}
             onClick={() => setStatusFilter(s as any)}
-            className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border shrink-0 ${
+            className={`px-8 py-3 rounded-xl text-[13px] font-black uppercase tracking-[0.2em] transition-all border shrink-0 ${
               statusFilter === s 
-                ? 'bg-neon-cyan text-black border-neon-cyan shadow-[0_0_15px_rgba(0,245,255,0.3)]' 
+                ? 'bg-brand-1 text-white border-brand-1 shadow-lg' 
                 : 'bg-white/5 text-gray-500 border-white/5 hover:border-white/10 hover:text-white'
             }`}
           >
@@ -140,11 +140,11 @@ export default function Archive() {
                       <div className="flex items-center gap-3">
                         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/5 ${STATUS_CONFIG[order.status]?.bg || 'bg-white/5'}`}>
                           {order.status === 'complete' || order.status === 'published' ? (
-                            <CheckCircle2 size={12} className="text-neon-green" />
+                            <CheckCircle2 size={16} className="text-brand-1" />
                           ) : order.status === 'failed' ? (
-                            <AlertTriangle size={12} className="text-red-400" />
+                            <AlertTriangle size={16} className="text-red-400" />
                           ) : (
-                            <Loader size={12} className="text-neon-cyan animate-spin" />
+                            <Loader size={16} className="text-brand-1 animate-spin" />
                           )}
                           <span className={`text-[10px] font-black uppercase tracking-widest ${STATUS_CONFIG[order.status]?.color || 'text-gray-400'}`}>
                             {STATUS_CONFIG[order.status]?.label || order.status}

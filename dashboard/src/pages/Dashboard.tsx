@@ -106,7 +106,7 @@ export default function Dashboard() {
                 <p className="text-white/70 max-w-sm mx-auto text-sm font-bold leading-relaxed uppercase tracking-widest italic">The production grid is currently idle. Initialize a new synthesis cycle at the Factory node.</p>
                 <button 
                   onClick={() => navigate('/factory')}
-                  className="mt-10 px-12 py-4 bg-neon-purple text-white hover:bg-neon-cyan hover:text-black rounded-[20px] font-black text-[12px] uppercase tracking-[0.3em] transition-all shadow-md"
+                  className="btn-standard mt-10 px-12"
                 >
                   {t('dash.enter_factory')}
                 </button>
@@ -192,7 +192,7 @@ export default function Dashboard() {
               </div>
               <button 
                 onClick={() => navigate('/trends')} 
-                className="text-[10px] font-black text-neon-amber uppercase tracking-[0.3em] hover:text-white transition-colors border-b border-neon-amber/20 pb-0.5"
+                className="text-[13px] font-black text-brand-1 uppercase tracking-[0.3em] hover:text-white transition-colors border-b border-brand-1/20 pb-0.5"
               >
                 Query_All
               </button>
@@ -236,24 +236,21 @@ export default function Dashboard() {
           </div>
 
           {/* Neural Expansion Module */}
-          <div className="glass-ultra rounded-[40px] p-10 border border-neon-cyan/20 bg-gradient-to-br from-neon-cyan/5 to-transparent relative overflow-hidden group">
-            <div className="absolute -top-10 -right-10 p-12 opacity-5 rotate-12 group-hover:rotate-0 transition-all duration-1000 transform scale-150">
-              <Sparkles size={160} className="text-neon-cyan" />
-            </div>
+        <div className="card-standard bg-gradient-to-br from-brand-1/10 to-transparent relative overflow-hidden group">
             <div className="space-y-6 relative z-10">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-neon-cyan font-black text-[10px] uppercase tracking-[0.4em]">
+                <div className="flex items-center gap-2 text-brand-1 font-black text-[13px] uppercase tracking-[0.4em]">
                    <Zap size={14} /> Neural Agent X
                 </div>
-                <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter leading-tight">Scale Your <span className="text-neon-cyan">Influence</span></h3>
-                <p className="text-[11px] text-gray-500 leading-relaxed font-medium italic">Deploy autonomous series nodes to dominate the content grid with zero manual intervention.</p>
+                <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter leading-tight">Scale Your <span className="text-brand-1">Influence</span></h3>
+                <p className="text-[14px] text-gray-500 leading-relaxed font-medium italic">Deploy autonomous series nodes to dominate the content grid.</p>
               </div>
               <button 
                 onClick={() => navigate('/auto-series')}
-                className="w-full py-6 bg-neon-cyan text-black font-black uppercase tracking-[0.3em] text-xs rounded-[24px] hover:bg-neon-purple hover:text-white transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-4 group"
+                className="btn-standard w-full"
               >
                 Launch Auto-Series Node
-                <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                <ArrowUpRight size={16} />
               </button>
             </div>
           </div>

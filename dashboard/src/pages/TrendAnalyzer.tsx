@@ -78,8 +78,8 @@ export default function TrendAnalyzer() {
             Global Intelligence Stream v4.2
           </motion.div>
           <div className="space-y-2">
-            <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
-              Trend <span className="text-neon-cyan">Radar</span> <span className="text-xs text-neon-cyan/40 align-top ml-3 font-mono">v4.2</span>
+            <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
+              Trend <span className="text-brand-1">Radar</span>
             </h1>
             <div className="flex items-center gap-4">
                <div className="h-[1px] w-16 bg-neon-cyan/50" />
@@ -137,24 +137,21 @@ export default function TrendAnalyzer() {
       {/* Analytics Summary Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Active Signals', value: filteredTrends.length, icon: Radio, color: 'text-neon-cyan' },
-          { label: 'Avg Velocity', value: '84%', icon: Zap, color: 'text-neon-amber' },
-          { label: 'Network Load', value: 'OPTIMAL', icon: BarChart3, color: 'text-neon-purple' },
-          { label: 'Signal Integrity', value: '99.8%', icon: ShieldAlert, color: 'text-neon-green' },
+          { label: 'Active Signals', value: filteredTrends.length, icon: Radio, color: 'text-brand-1' },
+          { label: 'Avg Velocity', value: '84%', icon: Zap, color: 'text-brand-2' },
+          { label: 'Network Load', value: 'OPTIMAL', icon: BarChart3, color: 'text-brand-1' },
+          { label: 'Signal Integrity', value: '99.8%', icon: ShieldAlert, color: 'text-brand-2' },
         ].map((stat, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="glass-ultra p-8 rounded-[32px] border border-white/5 group relative overflow-hidden"
+            className="card-standard"
           >
-            <div className={`absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 ${stat.color}`}>
-              <stat.icon size={60} />
-            </div>
             <div className="space-y-2 relative z-10">
-              <p className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{stat.label}</p>
-              <p className={`text-3xl font-black italic uppercase tracking-tighter ${stat.color}`}>{stat.value}</p>
+              <p className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{stat.label}</p>
+              <p className={`text-2xl font-black italic uppercase tracking-tighter ${stat.color}`}>{stat.value}</p>
             </div>
           </motion.div>
         ))}
@@ -230,7 +227,7 @@ export default function TrendAnalyzer() {
                     </div>
                     <button 
                       onClick={() => setSelectedTrend(trend)}
-                      className="flex items-center gap-3 bg-neon-cyan text-black px-8 py-4 rounded-[20px] font-black text-[12px] uppercase tracking-[0.2em] italic hover:bg-white hover:scale-105 transition-all shadow-xl active:scale-95"
+                      className="btn-standard px-8 py-3"
                     >
                       Analyze <ArrowUpRight size={18} />
                     </button>
