@@ -5,14 +5,25 @@
 @tailwind utilities;
 
 :root {
-  --bg-deep: #030303;
-  --surface: #080808;
+  --bg-deep: #050714; /* Deep Navy instead of Black to verify update */
+  --surface: #0a0c1f;
   --neon-cyan: #00f5ff;
   --neon-purple: #bc13fe;
   --neon-pink: #ff00ff;
   --neon-amber: #ffaa00;
   --neon-green: #39ff14;
-  --border: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.05);
+}
+
+/* NUCLEAR LEGIBILITY OVERRIDES - FORCED TOP LEVEL */
+.text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800 { 
+  color: #ffffff !important; 
+  font-weight: 800 !important; 
+}
+.text-\[9px\], .text-\[10px\], .text-xs {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.05em !important;
 }
 
 body {

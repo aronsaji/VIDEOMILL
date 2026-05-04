@@ -65,7 +65,12 @@ export default function Layout() {
                   animate={{ opacity: 1, x: 0 }} 
                   exit={{ opacity: 0, x: -20 }}
                 >
-                  <Logo size="sm" />
+                  <div className="flex flex-col">
+                    <Logo size="sm" />
+                    <div className="mt-2 text-[8px] font-black text-neon-cyan uppercase tracking-tighter opacity-80">
+                      v4.2 VERIFIED_GRID
+                    </div>
+                  </div>
                 </motion.div>
               ) : (
                 <motion.div 
