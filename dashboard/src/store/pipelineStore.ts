@@ -63,6 +63,8 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
         .select('*')
         .limit(50);
 
+      console.log('🔍 SUPABASE RAW RESPONSE (trends):', { data, error });
+
       if (error) throw error;
       
       // Sorter lokalt i appen i stedet (nyeste først)
