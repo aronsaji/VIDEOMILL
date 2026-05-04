@@ -8,7 +8,7 @@ interface PipelineState {
   loading: boolean;
   fetchOrders: () => Promise<void>;
   fetchTrends: () => Promise<void>;
-  fetchInitialData: () => Promise<void>; // Denne manglet!
+  fetchInitialData: () => Promise<void>;
   addOrder: (order: Partial<Order>) => void;
   updateOrder: (videoId: string, updates: Partial<Order>) => void;
   retryOrder: (order: Order) => Promise<void>;
@@ -20,7 +20,6 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   trends: [],
   loading: false,
 
-  // Samlefunksjon som App.tsx forventer
   fetchInitialData: async () => {
     set({ loading: true });
     await Promise.all([
@@ -48,13 +47,20 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
   fetchTrends: async () => {
     try {
+      // Vi bruker updated_at for sortering for å unngå 'viral_score' feilen i Supabase
       const { data, error } = await supabase
         .from('trends')
         .select('*')
-        .order('viral_score', { ascending: false })
+        .order('updated_at', { ascending: false })
         .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Kunne ikke sortere på updated_at, prøver uten sortering...');
+        const { data: fallbackData } = await supabase.from('trends').select('*').limit(50);
+        set({ trends: fallbackData || [] });
+        return;
+      }
+      
       set({ trends: data || [] });
     } catch (err) {
       console.error('Feil ved henting av trender:', err);
