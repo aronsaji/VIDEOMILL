@@ -256,7 +256,7 @@ export default function Factory() {
                   <button
                     key={lang}
                     onClick={() => setLanguage(lang)}
-                    className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${language === lang ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'bg-transparent border-white/5 text-gray-600 hover:text-white hover:border-white/10'}`}
+                    className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${language === lang ? 'bg-neon-cyan text-black border-neon-cyan shadow-[0_0_15px_rgba(0,245,255,0.3)]' : 'bg-transparent border-white/5 text-gray-600 hover:text-white hover:border-white/10'}`}
                   >
                     {lang}
                   </button>
@@ -278,7 +278,7 @@ export default function Factory() {
             <button
               onClick={handleStartProduction}
               disabled={!topic || isProducing}
-              className="w-full py-6 bg-white text-black font-black uppercase tracking-[0.3em] text-xs rounded-[24px] hover:bg-neon-cyan hover:text-white transition-all shadow-xl hover:shadow-neon-cyan/20 disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-4 group"
+              className="w-full py-6 bg-neon-cyan text-black font-black uppercase tracking-[0.3em] text-xs rounded-[24px] hover:bg-white transition-all shadow-xl hover:shadow-neon-cyan/20 disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-4 group"
             >
               {isProducing ? (
                 <>

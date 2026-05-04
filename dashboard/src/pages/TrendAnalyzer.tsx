@@ -210,7 +210,7 @@ export default function TrendAnalyzer() {
                 <div className="mt-10 pt-10 border-t border-white/5 space-y-8">
                   <div className="flex flex-wrap gap-2.5">
                     {trend.tags?.slice(0, 3).map(tag => (
-                      <span key={tag} className="text-[9px] font-black px-4 py-2 bg-white/5 text-gray-500 rounded-[14px] border border-white/5 uppercase tracking-widest italic group-hover:border-white/10 group-hover:text-gray-400">
+                      <span key={tag} className="text-[11px] font-black px-5 py-2.5 bg-white/5 text-gray-400 rounded-[14px] border border-white/5 uppercase tracking-[0.1em] italic group-hover:border-white/10 group-hover:text-white transition-all">
                         #{tag}
                       </span>
                     ))}

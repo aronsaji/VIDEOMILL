@@ -106,7 +106,7 @@ export default function Dashboard() {
                 <p className="text-gray-500 max-w-sm mx-auto text-xs font-medium leading-relaxed uppercase tracking-widest italic">The production grid is currently idle. Initialize a new synthesis cycle at the Factory node.</p>
                 <button 
                   onClick={() => navigate('/factory')}
-                  className="mt-10 px-12 py-4 bg-white text-black hover:bg-neon-purple hover:text-white rounded-[20px] font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl hover:shadow-neon-purple/20"
+                  className="mt-10 px-12 py-4 bg-neon-purple text-white hover:bg-white hover:text-black rounded-[20px] font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl hover:shadow-neon-purple/20"
                 >
                   {t('dash.enter_factory')}
                 </button>
@@ -128,10 +128,10 @@ export default function Dashboard() {
                         {order.title || order.topic}
                       </h4>
                       <div className="flex gap-2">
-                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-gray-500`}>
+                        <span className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-gray-400`}>
                           {order.language?.toUpperCase()}
                         </span>
-                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-neon-purple/10 border border-neon-purple/20 text-neon-purple`}>
+                        <span className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest bg-neon-purple/10 border border-neon-purple/20 text-neon-purple`}>
                           9:16_VERT
                         </span>
                       </div>

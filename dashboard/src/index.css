@@ -23,6 +23,7 @@
 .text-\[9px\], .text-\[10px\], .text-xs {
   color: #ffffff !important;
   font-weight: 900 !important;
+  font-size: 11px !important;
 }
 
 body {
