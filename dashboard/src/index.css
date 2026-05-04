@@ -42,7 +42,6 @@ body {
 
 .animate-glitch:hover {
   animation: glitch 0.2s infinite;
-  text-shadow: 2px 0 #ff00ff, -2px 0 #00f5ff;
 }
 
 /* Floating Particles Background */
@@ -54,11 +53,11 @@ body {
 }
 
 .neon-glow-purple {
-  filter: drop-shadow(0 0 10px rgba(188, 19, 254, 0.4));
+  filter: drop-shadow(0 0 2px rgba(188, 19, 254, 0.3));
 }
 
 .neon-glow-cyan {
-  filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.4));
+  filter: drop-shadow(0 0 2px rgba(0, 245, 255, 0.3));
 }
 
 /* Custom Scrollbar */
@@ -76,13 +75,12 @@ body {
   @apply relative overflow-hidden px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all duration-300;
   background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink));
   color: white;
-  box-shadow: 0 5px 20px rgba(188, 19, 254, 0.4);
+  box-shadow: 0 2px 10px rgba(188, 19, 254, 0.2);
 }
 
 .btn-cyber:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(188, 19, 254, 0.6);
-  letter-spacing: 0.2em;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(188, 19, 254, 0.3);
 }
 
 .btn-cyber:active {
