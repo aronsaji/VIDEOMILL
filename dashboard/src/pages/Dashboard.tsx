@@ -75,7 +75,8 @@ export default function Dashboard() {
     trends = [], 
     fetchInitialData, 
     fetchOrders,
-    isInitialLoaded 
+    isInitialLoaded,
+    error: storeError 
   } = usePipelineStore();
 
   useEffect(() => {
@@ -137,6 +138,24 @@ export default function Dashboard() {
     published: safeOrders.filter(o => o && o.status === 'published').length,
     failed: safeOrders.filter(o => o && (o.status === 'failed' || o.status === 'needs_attention')).length,
   };
+
+  if (storeError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 p-10 bg-red-500/5 border border-red-500/20 rounded-3xl">
+        <AlertTriangle size={50} className="text-red-500" />
+        <div className="text-center space-y-2">
+          <h2 className="text-xl font-bold text-white">Tilkoblingsfeil</h2>
+          <p className="text-gray-400 font-mono text-sm max-w-md">{storeError}</p>
+        </div>
+        <button 
+          onClick={() => fetchInitialData()}
+          className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all border border-white/10"
+        >
+          Prøv på nytt
+        </button>
+      </div>
+    );
+  }
 
   if (!isInitialLoaded && safeOrders.length === 0 && safeTrends.length === 0) {
     return (
