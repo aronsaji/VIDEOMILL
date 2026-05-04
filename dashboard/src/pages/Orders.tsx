@@ -1,9 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
-import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader, RefreshCw, Film } from 'lucide-react';
+import { ShoppingCart, Plus, Filter, Clock, CheckCircle2, AlertTriangle, Loader, RefreshCw, Film, User, Users } from 'lucide-react';
 import { triggerProduction } from '../lib/api';
 import type { OrderStatus } from '../types';
+
+// Auto-voice mapping logic
+const VOICE_MAP: Record<string, Record<string, string>> = {
+  'Norsk': { 'Mann': 'nb-NO-FinnNeural', 'Dame': 'nb-NO-PernilleNeural' },
+  'Engelsk': { 'Mann': 'en-US-AndrewNeural', 'Dame': 'en-US-AvaNeural' },
+  'Svensk': { 'Mann': 'sv-SE-MattiasNeural', 'Dame': 'sv-SE-SofieNeural' },
+  'Tamil': { 'Mann': 'ta-IN-ValluvarNeural', 'Dame': 'ta-IN-PallaviNeural' },
+  'Hindi': { 'Mann': 'hi-IN-MadhurNeural', 'Dame': 'hi-IN-SwararaNeural' },
+};
+
+const LANGUAGES = [
+  { name: 'Norsk', flag: '🇳🇴' },
+  { name: 'Engelsk', flag: '🇬🇧' },
+  { name: 'Svensk', flag: '🇸🇪' },
+  { name: 'Tamil', flag: '🇮🇳' },
+  { name: 'Hindi', flag: '🇮🇳' },
+];
 
 export default function Orders() {
   const { orders = [], fetchOrders } = usePipelineStore();
@@ -12,30 +29,29 @@ export default function Orders() {
   
   // Form states
   const [topic, setTopic] = useState('');
-  const [styleTone, setStyleTone] = useState('⚡ Engaging');
-  const [targetAudience, setTargetAudience] = useState('🎮 Youth (18–25)');
-  const [aiVoice, setAiVoice] = useState('🗣️ Nova (Female)');
-  const [videoFormat, setVideoFormat] = useState('📱 9:16 (Vertical)');
-  const [platforms, setPlatforms] = useState<string[]>(['TikTok', 'YouTube Shorts']);
+  const [gender, setGender] = useState<'Mann' | 'Dame'>('Dame');
   const [language, setLanguage] = useState('Norsk');
   const [instructions, setInstructions] = useState('');
 
-  // Hent ordrer når siden lastes
   useEffect(() => {
     fetchOrders();
   }, []);
 
   const handleCreateOrder = async () => {
     if (!topic) return;
+
+    // AUTO-SELECT VOICE
+    const selectedVoice = VOICE_MAP[language]?.[gender] || 'nb-NO-PernilleNeural';
+
     const success = await triggerProduction({
       action: 'MANUAL_START',
       title: topic,
       topic: topic,
-      style_tone: styleTone,
-      target_audience: targetAudience,
-      video_format: videoFormat,
-      ai_voice: aiVoice,
-      platforms: platforms.map(p => p.toLowerCase().split(' ')[0]),
+      style_tone: '⚡ Engaging',
+      target_audience: 'Global',
+      video_format: '📱 9:16 (Vertical)',
+      ai_voice: selectedVoice,
+      platforms: ['tiktok', 'youtube'],
       language,
       custom_instructions: instructions
     });
@@ -43,13 +59,13 @@ export default function Orders() {
     if (success) {
       setShowForm(false);
       setTopic('');
-      fetchOrders(); // Hent på nytt for å se den nye ordren
+      setInstructions('');
+      fetchOrders();
     } else {
-      alert('Kunne ikke koble til n8n-serveren. Kontroller at den kjører!');
+      alert('Kunne ikke starte produksjonen. Sjekk n8n!');
     }
   };
 
-  // Sikkerhets-sjekk for orders array
   const safeOrders = Array.isArray(orders) ? orders : [];
   const filteredOrders = statusFilter === 'all' 
     ? safeOrders 
@@ -69,7 +85,6 @@ export default function Orders() {
           <button 
             onClick={() => fetchOrders()}
             className="p-2.5 bg-white/5 text-gray-400 rounded-xl hover:bg-white/10 transition-all border border-white/5"
-            title="Oppdater liste"
           >
             <RefreshCw size={18} />
           </button>
@@ -78,7 +93,7 @@ export default function Orders() {
             className="flex items-center gap-2 px-5 py-2.5 bg-neon-cyan text-black rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(0,245,255,0.3)] hover:scale-105"
           >
             <Plus size={18} />
-            Opprett Video
+            Ny Video
           </button>
         </div>
       </div>
@@ -86,44 +101,94 @@ export default function Orders() {
       <AnimatePresence>
         {showForm && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="bg-surface/80 border border-neon-cyan/20 rounded-2xl p-6 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-surface/80 border border-neon-cyan/20 rounded-2xl p-8 backdrop-blur-xl shadow-[0_0_40px_rgba(0,245,255,0.1)] overflow-hidden"
           >
-            <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-              <Plus size={20} className="text-neon-cyan" />
-              Ny Videobestilling
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-neon-cyan/70 uppercase">Tittel / Tema</label>
-                  <input value={topic} onChange={e => setTopic(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-neon-cyan/50 transition-all" placeholder="Hva skal videoen handle om?" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              {/* Left Column: Input */}
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-mono text-neon-cyan uppercase tracking-tighter">Tittel / Tema</label>
+                  <input 
+                    value={topic} 
+                    onChange={e => setTopic(e.target.value)} 
+                    className="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/20 transition-all outline-none text-lg" 
+                    placeholder="Hva skal videoen handle om?" 
+                  />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-neon-cyan/70 uppercase">Spesielle instrukser</label>
-                  <textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-neon-cyan/50 transition-all resize-none" placeholder="F.eks: 'Bruk en dramatisk stemme'..." />
+                <div className="space-y-2">
+                  <label className="text-xs font-mono text-neon-cyan uppercase tracking-tighter">Spesielle instrukser (Valgfritt)</label>
+                  <textarea 
+                    value={instructions} 
+                    onChange={e => setInstructions(e.target.value)} 
+                    rows={4} 
+                    className="w-full bg-black/60 border border-white/10 rounded-xl px-5 py-4 text-white focus:border-neon-cyan/50 transition-all resize-none outline-none" 
+                    placeholder="F.eks: 'Gjør stemmen ekstra entusiastisk'..." 
+                  />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-4">
-                    <label className="text-xs font-mono text-gray-500 uppercase">Stemme</label>
-                    <select value={aiVoice} onChange={e => setAiVoice(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white">
-                       {['🗣️ Nova (Female)', '🗣️ Echo (Male)', '🗣️ Onyx (Deep)'].map(v => <option key={v} value={v}>{v}</option>)}
-                    </select>
-                 </div>
-                 <div className="space-y-4">
-                    <label className="text-xs font-mono text-gray-500 uppercase">Språk</label>
-                    <select value={language} onChange={e => setLanguage(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-sm text-white">
-                       {['Norsk', 'Engelsk', 'Svensk'].map(v => <option key={v} value={v}>{v}</option>)}
-                    </select>
-                 </div>
+
+              {/* Right Column: Buttons */}
+              <div className="space-y-8">
+                {/* Gender Toggle */}
+                <div className="space-y-3">
+                  <label className="text-xs font-mono text-gray-400 uppercase tracking-widest">Velg Stemme-Kjønn</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['Dame', 'Mann'].map((g) => (
+                      <button
+                        key={g}
+                        onClick={() => setGender(g as any)}
+                        className={`flex items-center justify-center gap-3 py-4 rounded-xl border-2 transition-all duration-300 font-bold ${
+                          gender === g 
+                            ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan shadow-[0_0_15px_rgba(0,245,255,0.2)]'
+                            : 'bg-black/40 border-white/5 text-gray-500 hover:border-white/20'
+                        }`}
+                      >
+                        {g === 'Dame' ? <User size={18} /> : <Users size={18} />}
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Language Grid */}
+                <div className="space-y-3">
+                  <label className="text-xs font-mono text-gray-400 uppercase tracking-widest">Velg Språk</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.name}
+                        onClick={() => setLanguage(lang.name)}
+                        className={`flex flex-col items-center justify-center py-3 rounded-xl border-2 transition-all duration-300 ${
+                          language === lang.name 
+                            ? 'bg-neon-cyan/10 border-neon-cyan text-neon-cyan shadow-[0_0_15px_rgba(0,245,255,0.1)]'
+                            : 'bg-black/40 border-white/5 text-gray-500 hover:border-white/20'
+                        }`}
+                      >
+                        <span className="text-xl mb-1">{lang.flag}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-tight">{lang.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 flex items-center justify-between">
+                  <p className="text-[10px] font-mono text-gray-500 italic">
+                    AI velger automatisk: <span className="text-neon-cyan">{VOICE_MAP[language]?.[gender]}</span>
+                  </p>
+                  <div className="flex gap-4">
+                    <button onClick={() => setShowForm(false)} className="px-6 py-2 text-sm text-gray-500 hover:text-white transition-colors">Avbryt</button>
+                    <button 
+                      onClick={handleCreateOrder} 
+                      className="px-10 py-3 bg-neon-cyan text-black rounded-xl font-black uppercase tracking-tighter hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,245,255,0.4)]"
+                    >
+                      Start Produksjon
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-white/5">
-              <button onClick={() => setShowForm(false)} className="px-6 py-2 text-sm text-gray-400 hover:text-white transition-colors">Avbryt</button>
-              <button onClick={handleCreateOrder} className="px-8 py-2 bg-neon-cyan text-black rounded-xl font-bold hover:scale-105 transition-all">Start Produksjon</button>
             </div>
           </motion.div>
         )}
@@ -160,6 +225,7 @@ export default function Orders() {
                           {(order.platform_destinations || []).map(p => (
                             <span key={p} className="text-[9px] font-mono px-1.5 py-0.5 bg-white/5 text-gray-500 rounded uppercase">{p}</span>
                           ))}
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 bg-neon-cyan/5 text-neon-cyan/50 rounded uppercase">{order.language}</span>
                         </div>
                       </div>
                     </td>
@@ -187,16 +253,6 @@ export default function Orders() {
                             />
                           </div>
                         )}
-
-                        {order.status === 'failed' && (
-                          <button
-                            onClick={() => usePipelineStore.getState().retryOrder(order)}
-                            className="flex items-center gap-1.5 w-fit px-3 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-[10px] font-bold uppercase transition-all"
-                          >
-                            <RefreshCw size={10} />
-                            Prøv Igjen
-                          </button>
-                        )}
                       </div>
                     </td>
                     <td className="p-5 text-right font-mono text-[10px] text-gray-500">
@@ -207,11 +263,6 @@ export default function Orders() {
               })}
             </tbody>
           </table>
-          {filteredOrders.length === 0 && (
-            <div className="p-20 text-center text-gray-600 font-mono text-sm">
-              Ingen videoer i denne kategorien.
-            </div>
-          )}
         </div>
       </div>
     </div>
