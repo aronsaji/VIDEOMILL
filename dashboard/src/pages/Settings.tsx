@@ -37,8 +37,8 @@ export default function Settings() {
                 onClick={() => setLanguage(lang.id as any)}
                 className={`px-10 py-5 rounded-[24px] text-xs font-black transition-all border uppercase tracking-[0.2em] italic flex items-center gap-4 ${
                   language === lang.id 
-                    ? 'bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.2)]' 
-                    : 'bg-white/5 text-gray-600 border-white/5 hover:border-white/20 hover:text-white'
+                    ? 'bg-neon-cyan text-black border-neon-cyan shadow-[0_0_20px_rgba(0,245,255,0.3)]' 
+                    : 'bg-white/5 text-gray-400 border-white/5 hover:border-white/20 hover:text-white'
                 }`}
               >
                 {lang.label}
