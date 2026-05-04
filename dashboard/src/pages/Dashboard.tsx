@@ -4,6 +4,8 @@ import { Activity, Play, ArrowUpRight, Flame, CheckCircle2, Clock, AlertTriangle
 import { useNavigate } from 'react-router-dom';
 import type { Order, OrderStatus } from '../types';
 import React, { useState } from 'react';
+import { triggerProduction } from '../lib/api';
+
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   queued:           { label: 'Queued',           color: 'text-gray-400',      bg: 'bg-gray-400/10 border-gray-400/20',      icon: Clock },
@@ -78,21 +80,17 @@ export default function Dashboard() {
     const finalLanguage = trendLanguage === 'Auto' ? (trend.language || 'English') : trendLanguage;
 
     try {
-      // THE REAL TRIGGER: Sending to n8n
-      const response = await fetch('http://localhost:5678/webhook/viranode-retry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'FORCE_START',
-          trend_id: trend.id,
-          title: trend.title,
-          topic: trend.tags[0] || 'Trend',
-          language: finalLanguage,
-          platforms: ['tiktok', 'youtube', 'snapchat']
-        })
+      // THE REAL TRIGGER: Using centralized API utility
+      const success = await triggerProduction({
+        action: 'FORCE_START',
+        trend_id: trend.id,
+        title: trend.title,
+        topic: trend.tags[0] || 'Trend',
+        language: finalLanguage,
+        platforms: ['tiktok', 'youtube', 'snapchat']
       });
-
-      if (response.ok) {
+ 
+      if (success) {
         addOrder({
           title: trend.title,
           topic: trend.tags[0] || 'Trend',
@@ -105,6 +103,7 @@ export default function Dashboard() {
         alert('Kunne ikke starte n8n-pipelinen. Sjekk om n8n kjører!');
       }
     } catch (err) {
+
       console.error('Fetch error:', err);
       // Still add locally for UI feedback if n8n is unreachable
       addOrder({

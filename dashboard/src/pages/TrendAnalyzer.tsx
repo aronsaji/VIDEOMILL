@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
 import { Flame, Video, RefreshCw, Plus, ExternalLink, ArrowUpRight, X, Monitor, Smartphone, Send, Heart, CheckCircle, Activity } from 'lucide-react';
 import type { TrendingTopic } from '../types';
+import { triggerProduction } from '../lib/api';
+
 
 const INITIAL_SOCIAL_ACCOUNTS = [
   { id: 'acc1', platform: 'youtube', handle: '@VideoMillOfficial', icon: Monitor },
@@ -73,6 +75,20 @@ export default function TrendAnalyzer() {
     const finalLanguage = language === 'Auto' ? (selectedTrend?.language || 'English') : language;
     const finalStyle = styleTone === 'Auto' ? 'General' : styleTone;
     const finalAudience = targetAudience === 'Auto' ? (selectedTrend?.country || 'Global') : targetAudience;
+    const platforms = accounts.filter(a => selectedChannels.includes(a.id)).map(a => a.platform);
+
+    triggerProduction({
+      action: 'TREND_START',
+      trend_id: selectedTrend?.id,
+      title: selectedTrend?.title || 'Auto Trend Video',
+      topic: selectedTrend?.tags[0] || 'Trend',
+      style_tone: finalStyle,
+      target_audience: finalAudience,
+      video_format: videoFormat,
+      ai_voice: aiVoice,
+      language: finalLanguage,
+      platforms: platforms
+    });
 
     usePipelineStore.getState().addOrder({
       title: selectedTrend?.title || 'Auto Trend Video',
@@ -82,8 +98,9 @@ export default function TrendAnalyzer() {
       video_format: videoFormat,
       ai_voice: aiVoice,
       language: finalLanguage,
-      platform_destinations: accounts.filter(a => selectedChannels.includes(a.id)).map(a => a.platform) as any,
+      platform_destinations: platforms as any,
     });
+
 
     setTimeout(() => {
       setIsOrdering(false);

@@ -1,9 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity, LayoutDashboard, Settings, Video, Terminal } from 'lucide-react';
+import { Activity, LayoutDashboard, Settings, Video, Terminal, Film, Library, List } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
-const SidebarIcon = ({ icon: Icon, active = false }: { icon: any; active?: boolean }) => (
-  <div
+const SidebarIcon = ({ icon: Icon, to, active = false }: { icon: any; to: string; active?: boolean }) => (
+  <Link
+    to={to}
     className={`p-3 rounded-xl cursor-pointer transition-all duration-300 ${
       active
         ? 'bg-neon-cyan/10 text-neon-cyan shadow-[0_0_15px_rgba(0,245,255,0.2)]'
@@ -11,10 +13,12 @@ const SidebarIcon = ({ icon: Icon, active = false }: { icon: any; active?: boole
     }`}
   >
     <Icon size={24} />
-  </div>
+  </Link>
 );
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+
   return (
     <div className="flex h-screen bg-background overflow-hidden text-gray-200">
       {/* Sidebar */}
@@ -28,12 +32,15 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           <Terminal size={32} />
         </div>
         <nav className="flex flex-col gap-4 flex-1 mt-4">
-          <SidebarIcon icon={LayoutDashboard} active />
-          <SidebarIcon icon={Video} />
-          <SidebarIcon icon={Activity} />
+          <SidebarIcon icon={LayoutDashboard} to="/" active={location.pathname === '/'} />
+          <SidebarIcon icon={Film} to="/auto-series" active={location.pathname === '/auto-series'} />
+          <SidebarIcon icon={Library} to="/library" active={location.pathname === '/library'} />
+          <SidebarIcon icon={List} to="/orders" active={location.pathname === '/orders'} />
+          <SidebarIcon icon={Activity} to="/trends" active={location.pathname === '/trends'} />
         </nav>
-        <SidebarIcon icon={Settings} />
+        <SidebarIcon icon={Settings} to="/settings" active={location.pathname === '/settings'} />
       </motion.aside>
+
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col relative">

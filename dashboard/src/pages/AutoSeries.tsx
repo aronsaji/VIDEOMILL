@@ -4,6 +4,8 @@ import {
   Film, Sparkles, Play, Camera, Smartphone,
   Plus, Minus, Globe, History, Check, ArrowRight
 } from 'lucide-react';
+import { triggerProduction } from '../lib/api';
+
 
 const LANGUAGES = [
   { id: 'ta', label: 'Tamil', flag: '🇮🇳' },
@@ -23,7 +25,8 @@ const PLATFORMS = [
 
 export default function AutoSeries() {
   const [activeTab, setActiveTab] = useState<'new' | 'mine'>('new');
-  
+  const store = usePipelineStore();
+
   // Form State
   const [title, setTitle] = useState('Sesong 1: Muvendar — De tre store Tamil-kongene');
   const [description, setDescription] = useState('Fokus: Chola, Chera og Pandya-dynastiene\nInnhold: Opprinnelsen, de største kongene, handel og de første store militære konfliktene\nVinkling: Episk historiefortelling — som en Netflix-serie om det virkelige Tamil Nadu\nMålgruppe: Tamil-diaspora og historieinteresserte worldwide');
@@ -44,13 +47,41 @@ export default function AutoSeries() {
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
+    if (!title || !description) return;
     setIsGenerating(true);
-    // Simulate generation start
-    setTimeout(() => {
+    
+    try {
+      // Trigger the production pipeline via n8n
+      const success = await triggerProduction({
+        action: 'SERIES_START',
+        title,
+        description,
+        language: LANGUAGES.find(l => l.id === selectedLanguage)?.label || 'Norsk',
+        platforms: selectedPlatforms,
+        season_num: seasonNum,
+        episodes_count: episodesCount,
+        created_at: new Date().toISOString()
+      });
+
+      if (success) {
+        store.addOrder({
+          title: `[SERIE] ${title}`,
+          topic: description.substring(0, 50),
+          platform_destinations: selectedPlatforms,
+          language: selectedLanguage,
+          status: 'queued'
+        });
+        setActiveTab('mine');
+      } else {
+        alert('Kunne ikke koble til n8n. Sjekk om n8n kjører!');
+      }
+    } catch (err) {
+      alert('Nettverksfeil: Kunne ikke sende forespørsel til n8n.');
+    } finally {
       setIsGenerating(false);
-      setActiveTab('mine');
-    }, 2000);
+    }
+
   };
 
   return (

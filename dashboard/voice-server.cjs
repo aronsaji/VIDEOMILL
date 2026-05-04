@@ -5,16 +5,16 @@ const path = require('path');
 const https = require('https');
 
 // --- KONFIGURASJON ---
-const PORT = 3001;
-const FFMPEG_PATH = `C:/VideoMill/NY_VIDEOMILL_V2/ffmpeg-2026-04-30-git-cc3ca17127-full_build/bin/ffmpeg.exe`;
-const BASE_ASSETS_DIR = `C:/VideoMill/VideoMill_Assets`;
-const EDGE_TTS_PATH = `C:/Users/saji_/AppData/Local/Python/pythoncore-3.14-64/Scripts/edge-tts.exe`;
+const PORT = process.env.PORT || 3001;
+const FFMPEG_PATH = process.env.FFMPEG_PATH || `C:/VideoMill/NY_VIDEOMILL_V2/ffmpeg-2026-04-30-git-cc3ca17127-full_build/bin/ffmpeg.exe`;
+const BASE_ASSETS_DIR = process.env.BASE_ASSETS_DIR || `C:/VideoMill/VideoMill_Assets`;
+const EDGE_TTS_PATH = process.env.EDGE_TTS_PATH || `C:/Users/saji_/AppData/Local/Python/pythoncore-3.14-64/Scripts/edge-tts.exe`;
 
-const SUPABASE_URL = 'https://gvthmjfsdawowithwivj.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2dGhtamZzZGF3b3dpdGh3aXZqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTk5NDg0MSwiZXhwIjoyMDkxNTcwODQxfQ.Ej5DRjnlqXFKNbnmZkTyVQOddZiF2Hd5GRH4PuZ67SE';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://gvthmjfsdawowithwivj.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2dGhtamZzZGF3b3dpdGh3aXZqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTk5NDg0MSwiZXhwIjoyMDkxNTcwODQxfQ.Ej5DRjnlqXFKNbnmZkTyVQOddZiF2Hd5GRH4PuZ67SE';
 
-const IMAGE_PROVIDER = 'local'; // 'local' prøver RTX 4080, faller tilbake til skyen
-const FOOOCUS_URL = 'http://127.0.0.1:7865';
+const IMAGE_PROVIDER = process.env.IMAGE_PROVIDER || 'local'; // 'local' prøver RTX 4080, faller tilbake til skyen
+const FOOOCUS_URL = process.env.FOOOCUS_URL || 'http://127.0.0.1:7865';
 
 // --- HJELPEFUNKSJONER ---
 
