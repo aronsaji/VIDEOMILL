@@ -98,7 +98,7 @@ export default function Layout() {
                     relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group
                     ${isActive 
                       ? 'bg-white/5 text-white border border-white/5 shadow-xl' 
-                      : 'text-gray-500 hover:text-white hover:bg-white/[0.02]'}
+                      : 'text-gray-500 hover:text-white hover:bg-neon-cyan/5'}
                   `}
                 >
                   {isActive && (

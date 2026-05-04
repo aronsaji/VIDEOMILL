@@ -103,10 +103,10 @@ export default function Dashboard() {
                   <Video size={48} className="relative z-10" />
                 </div>
                 <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-3">{t('dash.system_standby')}</h3>
-                <p className="text-gray-500 max-w-sm mx-auto text-xs font-medium leading-relaxed uppercase tracking-widest italic">The production grid is currently idle. Initialize a new synthesis cycle at the Factory node.</p>
+                <p className="text-white/70 max-w-sm mx-auto text-sm font-bold leading-relaxed uppercase tracking-widest italic">The production grid is currently idle. Initialize a new synthesis cycle at the Factory node.</p>
                 <button 
                   onClick={() => navigate('/factory')}
-                  className="mt-10 px-12 py-4 bg-neon-purple text-white hover:bg-white hover:text-black rounded-[20px] font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl hover:shadow-neon-purple/20"
+                  className="mt-10 px-12 py-4 bg-neon-purple text-white hover:bg-neon-cyan hover:text-black rounded-[20px] font-black text-[12px] uppercase tracking-[0.3em] transition-all shadow-xl hover:shadow-neon-cyan/40"
                 >
                   {t('dash.enter_factory')}
                 </button>

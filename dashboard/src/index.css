@@ -101,7 +101,7 @@ body {
 
 /* Card Hover */
 .card-cyber {
-  @apply transition-all duration-500 border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#bc13fe]/30;
+  @apply transition-all duration-500 border border-white/5 bg-white/[0.02] hover:bg-neon-purple/5 hover:border-[#bc13fe]/30;
 }
 
 /* HIGH CONTRAST OVERRIDES FOR LEGIBILITY - NUCLEAR VERSION */

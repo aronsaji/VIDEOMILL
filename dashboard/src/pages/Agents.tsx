@@ -204,7 +204,7 @@ export default function Agents() {
               { time: '01:12:30', node: 'SOCIAL', msg: 'Processed 14 engagement signals via YouTube Webhook.', color: 'text-neon-pink' },
               { time: '00:05:12', node: 'SYSTEM', msg: 'Global Command Node re-synchronized successfully.', color: 'text-neon-green' },
             ].map((log, i) => (
-              <div key={i} className="flex items-start gap-6 p-6 bg-black/40 rounded-3xl border border-white/5 text-gray-600 hover:text-white hover:bg-white/[0.03] transition-all group/item cursor-default">
+              <div key={i} className="flex items-start gap-6 p-6 bg-black/40 rounded-3xl border border-white/5 text-gray-600 hover:text-white hover:bg-neon-cyan/5 transition-all group/item cursor-default">
                 <span className={`${log.color} font-black group-hover/item:animate-pulse`}>[{log.time}]</span>
                 <span className="text-gray-400 font-black uppercase tracking-widest">{log.node}</span>
                 <span className="italic font-bold tracking-tight opacity-70 group-hover/item:opacity-100 uppercase">"{log.msg}"</span>

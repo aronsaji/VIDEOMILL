@@ -278,7 +278,7 @@ export default function Factory() {
             <button
               onClick={handleStartProduction}
               disabled={!topic || isProducing}
-              className="w-full py-6 bg-neon-cyan text-black font-black uppercase tracking-[0.3em] text-xs rounded-[24px] hover:bg-white transition-all shadow-xl hover:shadow-neon-cyan/20 disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-4 group"
+              className="w-full py-6 bg-neon-cyan text-black font-black uppercase tracking-[0.3em] text-xs rounded-[24px] hover:bg-neon-purple hover:text-white transition-all shadow-xl hover:shadow-neon-cyan/20 disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-4 group"
             >
               {isProducing ? (
                 <>

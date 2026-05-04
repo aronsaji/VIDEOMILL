@@ -93,19 +93,26 @@ export default function TrendAnalyzer() {
             <select 
               value={countryFilter}
               onChange={e => setCountryFilter(e.target.value)}
-              className="bg-white/[0.02] border border-white/5 rounded-[18px] px-6 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-white hover:bg-white/5 transition-all appearance-none cursor-pointer min-w-[160px]"
+              className="bg-white/5 border border-white/10 rounded-[18px] px-8 py-4 text-[11px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-white hover:bg-neon-cyan/10 transition-all appearance-none cursor-pointer min-w-[200px]"
             >
-              <option value="all">{t('trends.all_regions')}</option>
-              {countries.map(c => <option key={c} value={c} className="bg-[#05060f]">{c.toUpperCase()}</option>)}
+              <option value="all" className="bg-[#05060f]">GLOBAL_ALL_REGIONS</option>
+              <option value="no" className="bg-[#05060f]">NORWAY_NORTH_SEA</option>
+              <option value="us" className="bg-[#05060f]">USA_FEDERAL_NET</option>
+              <option value="uk" className="bg-[#05060f]">UK_CROWN_GRID</option>
+              <option value="de" className="bg-[#05060f]">GERMANY_CORE</option>
+              <option value="in" className="bg-[#05060f]">INDIA_SOUTH_ASIA</option>
             </select>
 
             <select 
               value={languageFilter}
               onChange={e => setLanguageFilter(e.target.value)}
-              className="bg-white/[0.02] border border-white/5 rounded-[18px] px-6 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-white hover:bg-white/5 transition-all appearance-none cursor-pointer min-w-[160px]"
+              className="bg-white/5 border border-white/10 rounded-[18px] px-8 py-4 text-[11px] font-black uppercase tracking-widest outline-none focus:border-neon-cyan/40 text-white hover:bg-neon-cyan/10 transition-all appearance-none cursor-pointer min-w-[200px]"
             >
-              <option value="all">{t('trends.all_languages')}</option>
-              {languages.map(l => <option key={l} value={l} className="bg-[#05060f]">{l.toUpperCase()}</option>)}
+              <option value="all" className="bg-[#05060f]">ALL_LANGUAGES</option>
+              <option value="no" className="bg-[#05060f]">NORSK_PRIMARY</option>
+              <option value="en" className="bg-[#05060f]">ENGLISH_GLOBAL</option>
+              <option value="de" className="bg-[#05060f]">DEUTSCHE_LEVEL_1</option>
+              <option value="hi" className="bg-[#05060f]">HINDI_REGIONAL</option>
             </select>
           </div>
 
@@ -188,12 +195,12 @@ export default function TrendAnalyzer() {
                 
                 <div className="flex justify-between items-start mb-10">
                   <div className="flex items-center gap-3 px-5 py-2.5 bg-neon-cyan/10 rounded-[18px] border border-neon-cyan/20 shadow-lg shadow-neon-cyan/5">
-                    <Flame size={14} className="text-neon-cyan animate-pulse" />
-                    <span className="text-[10px] font-black text-neon-cyan uppercase tracking-[0.2em] italic">
+                    <Flame size={16} className="text-neon-cyan animate-pulse" />
+                    <span className="text-[13px] font-black text-neon-cyan uppercase tracking-[0.2em] italic">
                       {trend.viral_score}% Viral Yield
                     </span>
                   </div>
-                  <div className="px-4 py-2 bg-white/5 rounded-xl text-gray-600 uppercase text-[9px] font-black border border-white/5 tracking-widest italic group-hover:text-white transition-colors">
+                  <div className="px-5 py-2.5 bg-white/5 rounded-xl text-white/90 uppercase text-[12px] font-black border border-white/5 tracking-widest italic group-hover:bg-neon-cyan/20 transition-colors">
                     {trend.platform}
                   </div>
                 </div>
@@ -217,15 +224,15 @@ export default function TrendAnalyzer() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-[10px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
-                      <Globe size={14} className="text-neon-cyan" />
+                    <div className="flex items-center gap-3 text-[12px] font-black font-mono text-white/80 uppercase tracking-widest italic">
+                      <Globe size={16} className="text-neon-cyan" />
                       <span>{trend.country || 'GLOBAL_NODE'}</span>
                     </div>
                     <button 
                       onClick={() => setSelectedTrend(trend)}
-                      className="flex items-center gap-3 bg-white text-black px-6 py-3.5 rounded-[20px] font-black text-[10px] uppercase tracking-[0.2em] italic hover:bg-neon-cyan hover:text-white transition-all shadow-xl active:scale-95"
+                      className="flex items-center gap-3 bg-neon-cyan text-black px-8 py-4 rounded-[20px] font-black text-[12px] uppercase tracking-[0.2em] italic hover:bg-white hover:scale-105 transition-all shadow-xl active:scale-95"
                     >
-                      Analyze <ArrowUpRight size={16} />
+                      Analyze <ArrowUpRight size={18} />
                     </button>
                   </div>
                 </div>

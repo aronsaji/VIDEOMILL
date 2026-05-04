@@ -61,7 +61,7 @@ export default function Archive() {
           </div>
           <button 
             onClick={() => fetchOrders()}
-            className="p-4 bg-white/5 text-gray-400 rounded-2xl hover:bg-white/10 transition-all border border-white/5 hover:text-white"
+            className="p-4 bg-white/5 text-gray-400 rounded-2xl hover:bg-neon-cyan/10 transition-all border border-white/5 hover:text-white"
           >
             <RefreshCw size={20} />
           </button>
@@ -109,7 +109,7 @@ export default function Archive() {
                 </tr>
               ) : (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-white/[0.02] transition-all group cursor-pointer">
+                  <tr key={order.id} className="hover:bg-neon-purple/5 transition-all group cursor-pointer">
                     <td className="px-10 py-8">
                        <div className="flex items-center gap-3">
                           <div className="w-2 h-2 rounded-full bg-white/10 group-hover:bg-neon-cyan transition-colors" />
