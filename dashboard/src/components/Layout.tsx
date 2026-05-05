@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Factory, Zap, Radar, 
   Bot, Archive, Settings, Menu, X, 
-  LogOut, User, Activity, Shield, Terminal
+  LogOut, User, Activity, Shield, Terminal, Globe
 } from 'lucide-react';
 import Logo from './Logo';
 import { triggerProduction } from '../lib/api';

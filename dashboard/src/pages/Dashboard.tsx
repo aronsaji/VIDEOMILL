@@ -15,6 +15,7 @@ import {
   Monitor,
   Mic2,
   Share2,
+  Radar,
   Database as DatabaseIcon
 } from 'lucide-react';
 
