@@ -132,20 +132,20 @@ async function updateStatus(id, status, extra = {}) {
 async function callFooocus(prompt, dest) {
   const cinematicPrompt = `${prompt}, cinematic shot, 8k resolution, highly detailed, masterpiece, stunning lighting, unreal engine 5 render, professional photography, viral aesthetic`;
   
-  // Vi prøver flere vanlige signaturer for Fooocus API
   const attempts = [
     { fn: 32, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] },
-    { fn: 33, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", "png", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] }
+    { fn: 33, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", "png", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] },
+    { fn: 33, data: [cinematicPrompt, "text, blurry", ["Fooocus V2"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true] }
   ];
 
   for (const attempt of attempts) {
     try {
-      const success = await new Promise((resolve, reject) => {
+      const success = await new Promise((resolve) => {
         const body = JSON.stringify({ fn_index: attempt.fn, data: attempt.data });
         const req = http.request(`${FOOOCUS_URL}/api/predict`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
-          timeout: 120000 
+          timeout: 180000 
         }, (res) => {
           let resBody = '';
           res.on('data', chunk => resBody += chunk);
@@ -157,17 +157,18 @@ async function callFooocus(prompt, dest) {
                 resolve(true);
               } else resolve(false);
             } else {
-              console.log(`⚠️ Fooocus Error [fn:${attempt.fn}]: ${res.statusCode} - ${resBody.slice(0, 100)}`);
+              console.log(`⚠️ Fooocus Error [fn:${attempt.fn}]: ${res.statusCode} - ${resBody.slice(0, 150)}`);
               resolve(false);
             }
           });
         });
-        req.on('error', () => resolve(false));
+        req.on('error', (err) => { console.log(`❌ Fooocus Connection Error: ${err.message}`); resolve(false); });
+        req.on('timeout', () => { req.destroy(); console.log(`🕒 Fooocus Timeout [fn:${attempt.fn}]`); resolve(false); });
         req.write(body);
         req.end();
       });
       if (success) return true;
-    } catch (e) {}
+    } catch (e) { console.log(`❌ Internal Error: ${e.message}`); }
   }
   return false;
 }
