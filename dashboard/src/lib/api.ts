@@ -70,3 +70,36 @@ export const retryProduction = async (videoId: string) => {
     return false;
   }
 };
+
+export const sendToN8n = async (payload: any) => {
+  console.group('📡 N8N_DIRECT_DISPATCH');
+  console.log('Payload:', payload);
+  
+  try {
+    const WEBHOOK_URL = 'https://n8n.videomill.ai/webhook/production-dispatch'; // Replace with real URL if known
+    
+    // Also save to Supabase for tracking
+    await triggerProduction({
+      title: payload.topic || payload.title,
+      ...payload
+    });
+
+    // Optional: Direct webhook call if n8n isn't listening to DB
+    /*
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) throw new Error('Network response was not ok');
+    */
+
+    console.log('✅ Dispatch sequence complete');
+    console.groupEnd();
+    return true;
+  } catch (err: any) {
+    console.error('❌ Dispatch failure:', err.message);
+    console.groupEnd();
+    return false;
+  }
+};

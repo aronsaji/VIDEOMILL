@@ -5,17 +5,15 @@ import {
   Settings2, Activity, Shield, 
   ChevronRight, Play, Globe, 
   Sparkles, History, CheckCircle2, 
-  AlertCircle, Clock, Database
+  AlertCircle, Clock, Database, Radio,
+  Terminal, Box, ArrowUpRight, Plus,
+  Volume2, Maximize2, SkipBack, SkipForward,
+  Type, Image as ImageIcon, Music, Film,
+  Share2, Download, Trash2, Save
 } from 'lucide-react';
 import { usePipelineStore } from '../store/pipelineStore';
 import { triggerProduction } from '../lib/api';
 import { useI18nStore } from '../store/i18nStore';
-
-const AGENTS = [
-  { id: 'agent-w', name: 'NEURAL_WRITER_v4', role: 'SCRIPT_SYNTHESIS', status: 'ACTIVE', color: 'text-[#BD00FF]', icon: PenTool },
-  { id: 'agent-e', name: 'PIXEL_EDITOR_v9', role: 'VISUAL_ASSEMBLY', status: 'WAITING', color: 'text-[#00f5ff]', icon: Layers },
-  { id: 'agent-r', name: 'RENDER_FORCE_RTX', role: 'FINAL_EXPORT', status: 'ONLINE', color: 'text-[#6bff83]', icon: Cpu },
-];
 
 export default function Factory() {
   const { t } = useI18nStore();
@@ -33,10 +31,6 @@ export default function Factory() {
     };
   }, [fetchOrders, subscribeToChanges]);
 
-  const activeCycles = Array.isArray(orders) 
-    ? orders.filter(o => o.status !== 'completed' && o.status !== 'failed').length 
-    : 0;
-
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     
@@ -46,9 +40,7 @@ export default function Factory() {
       topic: prompt,
       language: selectedLanguage,
       voice: selectedVoice,
-      timestamp: new Date().toISOString(),
-      priority: 'CRITICAL',
-      source: 'FACTORY_DIRECT_DISPATCH'
+      title: prompt.slice(0, 30) + (prompt.length > 30 ? '...' : '')
     };
 
     try {
@@ -62,243 +54,170 @@ export default function Factory() {
     }
   };
 
-  const getAgentStatus = (agentId: string) => {
-    if (isGenerating) {
-       if (agentId === 'agent-w') return { label: 'SYNTHESIZING', color: 'text-[#BD00FF]', pulse: true };
-       return { label: 'PREPARING', color: 'text-zinc-500', pulse: false };
-    }
-
-    if (activeCycles > 0) {
-       if (agentId === 'agent-w') return { label: 'IDLE', color: 'text-zinc-600', pulse: false };
-       if (agentId === 'agent-e') return { label: 'ASSEMBLING', color: 'text-[#00f5ff]', pulse: true };
-       if (agentId === 'agent-r') return { label: 'RENDERING', color: 'text-[#6bff83]', pulse: true };
-    }
-
-    return null;
-  };
-
   return (
-    <div className="max-w-[1600px] mx-auto space-y-10">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative border-b border-white/5 pb-8">
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 text-[#BD00FF] font-data-mono text-[11px] font-black uppercase tracking-[0.4em] mb-3">
-            <Activity size={16} />
-            NODE_ORCHESTRATION_v2.4
-          </div>
-          <h1 className="font-headline text-[52px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
-            {t('THE_FACTORY')}
+    <div className="h-[calc(100vh-120px)] flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Editor Header */}
+      <div className="flex justify-between items-center bg-[#050505] p-4 border border-white/5 rounded-2xl">
+        <div className="flex items-center gap-4">
+          <div className="h-4 w-[1px] bg-white/10" />
+          <h1 className="text-sm font-black text-white uppercase tracking-widest italic">
+            Production_Lab_<span className="text-primary-container">V14.4</span>
           </h1>
         </div>
-        
-        <div className="flex gap-6 relative z-10">
-          <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#BD00FF]/20 bg-[#BD00FF]/5 clipped-corner">
-             <span className="font-label-caps text-[12px] text-zinc-400 uppercase tracking-[0.3em] mb-2 font-bold">{t('ACTIVE_CYCLES')}</span>
-             <span className="font-headline text-5xl font-black text-white italic tracking-tighter">
-               {String(activeCycles).padStart(2, '0')}
-             </span>
-          </div>
-          <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#6bff83]/20 bg-[#6bff83]/5 clipped-corner">
-             <span className="font-label-caps text-[12px] text-zinc-400 uppercase tracking-[0.3em] mb-2 font-bold">{t('QUEUE_DEPTH')}</span>
-             <span className="font-headline text-5xl font-black text-[#6bff83] italic tracking-tighter">
-               {String(orders.length || 0).padStart(2, '0')}
-             </span>
-          </div>
+        <div className="flex items-center gap-3">
+          <button className="px-4 py-2 bg-white/5 text-zinc-400 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
+            Drafts
+          </button>
+          <button className="px-6 py-2 bg-primary-container text-black rounded-lg text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:brightness-110 transition-all">
+            Save Project
+          </button>
         </div>
-      </header>
+      </div>
 
-      <div className="grid grid-cols-12 gap-8">
-        {/* Left Column: Automated Workstations */}
-        <div className="col-span-12 lg:col-span-4 space-y-8">
-           <section className="panel-kinetic p-8 space-y-8 clipped-corner border-white/5">
-              <div className="flex items-center gap-3 pb-4 border-b border-white/5">
-                 <Shield size={18} className="text-[#BD00FF]" />
-                 <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">AGENT_ORCHESTRATION_NODES</h2>
+      <div className="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
+        {/* Left Toolbar */}
+        <div className="col-span-1 bg-[#050505] border border-white/5 rounded-2xl flex flex-col items-center py-6 gap-8">
+          {[
+            { icon: Type, label: 'Text' },
+            { icon: ImageIcon, label: 'Media' },
+            { icon: Music, label: 'Audio' },
+            { icon: Layers, label: 'Scenes' },
+            { icon: Sparkles, label: 'AI' },
+            { icon: Settings2, label: 'Config' }
+          ].map((item, i) => (
+            <button key={i} className="group relative flex flex-col items-center gap-2">
+              <div className="p-3 text-zinc-600 group-hover:text-primary-container group-hover:bg-primary-container/10 rounded-xl transition-all">
+                <item.icon size={20} />
               </div>
-              
-              <div className="space-y-4">
-                 {AGENTS.map((agent, i) => {
-                    const dynamic = getAgentStatus(agent.id);
-                    const statusLabel = dynamic?.label || agent.status;
-                    const statusColor = dynamic?.color || (agent.status === 'ACTIVE' ? 'text-[#6bff83]' : 'text-zinc-600');
-                    const isPulsing = dynamic?.pulse || agent.status === 'ACTIVE';
-
-                    return (
-                      <motion.div 
-                        key={agent.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className={`p-6 bg-white/[0.01] border transition-all cursor-crosshair clipped-corner-sm ${
-                           dynamic?.pulse ? 'border-[#BD00FF]/40 bg-[#BD00FF]/5' : 'border-white/5'
-                        }`}
-                      >
-                         <div className="flex justify-between items-start mb-4">
-                            <div className={`p-4 bg-black/60 border border-white/5 clipped-corner-sm ${agent.color}`}>
-                               <agent.icon size={22} className={dynamic?.pulse ? 'animate-pulse' : ''} />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className={`font-data-mono text-[9px] px-2 py-0.5 font-black italic tracking-widest ${statusColor}`}>
-                                {statusLabel}
-                              </span>
-                              <div className={`w-1.5 h-1.5 rounded-full ${isPulsing ? 'bg-[#6bff83]' : 'bg-zinc-800'} ${isPulsing ? 'animate-pulse-led' : ''}`} />
-                            </div>
-                         </div>
-                         <h3 className="font-headline text-xl font-black text-white uppercase italic mb-1 tracking-tight">
-                           {agent.name}
-                         </h3>
-                         <p className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">{agent.role}</p>
-                      </motion.div>
-                    );
-                 })}
-              </div>
-           </section>
-
-           <section className="panel-kinetic p-8 clipped-corner border-white/5 bg-gradient-to-br from-[#BD00FF]/5 to-transparent">
-              <div className="flex items-center justify-between mb-8">
-                 <div className="flex items-center gap-3">
-                    <Database size={18} className="text-[#00f5ff]" />
-                    <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">LIVE_QUEUE_FEED</h2>
-                 </div>
-                 <span className="font-data-mono text-[9px] text-[#00f5ff] font-black animate-pulse">STREAMING_LIVE</span>
-              </div>
-              
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                 <AnimatePresence mode="popLayout">
-                    {orders.slice(0, 5).map((order) => (
-                      <motion.div 
-                        key={order.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="p-4 bg-white/[0.02] border border-white/5 clipped-corner-sm flex flex-col gap-2"
-                      >
-                         <div className="flex justify-between items-start">
-                            <span className="font-headline text-[13px] font-black text-white uppercase italic truncate max-w-[150px]">
-                              {order.topic || 'NEURAL_TASK'}
-                            </span>
-                            <span className="font-data-mono text-[9px] text-zinc-500">#{String(order.id).slice(0,6)}</span>
-                         </div>
-                         <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                               {order.status === 'completed' ? <CheckCircle2 size={12} className="text-[#6bff83]" /> : 
-                                order.status === 'failed' ? <AlertCircle size={12} className="text-red-500" /> :
-                                <Clock size={12} className="text-[#BD00FF] animate-spin-slow" />}
-                               <span className="font-data-mono text-[9px] text-zinc-400 uppercase">{order.status || 'PENDING'}</span>
-                            </div>
-                            <span className="font-data-mono text-[9px] text-[#BD00FF] font-black">{order.progress || 0}%</span>
-                         </div>
-                      </motion.div>
-                    ))}
-                 </AnimatePresence>
-              </div>
-           </section>
+              <span className="text-[8px] font-black uppercase tracking-widest text-zinc-800 group-hover:text-zinc-500 transition-colors">{item.label}</span>
+            </button>
+          ))}
         </div>
 
-        {/* Main Content Area: Production Terminal */}
-        <div className="col-span-12 lg:col-span-8 space-y-8">
-           <div className="panel-kinetic p-10 clipped-corner border-[#BD00FF]/20 bg-[#0A0A0B] relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                 <Cpu size={120} className="text-[#BD00FF]" />
+        {/* Main Preview Area */}
+        <div className="col-span-8 flex flex-col gap-6 overflow-hidden">
+          <div className="flex-1 bg-black border border-white/5 rounded-[2rem] relative overflow-hidden group shadow-2xl">
+            {/* Monitor Overlay */}
+            <div className="absolute top-6 left-6 z-10 flex items-center gap-3">
+              <div className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-[9px] font-black text-white uppercase tracking-widest">Live_Render</span>
               </div>
+            </div>
 
-              <div className="relative z-10 space-y-10">
-                 <div className="flex justify-between items-start">
-                    <div>
-                       <span className="font-label-caps text-[11px] text-[#BD00FF] font-black uppercase tracking-[0.4em] mb-4 block">SYSTEM_INPUT_INTERFACE</span>
-                       <h2 className="font-headline text-4xl font-black text-white italic uppercase tracking-tighter">INITIATE_PRODUCTION_BURST</h2>
-                    </div>
-                    <div className="p-4 border border-[#BD00FF]/30 clipped-corner-sm bg-[#BD00FF]/10 text-[#BD00FF]">
-                       <Zap size={24} className={isGenerating ? 'animate-pulse' : ''} />
-                    </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              {isGenerating ? (
+                <div className="flex flex-col items-center gap-6">
+                  <div className="relative">
+                    <div className="w-24 h-24 border-4 border-primary-container/20 border-t-primary-container rounded-full animate-spin" />
+                    <Zap size={32} className="absolute inset-0 m-auto text-primary-container animate-pulse" />
+                  </div>
+                  <p className="text-xl font-black text-white font-headline-md uppercase italic tracking-tighter animate-pulse">Synthesizing_Neural_Frames...</p>
+                </div>
+              ) : (
+                <div className="text-center space-y-6 max-w-lg px-10">
+                   <Box size={80} className="mx-auto text-zinc-900" />
+                   <h2 className="text-3xl font-black text-white font-headline-md uppercase italic tracking-tighter leading-tight">Initiate_New_Sequence</h2>
+                   <p className="text-zinc-600 font-mono text-[11px] uppercase tracking-widest leading-relaxed">
+                     Input your prompt below to trigger the autonomous production node. Our RTX-4080 core will handle rendering.
+                   </p>
+                </div>
+              )}
+            </div>
+
+            {/* Preview Controls */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-xl border border-white/10 px-8 py-3 rounded-2xl flex items-center gap-8 shadow-2xl">
+               <button className="text-zinc-500 hover:text-white transition-colors"><SkipBack size={18} /></button>
+               <button className="w-12 h-12 bg-primary-container text-black rounded-full flex items-center justify-center hover:scale-105 transition-transform">
+                 <Play size={24} fill="currentColor" />
+               </button>
+               <button className="text-zinc-500 hover:text-white transition-colors"><SkipForward size={18} /></button>
+               <div className="h-4 w-[1px] bg-white/10" />
+               <div className="flex items-center gap-3 text-zinc-500">
+                 <Volume2 size={18} />
+                 <div className="w-20 h-1 bg-white/10 rounded-full overflow-hidden">
+                   <div className="w-2/3 h-full bg-primary-container" />
                  </div>
+               </div>
+               <button className="text-zinc-500 hover:text-white transition-colors"><Maximize2 size={18} /></button>
+            </div>
+          </div>
 
-                 <div className="space-y-6">
-                    <div className="relative">
-                       <textarea 
-                         value={prompt}
-                         onChange={(e) => setPrompt(e.target.value)}
-                         placeholder="DESCRIBE_THE_VIRAL_CONCEPT_OR_NEURAL_TOPIC..."
-                         className="w-full h-48 bg-black/40 border border-white/10 p-8 text-white font-headline text-xl italic uppercase placeholder:text-zinc-800 focus:outline-none focus:border-[#BD00FF]/50 transition-all clipped-corner resize-none"
-                       />
-                       <div className="absolute bottom-6 right-6 flex gap-4">
-                          <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-zinc-500 font-data-mono text-[10px] font-black uppercase hover:text-white transition-colors clipped-corner-sm">
-                             <Sparkles size={14} />
-                             AI_OPTIMIZE
-                          </button>
-                       </div>
+          {/* Timeline */}
+          <div className="h-48 bg-[#050505] border border-white/5 rounded-[2rem] p-6 flex flex-col gap-4">
+             <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                <span className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em]">Timeline_Sequencer</span>
+                <span className="text-[9px] font-mono text-primary-container">00:00:00:00</span>
+             </div>
+             <div className="flex-1 flex gap-2 overflow-x-auto custom-scrollbar pb-2">
+                {orders.slice(0, 8).map((order, i) => (
+                  <div key={i} className="flex-none w-40 h-full bg-white/5 rounded-xl border border-white/5 p-3 flex flex-col justify-between group hover:border-primary-container/30 transition-all cursor-pointer">
+                    <div className="flex justify-between items-start">
+                      <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">S_{i+1}</span>
+                      {order.status === 'completed' ? <CheckCircle2 size={12} className="text-[#6bff83]" /> : <Clock size={12} className="text-primary-container animate-pulse" />}
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                       <div className="space-y-3">
-                          <label className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">PRODUCTION_LANGUAGE</label>
-                          <div className="flex flex-wrap gap-2">
-                             {['English', 'Norsk', 'Tamil', 'Hindi', 'Español'].map(lang => (
-                               <button 
-                                 key={lang}
-                                 onClick={() => setSelectedLanguage(lang)}
-                                 className={`px-4 py-2 font-data-mono text-[11px] font-black uppercase transition-all clipped-corner-sm border ${
-                                   selectedLanguage === lang ? 'bg-[#BD00FF] border-[#BD00FF] text-white' : 'bg-white/5 border-white/10 text-zinc-500 hover:border-[#BD00FF]/50'
-                                 }`}
-                               >
-                                 {lang}
-                               </button>
-                             ))}
-                          </div>
-                       </div>
-                       <div className="space-y-3">
-                          <label className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-widest block font-bold">VOICE_SYNTHESIS_MODEL</label>
-                          <div className="flex gap-2">
-                             {['Male 1', 'Female 1', 'Male 2', 'Neural Max'].map(voice => (
-                               <button 
-                                 key={voice}
-                                 onClick={() => setSelectedVoice(voice)}
-                                 className={`px-4 py-2 font-data-mono text-[11px] font-black uppercase transition-all clipped-corner-sm border ${
-                                   selectedVoice === voice ? 'bg-[#00f5ff] border-[#00f5ff] text-black' : 'bg-white/5 border-white/10 text-zinc-500 hover:border-[#00f5ff]/50'
-                                 }`}
-                               >
-                                 {voice}
-                               </button>
-                             ))}
-                          </div>
-                       </div>
+                    <p className="text-[10px] font-black text-zinc-500 uppercase italic truncate">{order.title || 'Untitled'}</p>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                       <div className={`h-full bg-primary-container transition-all duration-1000`} style={{ width: `${order.progress || 0}%` }} />
                     </div>
+                  </div>
+                ))}
+                <button className="flex-none w-40 h-full border-2 border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-primary-container/30 hover:bg-white/5 transition-all text-zinc-800 hover:text-primary-container">
+                   <Plus size={24} />
+                   <span className="text-[9px] font-black uppercase tracking-widest">Add Scene</span>
+                </button>
+             </div>
+          </div>
+        </div>
 
-                    <button 
-                      onClick={handleGenerate}
-                      disabled={isGenerating || !prompt.trim()}
-                      className="w-full group relative h-24 overflow-hidden clipped-corner bg-white text-black transition-transform active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
-                    >
-                       <div className="absolute inset-0 bg-[#BD00FF] translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                       <div className="relative z-10 flex items-center justify-center gap-4">
-                          <span className="font-headline text-2xl font-black italic uppercase tracking-tighter group-hover:text-white transition-colors">
-                            {isGenerating ? 'EXECUTING_DISPATCH...' : 'EXECUTE_PRODUCTION_SEQUENCE'}
-                          </span>
-                          <ChevronRight size={28} className="group-hover:translate-x-2 transition-transform group-hover:text-white" />
-                       </div>
+        {/* Right Sidebar: Controls */}
+        <div className="col-span-3 flex flex-col gap-6 overflow-hidden">
+           <div className="flex-1 bg-[#050505] border border-white/5 rounded-[2rem] p-8 flex flex-col gap-8 overflow-y-auto custom-scrollbar">
+              <section className="space-y-6">
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] italic">Neural_Input</h3>
+                <div className="relative">
+                  <textarea 
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="Describe your vision..."
+                    className="w-full h-32 bg-black border border-white/5 rounded-2xl p-4 text-xs text-white placeholder-zinc-800 focus:outline-none focus:border-primary-container/50 transition-all resize-none font-mono"
+                  />
+                  <button className="absolute bottom-3 right-3 p-2 bg-primary-container/10 text-primary-container rounded-lg hover:bg-primary-container hover:text-black transition-all">
+                    <Sparkles size={14} />
+                  </button>
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Output_Profile</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {['TikTok', 'YouTube', 'Reels', 'Shorts'].map(p => (
+                    <button key={p} className="py-3 bg-white/5 border border-white/5 rounded-xl text-[10px] font-black text-zinc-500 uppercase tracking-widest hover:text-white hover:border-white/20 transition-all">
+                      {p}
                     </button>
-                 </div>
-              </div>
-           </div>
+                  ))}
+                </div>
+              </section>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="panel-kinetic p-8 clipped-corner border-white/5 flex items-center gap-6 group hover:border-[#6bff83]/30 transition-colors">
-                 <div className="p-5 bg-[#6bff83]/10 text-[#6bff83] border border-[#6bff83]/20 clipped-corner-sm group-hover:scale-110 transition-transform">
-                    <History size={32} />
-                 </div>
-                 <div>
-                    <h4 className="font-headline text-2xl font-black text-white italic uppercase tracking-tight">HISTORY_ARCHIVE</h4>
-                    <p className="font-data-mono text-[11px] text-zinc-500 uppercase tracking-widest font-bold">View all previous generations</p>
-                 </div>
-              </div>
-              <div className="panel-kinetic p-8 clipped-corner border-white/5 flex items-center gap-6 group hover:border-[#BD00FF]/30 transition-colors">
-                 <div className="p-5 bg-[#BD00FF]/10 text-[#BD00FF] border border-[#BD00FF]/20 clipped-corner-sm group-hover:scale-110 transition-transform">
-                    <Settings2 size={32} />
-                 </div>
-                 <div>
-                    <h4 className="font-headline text-2xl font-black text-white italic uppercase tracking-tight">FACTORY_CONFIG</h4>
-                    <p className="font-data-mono text-[11px] text-zinc-500 uppercase tracking-widest font-bold">Adjust global node parameters</p>
-                 </div>
-              </div>
+              <section className="space-y-4">
+                <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Voice_Synthesis</h3>
+                <div className="space-y-2">
+                   {['Male_Premium', 'Female_Cinematic', 'Deep_Neural'].map(v => (
+                     <button key={v} className="w-full py-3 px-4 bg-white/5 border border-white/5 rounded-xl flex items-center justify-between group hover:border-primary-container/30 transition-all">
+                       <span className="text-[10px] font-black text-zinc-500 group-hover:text-white uppercase tracking-widest">{v}</span>
+                       <div className="w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-primary-container group-hover:shadow-[0_0_8px_#22d3ee]" />
+                     </button>
+                   ))}
+                </div>
+              </section>
+
+              <button 
+                onClick={handleGenerate}
+                disabled={isGenerating || !prompt.trim()}
+                className="w-full py-6 bg-primary-container text-black font-black uppercase tracking-[0.2em] italic rounded-2xl shadow-[0_0_30px_rgba(34,211,238,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale mt-auto"
+              >
+                {isGenerating ? 'Dispatching...' : 'Execute_Render'}
+              </button>
            </div>
         </div>
       </div>

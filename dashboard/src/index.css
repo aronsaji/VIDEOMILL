@@ -5,44 +5,19 @@
 @tailwind utilities;
 
 :root {
-  --background: #131314;
+  --background: #000000;
   --surface: #0a0a0b;
-  --brand-primary: #bd00ff;
-  --brand-secondary: #00f5ff;
-  --brand-success: #6bff83;
-  --brand-warning: #ffaa00;
+  --primary-container: #22d3ee; /* Cyan-400 */
+  --secondary-container: #e90053; /* Magenta-ish for accents */
+  --surface-container-low: #0a0a0b;
   --text-main: #f8fafc;
   --text-muted: #d1d5db;
-  --grid-color: rgba(189, 0, 255, 0.05);
+  --grid-color: rgba(34, 211, 238, 0.05);
 }
 
-/* Readability Overrides - Forced High Contrast */
-.text-zinc-600, .text-zinc-500, .text-slate-600, .text-slate-500, .text-gray-600, .text-gray-500 {
-  color: #a1a1aa !important; /* Lighter Zinc */
-}
-
-.text-zinc-400, .text-slate-400, .text-zinc-300, .text-gray-400 {
-  color: #e4e4e7 !important; /* Near White Zinc */
-}
-
-.text-muted, .text-zinc-700 {
-  color: #d1d5db !important;
-}
-
-/* Global scale up for small technical text */
-span[class*="text-[9px]"], div[class*="text-[9px]"], 
-span[class*="text-[10px]"], div[class*="text-[10px]"],
-span[class*="text-[11px]"], div[class*="text-[11px]"] {
-  font-size: 12px !important; /* Minimum readable size */
-  font-weight: 600 !important;
-  letter-spacing: 0.05em !important;
-}
-
-.font-label-caps {
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.3em !important;
-  color: #fff !important;
+/* Custom Font Utilities */
+.font-headline-md {
+  font-family: 'Epilogue', sans-serif;
 }
 
 body {
@@ -50,7 +25,7 @@ body {
   background-image: 
     linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 40px 40px;
+  background-size: 60px 60px;
   color: var(--text-main);
   font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -58,39 +33,32 @@ body {
   overflow-x: hidden;
 }
 
-/* Global Typography */
-.font-headline { font-family: 'Epilogue', sans-serif; font-weight: 900; }
-.font-data-mono { font-family: 'JetBrains Mono', monospace; }
-.font-label-caps { font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 0.2em; }
-
-/* Clipped Corner Standard */
-.clipped-corner {
-  clip-path: polygon(
-    0% 12px, 
-    12px 0%, 
-    100% 0%, 
-    100% calc(100% - 12px), 
-    calc(100% - 12px) 100%, 
-    0% 100%
-  );
+/* Global scale up for small technical text */
+span[class*="text-[9px]"], div[class*="text-[9px]"], 
+span[class*="text-[10px]"], div[class*="text-[10px]"],
+span[class*="text-[11px]"], div[class*="text-[11px]"] {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
 }
 
-.clipped-corner-sm {
-  clip-path: polygon(
-    0% 8px, 
-    8px 0%, 
-    100% 0%, 
-    100% calc(100% - 8px), 
-    calc(100% - 8px) 100%, 
-    0% 100%
-  );
-}
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-container); }
 
 /* Scanline Overlay */
 .scanline-overlay {
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
   background-size: 100% 4px;
   pointer-events: none;
+}
+
+/* Kinetic Panels */
+.panel-kinetic {
+  @apply bg-surface-container-low/80 backdrop-blur-3xl border border-white/5 relative overflow-hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
 /* Animations */
@@ -100,46 +68,7 @@ body {
 }
 
 .animate-radar {
-  animation: radar-sweep 10s linear infinite;
-}
-
-@keyframes pulse-led {
-  0%, 100% { opacity: 1; filter: brightness(1) drop-shadow(0 0 5px currentColor); }
-  50% { opacity: 0.5; filter: brightness(0.8) drop-shadow(0 0 2px currentColor); }
-}
-
-.animate-pulse-led {
-  animation: pulse-led 2s ease-in-out infinite;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
-::-webkit-scrollbar-thumb { background: var(--brand-primary); opacity: 0.3; }
-::-webkit-scrollbar-thumb:hover { background: var(--brand-secondary); }
-
-/* Utility Panels */
-.panel-kinetic {
-  @apply bg-[#0A0A0B]/80 backdrop-blur-xl border border-white/5 relative overflow-hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.panel-kinetic:hover {
-  @apply border-white/10;
-}
-
-/* Kinetic Buttons */
-.btn-kinetic {
-  @apply relative px-8 py-4 font-headline font-black uppercase italic transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 90% 100%, 0% 100%);
-}
-
-.btn-kinetic-primary {
-  @apply bg-white text-black hover:bg-[#6bff83];
-}
-
-.btn-kinetic-ghost {
-  @apply bg-transparent border border-white/10 text-white hover:bg-white/5;
+  animation: radar-sweep 15s linear infinite;
 }
 
 @keyframes spin-slow {
@@ -148,15 +77,30 @@ body {
 }
 
 .animate-spin-slow {
-  animation: spin-slow 12s linear infinite;
+  animation: spin-slow 20s linear infinite;
 }
 
-@keyframes scanner {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+/* High Contrast Technical Text */
+.text-zinc-600, .text-zinc-700, .text-zinc-800 {
+  color: #52525b !important;
 }
 
-.animate-scanner {
-  animation: scanner 3s linear infinite;
+.text-zinc-500 {
+  color: #71717a !important;
 }
 
+/* Tailwind Extensions */
+@layer utilities {
+  .bg-primary-container {
+    background-color: var(--primary-container);
+  }
+  .text-primary-container {
+    color: var(--primary-container);
+  }
+  .border-primary-container {
+    border-color: var(--primary-container);
+  }
+  .bg-surface-container-low {
+    background-color: var(--surface-container-low);
+  }
+}

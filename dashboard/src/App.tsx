@@ -12,6 +12,7 @@ import Factory from './pages/Factory';
 import Orders from './pages/Orders';
 import Login from './pages/Login';
 import Agents from './pages/Agents';
+import CreateOrder from './pages/CreateOrder';
 
 function App() {
   const fetchInitialData = usePipelineStore(state => state.fetchInitialData);
@@ -65,6 +66,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/factory" element={<Factory />} />
+          <Route path="/create-order" element={<CreateOrder />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/auto-series" element={<AutoSeries />} />
           <Route path="/trends" element={<TrendAnalyzer />} />
