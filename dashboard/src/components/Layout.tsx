@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Factory, Zap, Radar, 
   Bot, Archive, Settings, Menu, X, 
-  LogOut, User, Activity, Shield, Terminal, Globe
+  LogOut, User, Activity, Shield, Terminal, Globe, ClipboardList
 } from 'lucide-react';
 import Logo from './Logo';
 import { triggerProduction } from '../lib/api';
@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase';
 const NAV_ITEMS = [
   { path: '/', label: 'COMMAND_CENTER', icon: LayoutDashboard, color: 'text-[#BD00FF]' },
   { path: '/factory', label: 'THE_FACTORY', icon: Factory, color: 'text-[#6bff83]' },
+  { path: '/orders', label: 'ORDERS_TERMINAL', icon: ClipboardList, color: 'text-[#BD00FF]' },
   { path: '/auto-series', label: 'AUTO_SERIES', icon: Zap, color: 'text-[#e90053]' },
   { path: '/trends', label: 'TREND_RADAR', icon: Radar, color: 'text-[#00f5ff]' },
   { path: '/agents', label: 'AI_AGENTS', icon: Bot, color: 'text-[#ffaa00]' },

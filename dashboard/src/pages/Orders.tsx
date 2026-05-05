@@ -1,215 +1,187 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
 import { 
-  Zap, Send, Target, Globe, Mic, Type, 
-  Smartphone, Monitor, Sparkles, AlertCircle,
-  CheckCircle2, Loader2, Activity, Cpu, ShieldAlert
+  ClipboardList, Search, Filter, 
+  Clock, CheckCircle2, Zap, AlertCircle,
+  MoreVertical, ArrowUpRight, Play,
+  Download, Trash2, Database
 } from 'lucide-react';
+import { useI18nStore } from '../store/i18nStore';
 
 export default function Orders() {
-  const { triggerProduction } = usePipelineStore();
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    topic: '',
-    language: 'Norwegian',
-    platform: 'TikTok',
-    ai_voice: 'nova',
-    style: 'documentary'
-  });
+  const { t } = useI18nStore();
+  const { orders = [], fetchOrders, subscribeToChanges } = usePipelineStore();
+  const [searchTerm, setSearchTerm] = React.useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await triggerProduction({
-        ...formData,
-        timestamp: new Date().toISOString()
-      });
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-      setFormData({ ...formData, topic: '' });
-    } catch (error) {
-      console.error('Failed to trigger production:', error);
-    } finally {
-      setLoading(false);
+  React.useEffect(() => {
+    fetchOrders();
+    const unsubscribe = subscribeToChanges();
+    return () => {
+       if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, []);
+
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  
+  const filteredOrders = safeOrders.filter(o => 
+    (o.topic || o.title || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'completed': return 'text-[#6bff83] border-[#6bff83]/20 bg-[#6bff83]/5';
+      case 'processing': return 'text-[#00f5ff] border-[#00f5ff]/20 bg-[#00f5ff]/5';
+      case 'rendering': return 'text-[#BD00FF] border-[#BD00FF]/20 bg-[#BD00FF]/5';
+      case 'failed': return 'text-[#ff4444] border-[#ff4444]/20 bg-[#ff4444]/5';
+      default: return 'text-zinc-500 border-white/10 bg-white/5';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'completed': return <CheckCircle2 size={14} />;
+      case 'processing': return <Zap size={14} className="animate-pulse" />;
+      case 'rendering': return <Database size={14} className="animate-spin-slow" />;
+      case 'failed': return <AlertCircle size={14} />;
+      default: return <Clock size={14} />;
     }
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto space-y-16 pb-24 px-4 lg:px-0">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-        <div className="space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 text-brand-2 font-mono text-[13px] font-black uppercase tracking-[0.4em]"
-          >
-            <Activity size={14} className="animate-pulse" />
-            Direct Synthesis Protocol v1.2
-          </motion.div>
-          <div className="space-y-2">
-            <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-              Manual <span className="text-brand-2">Trigger</span>
-            </h1>
-            <div className="flex items-center gap-4">
-               <div className="h-[1px] w-16 bg-brand-2/50" />
-               <p className="text-gray-500 font-bold uppercase tracking-widest text-[13px] italic">Bypass automated neural analysis engines</p>
-            </div>
+    <div className="max-w-[1600px] mx-auto space-y-10">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-white/5 pb-10">
+        <div>
+          <div className="flex items-center gap-3 text-[#BD00FF] font-data-mono text-[11px] font-black uppercase tracking-[0.4em] mb-3">
+            <ClipboardList size={16} />
+            ORDER_LOG_LOGISTICS_v4
           </div>
+          <h1 className="font-headline text-[52px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
+            ORDERS_<span className="text-[#BD00FF]">TERMINAL</span>
+          </h1>
+        </div>
+
+        <div className="flex gap-6">
+           <div className="panel-kinetic p-6 flex flex-col min-w-[180px] group border-[#BD00FF]/20 bg-[#BD00FF]/5 clipped-corner-sm">
+              <span className="font-label-caps text-[11px] text-zinc-400 uppercase tracking-[0.3em] mb-1 font-bold">TOTAL_REQS</span>
+              <span className="font-headline text-4xl font-black text-white italic tracking-tighter">{safeOrders.length}</span>
+           </div>
+           <div className="panel-kinetic p-6 flex flex-col min-w-[180px] group border-[#6bff83]/20 bg-[#6bff83]/5 clipped-corner-sm">
+              <span className="font-label-caps text-[11px] text-zinc-400 uppercase tracking-[0.3em] mb-1 font-bold">ACTIVE_NODES</span>
+              <span className="font-headline text-4xl font-black text-[#6bff83] italic tracking-tighter">
+                {safeOrders.filter(o => o.status !== 'completed').length}
+              </span>
+           </div>
+        </div>
+      </header>
+
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="relative flex-1 group">
+          <Search size={18} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-[#BD00FF] transition-colors" />
+          <input 
+            type="text" 
+            placeholder="SEARCH_BY_ORDER_TOPIC_OR_ID..."
+            className="w-full bg-[#0A0A0B] border border-white/5 p-6 pl-16 text-white font-data-mono text-[13px] uppercase focus:outline-none focus:border-[#BD00FF]/50 transition-all clipped-corner-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-4 bg-[#0A0A0B] p-2 border border-white/5 clipped-corner-sm">
+           {['ALL', 'PROCESSING', 'COMPLETED', 'FAILED'].map(f => (
+             <button key={f} className="px-6 py-4 font-headline text-[11px] font-black uppercase italic text-zinc-500 hover:text-white transition-colors">
+               {f}
+             </button>
+           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit} className="card-standard !p-12 space-y-10 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-brand-2/[0.01] pointer-events-none" />
-            
-            {/* Topic Input */}
-            <div className="space-y-4">
-              <label className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em] ml-2">Production Blueprint / Concept</label>
-              <div className="relative">
-                <Target className="absolute left-8 top-8 text-brand-2" size={24} />
-                <textarea 
-                  required
-                  value={formData.topic}
-                  onChange={e => setFormData({ ...formData, topic: e.target.value })}
-                  placeholder="E.g. The secret history of Cyberpunk architecture in Tokyo..."
-                  className="w-full bg-black/40 border border-white/5 rounded-[32px] p-8 pl-20 min-h-[200px] text-[18px] font-black text-white placeholder:text-gray-700 focus:border-brand-2/40 outline-none transition-all resize-none italic uppercase tracking-tight"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {/* Language */}
-              <div className="space-y-4">
-                <label className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em] ml-2">Neural Language</label>
-                <div className="relative">
-                  <Globe className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-2" size={20} />
-                  <select 
-                    value={formData.language}
-                    onChange={e => setFormData({ ...formData, language: e.target.value })}
-                    className="w-full bg-black/40 border border-white/5 rounded-[24px] p-5 pl-16 text-[14px] font-black text-white appearance-none focus:border-brand-2/40 outline-none uppercase italic tracking-widest cursor-pointer"
-                  >
-                    <option value="Norwegian" className="bg-[#05060f]">Norsk_Bokmål</option>
-                    <option value="English" className="bg-[#05060f]">English_Global</option>
-                    <option value="Swedish" className="bg-[#05060f]">Svenska_North</option>
-                    <option value="German" className="bg-[#05060f]">Deutsch_Level_1</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* AI Voice */}
-              <div className="space-y-4">
-                <label className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em] ml-2">Voice Frequency Profile</label>
-                <div className="relative">
-                  <Mic className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-2" size={20} />
-                  <select 
-                    value={formData.ai_voice}
-                    onChange={e => setFormData({ ...formData, ai_voice: e.target.value })}
-                    className="w-full bg-black/40 border border-white/5 rounded-[24px] p-5 pl-16 text-[14px] font-black text-white appearance-none focus:border-brand-2/40 outline-none uppercase italic tracking-widest cursor-pointer"
-                  >
-                    <option value="nova" className="bg-[#05060f]">Nova (Premium Female)</option>
-                    <option value="onyx" className="bg-[#05060f]">Onyx (Deep Male)</option>
-                    <option value="echo" className="bg-[#05060f]">Echo (Neutral)</option>
-                    <option value="fable" className="bg-[#05060f]">Fable (Narrator)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Platform Selection */}
-            <div className="space-y-6">
-              <label className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em] ml-2">Synthesis Dimensions</label>
-              <div className="grid grid-cols-2 gap-6">
-                {[
-                  { id: 'TikTok', icon: Smartphone, label: '9:16 Vertical' },
-                  { id: 'YouTube', icon: Monitor, label: '16:9 Landscape' },
-                ].map(p => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, platform: p.id })}
-                    className={`flex items-center justify-center gap-4 p-8 rounded-[32px] border transition-all ${
-                      formData.platform === p.id 
-                        ? 'bg-brand-2/10 border-brand-2/50 text-white shadow-[0_0_30px_rgba(157,78,221,0.2)]' 
-                        : 'bg-white/5 border-white/5 text-gray-600 hover:border-white/10 hover:text-white'
-                    }`}
-                  >
-                    <p.icon size={24} />
-                    <span className="font-black text-[11px] uppercase tracking-[0.3em] italic">{p.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              disabled={loading || success}
-              className={`w-full py-8 rounded-[32px] font-black uppercase tracking-[0.3em] text-[13px] flex items-center justify-center gap-4 transition-all ${
-                success 
-                  ? 'bg-brand-2 text-white shadow-[0_0_50px_rgba(157,78,221,0.4)]' 
-                  : 'bg-brand-2 text-white hover:shadow-[0_0_50px_rgba(157,78,221,0.4)] group-hover:scale-[1.01]'
-              }`}
-            >
-              {loading ? (
-                <Loader2 className="animate-spin" size={24} />
-              ) : success ? (
-                <>
-                  <CheckCircle2 size={24} />
-                  Extraction Initialized
-                </>
-              ) : (
-                <>
-                  <Send size={22} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                  Ignite Production Forge
-                </>
+      {/* Orders Table/Grid */}
+      <div className="panel-kinetic border-white/5 clipped-corner overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-white/[0.02] border-b border-white/5">
+                <th className="p-6 font-label-caps text-[11px] text-zinc-400 uppercase tracking-widest">ORDER_ID</th>
+                <th className="p-6 font-label-caps text-[11px] text-zinc-400 uppercase tracking-widest">TOPIC / TITLE</th>
+                <th className="p-6 font-label-caps text-[11px] text-zinc-400 uppercase tracking-widest text-center">STATUS</th>
+                <th className="p-6 font-label-caps text-[11px] text-zinc-400 uppercase tracking-widest text-center">PLATFORM</th>
+                <th className="p-6 font-label-caps text-[11px] text-zinc-400 uppercase tracking-widest">TIMESTAMP</th>
+                <th className="p-6 font-label-caps text-[11px] text-zinc-400 uppercase tracking-widest">PROGRESS</th>
+                <th className="p-6"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {filteredOrders.length > 0 ? filteredOrders.map((order) => (
+                <tr key={order.id} className="group hover:bg-white/[0.01] transition-colors">
+                  <td className="p-6">
+                    <span className="font-data-mono text-[11px] text-[#BD00FF] font-black tracking-widest">
+                      #{String(order.id).slice(0, 8).toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="p-6 max-w-md">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-headline text-lg font-black text-white italic uppercase tracking-tight truncate">
+                        {order.topic || order.title || 'NEURAL_RENDER_UNNAMED'}
+                      </span>
+                      <span className="font-data-mono text-[10px] text-zinc-500 uppercase">PROCESSED_BY: VIRANODE_CLUSTER_04</span>
+                    </div>
+                  </td>
+                  <td className="p-6">
+                    <div className="flex justify-center">
+                      <span className={`flex items-center gap-2 px-3 py-1.5 border clipped-corner-sm font-data-mono text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
+                        {getStatusIcon(order.status)}
+                        {order.status || 'PENDING'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-6">
+                    <div className="flex justify-center">
+                      <span className="px-3 py-1 bg-white/5 border border-white/10 text-white font-data-mono text-[10px] font-black uppercase tracking-[0.2em] clipped-corner-sm">
+                        {order.platform || 'TIKTOK'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="p-6">
+                    <span className="font-data-mono text-[11px] text-zinc-400">
+                      {new Date(order.created_at || Date.now()).toLocaleString()}
+                    </span>
+                  </td>
+                  <td className="p-6 min-w-[200px]">
+                    <div className="flex flex-col gap-2">
+                       <div className="flex justify-between font-data-mono text-[9px] text-zinc-500 uppercase font-black">
+                          <span>Progress</span>
+                          <span>{order.progress || 0}%</span>
+                       </div>
+                       <div className="h-1 bg-white/5 relative overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${order.progress || 0}%` }}
+                            className="absolute top-0 left-0 h-full bg-[#BD00FF]"
+                          />
+                       </div>
+                    </div>
+                  </td>
+                  <td className="p-6 text-right">
+                    <button className="p-3 text-zinc-600 hover:text-white hover:bg-white/5 transition-all clipped-corner-sm">
+                      <MoreVertical size={16} />
+                    </button>
+                  </td>
+                </tr>
+              )) : (
+                <tr>
+                  <td colSpan={7} className="p-20 text-center">
+                    <div className="flex flex-col items-center gap-4 opacity-20">
+                      <ClipboardList size={48} className="text-zinc-600" />
+                      <p className="font-data-mono text-zinc-600 uppercase tracking-widest text-[13px]">
+                        No production orders found in neural database.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
               )}
-            </button>
-          </form>
-        </div>
-
-        {/* Info Sidebar */}
-        <div className="space-y-8">
-          <div className="card-standard !p-10 space-y-8 relative overflow-hidden group">
-             <div className="absolute inset-0 bg-brand-2/[0.01] pointer-events-none" />
-             <div className="flex items-center gap-4 text-brand-2 font-mono text-[11px] font-black uppercase tracking-[0.4em] italic">
-                <Sparkles size={18} />
-                Neural Forge Intel
-             </div>
-             <p className="text-[13px] text-gray-500 font-bold leading-relaxed uppercase italic tracking-tight opacity-80">
-               Manual triggers bypass the trend analysis engine. Use this for specific high-priority custom content synthesis.
-             </p>
-             <div className="h-[1px] w-full bg-white/5" />
-             <ul className="space-y-6">
-               {[
-                 'Instant priority queueing',
-                 'Custom asset sourcing',
-                 'Manual script override',
-                 'Multi-platform output'
-               ].map(item => (
-                 <li key={item} className="flex items-center gap-4 text-[11px] font-black font-mono text-gray-400 uppercase tracking-widest italic group-hover:text-white transition-colors">
-                    <div className="w-2 h-2 bg-brand-2 rounded-full shadow-[0_0_8px_rgba(157,78,221,0.5)]" />
-                    {item}
-                 </li>
-               ))}
-             </ul>
-          </div>
-
-          <div className="card-standard !p-10 !border-brand-2/20 bg-brand-2/[0.03] space-y-6 relative overflow-hidden group">
-             <div className="flex items-center gap-4 text-brand-2 font-mono text-[11px] font-black uppercase tracking-[0.4em] italic">
-                <ShieldAlert size={18} />
-                Warning Protocol
-             </div>
-             <p className="text-[12px] text-gray-600 font-black leading-relaxed uppercase italic tracking-tight opacity-90">
-               Each manual ignition consumes 1 production credit. Ensure your blueprint is refined before initiating the forge cycle.
-             </p>
-             <div className="absolute -bottom-10 -right-10 p-12 opacity-[0.05] group-hover:rotate-12 transition-transform duration-1000">
-                <Cpu size={120} className="text-brand-2" />
-             </div>
-          </div>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

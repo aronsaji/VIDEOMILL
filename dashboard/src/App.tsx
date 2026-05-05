@@ -9,6 +9,7 @@ import TrendAnalyzer from './pages/TrendAnalyzer';
 import Library from './pages/Library';
 import Settings from './pages/Settings';
 import Factory from './pages/Factory';
+import Orders from './pages/Orders';
 import Login from './pages/Login';
 import Agents from './pages/Agents';
 
@@ -64,6 +65,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/factory" element={<Factory />} />
+          <Route path="/orders" element={<Orders />} />
           <Route path="/auto-series" element={<AutoSeries />} />
           <Route path="/trends" element={<TrendAnalyzer />} />
           <Route path="/archive" element={<Library />} />
