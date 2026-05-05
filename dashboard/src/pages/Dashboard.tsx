@@ -1,29 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Activity, Play, ArrowUpRight, Flame, CheckCircle2, 
-  Clock, AlertTriangle, Loader, RefreshCw, Smartphone, 
-  Monitor, Send, Heart, Video, Sparkles, Wand2, Zap,
-  Cpu, Database, Radio, Globe, Shield, Terminal, Layers
+import { motion } from 'framer-motion';
+import {
+  Activity, Play, CheckCircle2, Clock, AlertTriangle,
+  Loader, RefreshCw, Send, Zap, Cpu, Database, Terminal,
+  Eye, FileText, Mic, Film, Upload, Server
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePipelineStore } from '../store/pipelineStore';
 import { useLanguage } from '../contexts/LanguageContext';
-import type { Order, OrderStatus } from '../types';
+import type { Order } from '../types';
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; glow: string; icon: any }> = {
-  queued:           { label: 'BUFFERING',      color: 'text-gray-500',      glow: 'shadow-gray-500/10',     icon: Clock },
-  script_generation:{ label: 'COGNITION',      color: 'text-brand-2',       glow: 'shadow-brand-2/20',      icon: Cpu },
-  rendering:        { label: 'SYNTHESIS',      color: 'text-brand-1',       glow: 'shadow-brand-1/30',      icon: Zap },
-  uploading:        { label: 'UPLOADING',      color: 'text-brand-1',       glow: 'shadow-brand-1/20',      icon: Send },
-  published:        { label: 'DEPLOYED',       color: 'text-brand-1',       glow: 'shadow-brand-1/30',      icon: CheckCircle2 },
-  failed:           { label: 'CORRUPTED',      color: 'text-red-500',       glow: 'shadow-red-500/20',      icon: AlertTriangle },
+const PIPELINE_STEPS = [
+  { id: 1, name: 'Webhook', icon: Zap },
+  { id: 2, name: 'Script (Groq)', icon: Terminal },
+  { id: 3, name: 'Edge-TTS', icon: Mic },
+  { id: 4, name: 'Vision Layer', icon: Eye },
+  { id: 5, name: 'Studio Edit', icon: Film },
+  { id: 6, name: 'FFmpeg Render', icon: Activity },
+  { id: 7, name: 'Supabase Put', icon: Upload },
+  { id: 8, name: 'Update DB', icon: Database },
+];
+
+const STATUS_TO_STEP: Record<string, number> = {
+  queued: 0, script_generation: 2, rendering: 4, uploading: 6, published: 8, complete: 8, failed: -1,
 };
+
+const glass = {
+  background: 'rgba(15, 15, 15, 0.6)',
+  backdropFilter: 'blur(20px) saturate(150%)',
+  border: '1px solid rgba(139, 92, 246, 0.15)',
+  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.03)',
+};
+
+const LOG_LINES = [
+  { time: '14:22:01', tag: 'SYS', tagColor: 'text-cyan-400', text: 'Executing n8n-core::Webhook_Listener' },
+  { time: '14:22:05', tag: 'AI', tagColor: 'text-violet-400', text: 'Scripting engine (Groq) payload received.' },
+  { time: '14:22:08', tag: 'TTS', tagColor: 'text-cyan-400', text: 'Edge-TTS calling voice: "en-US-GuyNeural"' },
+  { time: '14:22:15', tag: 'FFM', tagColor: 'text-zinc-500', text: 'ffmpeg -y -i input_01.mp4 -vf "scale=1920:1080"' },
+  { time: '14:22:18', tag: 'FFM', tagColor: 'text-cyan-400', text: '[FFmpeg] frame= 452 fps= 24 q=28.0 size= 4224kB' },
+  { time: '14:22:22', tag: 'VIS', tagColor: 'text-violet-400', text: 'Vision Layer: Analyzing metadata frames...' },
+];
 
 export default function Dashboard() {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { orders = [], trends = [], fetchInitialData, fetchOrders, isLoading } = usePipelineStore();
+  const { orders = [], fetchInitialData, fetchOrders, isLoading } = usePipelineStore();
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     fetchInitialData();
@@ -31,228 +53,241 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  const activeProductions = orders.filter(o => o.status !== 'published' && o.status !== 'failed');
-  const recentTrends = trends.slice(0, 4);
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const activeOrders = safeOrders.filter(o => o.status !== 'published' && o.status !== 'complete');
+  const selected = selectedOrder || activeOrders[0] || safeOrders[0];
+  const currentStep = selected ? (STATUS_TO_STEP[selected.status] ?? 0) : 0;
+
+  const getStepState = (stepIndex: number) => {
+    if (!selected || selected.status === 'failed') return 'failed';
+    const done = STATUS_TO_STEP[selected.status] ?? 0;
+    if (stepIndex < done) return 'done';
+    if (stepIndex === done) return 'active';
+    return 'queued';
+  };
+
+  const gpuBars = [80, 60, 95, 40, 70, 50, 85];
 
   return (
-    <div className="space-y-12 max-w-[1600px] mx-auto pb-20 px-4 lg:px-0">
-      {/* Tactical Telemetry Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: t('dash.network_integrity'), value: 'OPTIMAL', icon: Shield, color: 'text-brand-1', detail: 'Encrypted_Link_1' },
-          { label: t('dash.neural_activity'), value: activeProductions.length, icon: Cpu, color: 'text-brand-2', detail: t('common.active_nodes') },
-          { label: t('dash.cognition_rate'), value: '98.4%', icon: Sparkles, color: 'text-brand-2', detail: t('common.stable') },
-          { label: t('dash.data_velocity'), value: '4.2GB/S', icon: Database, color: 'text-brand-1', detail: 'Burst_Active' },
-        ].map((stat, i) => (
-          <div key={i} className="card-standard group hover:border-brand-2/30 transition-all duration-500 overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
-              <Activity size={40} className={`text-${stat.color}`} />
+    <div className="max-w-[1600px] mx-auto pb-20">
+      <div className="grid grid-cols-12 gap-6">
+        {/* Left Column: Production Queue */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+          <div className="rounded-xl p-6" style={glass}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-['Space_Grotesk'] text-2xl font-semibold text-violet-400">Production Queue</h3>
+              <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{activeOrders.length} Active</span>
             </div>
-            <div className="space-y-4 relative z-10">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] italic">{stat.label}</span>
-                <div className={`w-2 h-2 rounded-full bg-${stat.color} animate-pulse`} />
-              </div>
-              <div className="text-3xl font-black text-white italic tracking-tighter uppercase">{stat.value}</div>
-              <div className="flex gap-1">
-                {[...Array(12)].map((_, j) => (
-                  <div 
-                    key={j} 
-                    className={`segment-meter-block ${j < stat.val ? `bg-${stat.color}` : 'bg-white/5'}`} 
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Operations Hub: Live Production Line */}
-        <div className="lg:col-span-8 space-y-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-brand-2 shadow-[0_0_8px_#bc13fe]"></div>
-                <span className="font-mono text-[10px] font-black text-brand-2 uppercase tracking-[0.3em] italic">Autonomous Neural Force Active</span>
-              </div>
-              <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">
-                COMMAND <span className="text-brand-2">CENTER</span>
-              </h1>
-              <p className="text-[13px] text-gray-500 font-bold uppercase tracking-widest italic opacity-70">The Non-Stop Viral Engine Control Interface</p>
-            </div>
-            
-            <div className="flex items-center gap-4">
-                 <div className="h-[1px] w-12 bg-brand-1/50" />
-                 <span className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{t('dash.live_stream')}</span>
-            </div>
-            <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 backdrop-blur-md">
-               <Layers size={14} className="text-brand-1" />
-               <span className="text-[11px] font-black font-mono text-white uppercase tracking-widest">{activeProductions.length} {t('common.active_nodes')}</span>
-            </div>
-          </div>
-
-          <div className="space-y-5">
-            {activeProductions.length === 0 ? (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="glass-ultra rounded-[48px] py-32 text-center border border-dashed border-white/10"
-              >
-                <div className="p-8 bg-white/[0.02] rounded-full w-fit mx-auto mb-8 text-gray-700 border border-white/5 relative">
-                  <div className="absolute inset-0 bg-neon-purple/5 rounded-full blur-xl" />
-                  <Video size={48} className="relative z-10" />
-                </div>
-                <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-3">{t('dash.system_standby')}</h3>
-                <p className="text-white/70 max-w-sm mx-auto text-sm font-bold leading-relaxed uppercase tracking-widest italic">The production grid is currently idle. Initialize a new synthesis cycle at the Factory node.</p>
-                <button 
-                  onClick={() => navigate('/factory')}
-                  className="btn-standard mt-10 px-12"
-                >
-                  {t('dash.enter_factory')}
-                </button>
-              </motion.div>
-            ) : (
-              activeProductions.map((order, i) => (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
+            <div className="space-y-3">
+              {safeOrders.slice(0, 5).map((order) => {
+                const isSelected = selected?.id === order.id;
+                const isActive = order.status === 'rendering' || order.status === 'script_generation';
+                return (
+                  <div
                     key={order.id}
-                    className="card-standard !p-8 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden group hover:!border-brand-1/30 transition-all"
+                    onClick={() => setSelectedOrder(order)}
+                    className={`rounded-lg p-4 cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-violet-500/10 border border-violet-500/50'
+                        : 'bg-zinc-950/60 border border-violet-500/10 hover:border-violet-500/40 opacity-80 hover:opacity-100'
+                    }`}
+                    style={{ boxShadow: isSelected ? '0 0 20px rgba(139,92,246,0.1)' : 'none' }}
                   >
-                    <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-1 shadow-[0_0_15px_rgba(0,245,255,0.5)]" />
-                  
-                  <div className="flex-1 space-y-4 w-full">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                      <h4 className="text-xl font-black text-white italic uppercase tracking-tight group-hover:text-brand-1 transition-colors leading-none">
-                        {order.title || order.topic}
-                      </h4>
-                      <div className="flex gap-2">
-                        <span className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-gray-400`}>
-                          {order.language?.toUpperCase()}
-                        </span>
-                        <span className={`px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest bg-brand-1/10 border border-brand-1/20 text-brand-1`}>
-                          9:16_VERT
-                        </span>
-                      </div>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-zinc-300'}`}>
+                        {(order.title || order.topic || 'UNTITLED').toUpperCase().replace(/\s+/g, '_').slice(0, 22)}
+                      </span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-black ${
+                        isActive ? 'bg-cyan-400/20 text-cyan-400' : order.status === 'failed' ? 'bg-red-500/20 text-red-400' : order.status === 'published' || order.status === 'complete' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-700 text-zinc-400'
+                      }`}>
+                        {order.status === 'rendering' ? 'Rendering' : order.status === 'script_generation' ? 'Processing' : order.status?.replace('_', ' ')}
+                      </span>
                     </div>
-                    
-                    <div className="flex flex-wrap items-center gap-6">
-                      <div className="flex items-center gap-2 text-[11px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
-                        <Terminal size={12} className="text-brand-1" />
-                        DEST: {order.platform_destinations?.join(' / ').toUpperCase() || 'TIKTOK_PRIMARY'}
-                      </div>
-                      <div className="flex items-center gap-2 text-[11px] font-black font-mono text-gray-600 uppercase tracking-widest italic">
-                        <Clock size={12} />
-                        TS: {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </div>
-                    </div>
-
-                    {/* Technical Progress Gauge */}
-                    <div className="space-y-2 pt-4">
-                      <div className="flex justify-between text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.2em]">
-                        <span className="flex items-center gap-2">
-                           <div className="w-1.5 h-1.5 bg-brand-2 rounded-full animate-pulse" />
-                           Synthesis Process
-                        </span>
-                        <span className="text-brand-2">{order.progress || 10}% Complete</span>
-                      </div>
-                      <div className="h-1.5 bg-white/[0.03] rounded-full overflow-hidden border border-white/5">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${order.progress || 10}%` }}
-                          className="h-full bg-gradient-to-r from-brand-2 to-brand-1 shadow-[0_0_15px_rgba(188,19,254,0.4)]" 
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${order.progress || 0}%`,
+                            background: 'linear-gradient(90deg, #06B6D4, #8B5CF6)',
+                            boxShadow: '0 0 10px rgba(6,182,212,0.5)',
+                          }}
                         />
                       </div>
+                      <span className={`text-xs font-mono ${isSelected ? 'text-white' : 'text-zinc-400'}`}>{order.progress || 0}%</span>
                     </div>
                   </div>
+                );
+              })}
+              {safeOrders.length === 0 && (
+                <div className="text-center py-12 text-zinc-600 text-xs uppercase tracking-widest">No active pipelines</div>
+              )}
+            </div>
+          </div>
 
-                  <div className="flex items-center gap-4 min-w-[200px] justify-end w-full md:w-auto">
-                    <div className={`flex items-center gap-3 px-6 py-4 rounded-[20px] bg-black/40 border border-white/5 ${STATUS_CONFIG[order.status]?.color || 'text-white'} shadow-lg group-hover:scale-105 transition-transform`}>
-                      {React.createElement(STATUS_CONFIG[order.status]?.icon || Loader, { size: 16, className: order.status !== 'failed' && order.status !== 'published' ? 'animate-spin-slow' : '' })}
-                      <span className="text-[11px] font-black tracking-[0.2em] uppercase italic">{STATUS_CONFIG[order.status]?.label || order.status}</span>
-                    </div>
-                  </div>
-                </motion.div>
-              ))
-            )}
+          {/* Live System Feed */}
+          <div className="rounded-xl flex-1 flex flex-col overflow-hidden" style={glass}>
+            <div className="p-4 border-b border-violet-500/20 bg-zinc-950/40 flex justify-between items-center">
+              <span className="text-xs font-['Space_Grotesk'] font-bold text-zinc-300 uppercase tracking-widest">Live System Feed</span>
+              <Activity size={14} className="text-cyan-400 animate-pulse" />
+            </div>
+            <div className="p-4 font-mono text-[10px] text-zinc-500 overflow-y-auto space-y-2 max-h-[400px]">
+              {LOG_LINES.map((log, i) => (
+                <p key={i}><span className={log.tagColor}>[{log.time}]</span> {log.text}</p>
+              ))}
+              <p className="text-zinc-400 animate-pulse">_ system awaiting next frame packet...</p>
+            </div>
           </div>
         </div>
 
-        {/* Intelligence Grid: Trend Radar & AI Expansion */}
-        <div className="lg:col-span-4 space-y-10">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter flex items-center gap-3">
-                  <Flame className="text-brand-1" size={24} />
-                  Trend <span className="text-brand-1">Radar</span>
-                </h2>
-                <div className="h-[1px] w-8 bg-brand-1/50" />
-              </div>
-              <button 
-                onClick={() => navigate('/trends')} 
-                className="text-[13px] font-black text-brand-1 uppercase tracking-[0.3em] hover:text-white transition-colors border-b border-brand-1/20 pb-0.5"
-              >
-                Query_All
-              </button>
+        {/* Right Column: Pipeline Detail */}
+        <div className="col-span-12 lg:col-span-8 space-y-6">
+          {/* Selected Item Header */}
+          <div className="rounded-xl p-8 relative overflow-hidden" style={glass}>
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+              <Server size={120} className="text-violet-400" />
             </div>
-
-            <div className="space-y-4">
-              {recentTrends.map((trend, i) => (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  key={trend.id}
-                  onClick={() => navigate('/factory', { state: { trend } })}
-                  className="glass-ultra rounded-[28px] p-6 border border-white/5 hover:border-brand-1/30 cursor-pointer group transition-all relative overflow-hidden"
-                >
-                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                     <Activity size={40} className="text-brand-1" />
-                  </div>
-                  <div className="space-y-4 relative z-10">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                         <div className="w-1.5 h-1.5 bg-brand-1 rounded-full animate-pulse" />
-                         <span className="text-[11px] font-black font-mono text-brand-1 uppercase tracking-widest italic">
-                            {trend.viral_score}% Viral_Yield
-                         </span>
-                      </div>
-                      <span className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-widest italic">{trend.platform}</span>
-                    </div>
-                    <h4 className="text-[13px] font-black text-white group-hover:text-brand-1 transition-colors leading-tight uppercase tracking-tight italic">
-                      {trend.title}
-                    </h4>
-                    <div className="flex flex-wrap gap-2 pt-1 border-t border-white/5 mt-2">
-                      {trend.tags?.slice(0, 3).map(tag => (
-                        <span key={tag} className="text-[11px] font-mono font-bold text-gray-700 uppercase">#{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="relative z-10 flex flex-col gap-2">
+              <span className="text-cyan-400 text-xs font-black tracking-widest uppercase">Currently Inspecting</span>
+              <h2 className="font-['Space_Grotesk'] text-4xl font-bold text-white tracking-tighter">
+                {selected ? (selected.title || selected.topic || 'NO_SELECTION').toUpperCase().replace(/\s+/g, '_').slice(0, 28) : 'AWAITING_INPUT'}
+              </h2>
+              <div className="flex items-center gap-6 mt-4">
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Clock size={14} />
+                  <span className="text-sm font-medium">Elapsed: 00:{String(Math.floor((selected?.progress || 0) / 2)).padStart(2, '0')}:12</span>
+                </div>
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Database size={14} />
+                  <span className="text-sm font-medium">Size: {((selected?.progress || 0) * 4.2).toFixed(1)} MB</span>
+                </div>
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Zap size={14} />
+                  <span className="text-sm font-medium">Source: n8n-Webhook-Prod</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Neural Expansion Module */}
-        <div className="card-standard bg-gradient-to-br from-brand-1/10 to-transparent relative overflow-hidden group">
-            <div className="space-y-6 relative z-10">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-brand-1 font-black text-[13px] uppercase tracking-[0.4em]">
-                   <Zap size={14} /> Neural Agent X
-                </div>
-                <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter leading-tight">Scale Your <span className="text-brand-1">Influence</span></h3>
-                <p className="text-[14px] text-gray-500 leading-relaxed font-medium italic">Deploy autonomous series nodes to dominate the content grid.</p>
+          {/* 8-Step Pipeline Grid */}
+          <div className="grid grid-cols-4 gap-4">
+            {PIPELINE_STEPS.map((step, i) => {
+              const state = getStepState(i);
+              const StepIcon = step.icon;
+              const circumference = 2 * Math.PI * 45;
+              let offset = circumference;
+              let strokeColor = 'rgba(255,255,255,0.05)';
+              let borderColor = 'border-l-zinc-700';
+              let opacity = 'opacity-40';
+              let stepColor = 'text-zinc-600';
+              let nameColor = 'text-zinc-400';
+              let iconColor = 'text-zinc-500';
+              let bgExtra = '';
+
+              if (state === 'done') {
+                offset = 0;
+                strokeColor = '#8B5CF6';
+                borderColor = 'border-l-violet-500';
+                opacity = '';
+                stepColor = 'text-zinc-500';
+                nameColor = 'text-white';
+                iconColor = 'text-violet-400';
+              } else if (state === 'active') {
+                offset = circumference * 0.25;
+                strokeColor = '#06B6D4';
+                borderColor = 'border-l-cyan-400';
+                opacity = '';
+                stepColor = 'text-cyan-400';
+                nameColor = 'text-white';
+                iconColor = 'text-cyan-400';
+                bgExtra = 'bg-cyan-500/5';
+              }
+
+              return (
+                <motion.div
+                  key={step.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className={`rounded-xl p-6 border-l-4 ${borderColor} flex flex-col items-center gap-4 ${opacity} ${bgExtra}`}
+                  style={glass}
+                >
+                  <div className="relative w-16 h-16">
+                    <svg className="w-16 h-16" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                      <circle cx="50" cy="50" r="45" fill="transparent" stroke="rgba(139,92,246,0.1)" strokeWidth="8" />
+                      {state !== 'queued' && (
+                        <circle
+                          cx="50" cy="50" r="45" fill="transparent"
+                          stroke={strokeColor} strokeWidth="8"
+                          strokeDasharray={circumference}
+                          strokeDashoffset={offset}
+                          style={{ filter: `drop-shadow(0 0 8px ${strokeColor})` }}
+                        />
+                      )}
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {state === 'done' ? (
+                        <CheckCircle2 size={20} className={iconColor} />
+                      ) : state === 'active' ? (
+                        <StepIcon size={20} className={`${iconColor} animate-pulse`} />
+                      ) : (
+                        <StepIcon size={20} className={iconColor} />
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-xs font-black uppercase tracking-tighter ${stepColor}`}>Step {String(step.id).padStart(2, '0')}</p>
+                    <h4 className={`text-sm font-bold mt-1 ${nameColor}`}>{step.name}</h4>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* System Analytics Row */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="rounded-xl p-6" style={glass}>
+              <h4 className="font-['Space_Grotesk'] font-bold text-zinc-300 mb-4 uppercase tracking-widest text-xs">GPU Load Distribution</h4>
+              <div className="flex items-end gap-2 h-32">
+                {gpuBars.map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t-sm"
+                    style={{
+                      height: `${h}%`,
+                      background: i === 2 ? 'rgba(6,182,212,0.2)' : 'rgba(139,92,246,0.2)',
+                      borderTop: `1px solid ${i === 2 ? 'rgba(6,182,212,0.5)' : 'rgba(139,92,246,0.5)'}`,
+                    }}
+                  />
+                ))}
               </div>
-              <button 
-                onClick={() => navigate('/auto-series')}
-                className="btn-standard w-full !bg-brand-1 !shadow-brand-1/30"
-              >
-                Launch Auto-Series Node
-                <ArrowUpRight size={16} />
-              </button>
+              <div className="flex justify-between mt-2 text-[10px] font-mono text-zinc-500">
+                <span>08:00</span><span>10:00</span><span>12:00</span><span>LIVE</span>
+              </div>
+            </div>
+
+            <div className="rounded-xl p-6 flex flex-col justify-between" style={glass}>
+              <div>
+                <h4 className="font-['Space_Grotesk'] font-bold text-zinc-300 mb-4 uppercase tracking-widest text-xs">Environment Meta</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-zinc-500">Edge-TTS Server</span>
+                    <span className="text-cyan-400 font-mono">STABLE (14ms)</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-zinc-500">Supabase Bucket</span>
+                    <span className="text-cyan-400 font-mono">CONNECTED</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-zinc-500">Groq API Status</span>
+                    <span className="text-cyan-400 font-mono">402 tokens/sec</span>
+                  </div>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-violet-500/20 flex gap-4">
+                <button className="flex-1 bg-zinc-900 text-zinc-300 py-2 rounded text-xs font-bold hover:bg-zinc-800 border border-zinc-800 transition-colors">Abort Pipeline</button>
+                <button className="flex-1 bg-violet-600/20 text-violet-300 py-2 rounded text-xs font-bold hover:bg-violet-600/30 border border-violet-500/30 transition-colors">Force Re-Render</button>
+              </div>
             </div>
           </div>
         </div>

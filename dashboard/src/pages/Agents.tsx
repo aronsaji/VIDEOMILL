@@ -1,281 +1,200 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Bot, TrendingUp, DollarSign, Shield, MessageSquare, 
-  Zap, Radar, Eye, Upload, Activity, Clock, 
-  Sparkles, Terminal, Cpu, Database, Network, RefreshCw,
-  Target, Globe, ShieldCheck, Layers, Boxes
+import { motion } from 'framer-motion';
+import {
+  Film, Sparkles, Activity, Palette, Brain,
+  Download, Zap, Settings, Eye
 } from 'lucide-react';
 
-const AGENT_CONFIG = {
-  COO: {
-    name: 'COO',
-    title: 'Chief Operating Officer',
-    icon: TrendingUp,
-    color: 'text-brand-2',
-    description: 'Operational efficiency, production KPIs, and resource allocation.',
-    schedule: 'Daily @ 02:00',
-  },
-  CFO: {
-    name: 'CFO',
-    title: 'Chief Financial Officer',
-    icon: DollarSign,
-    color: 'text-brand-2',
-    description: 'Financial oversight, ROI optimization, and budget synthesis.',
-    schedule: 'Daily @ 02:00',
-  },
-  Marketing: {
-    name: 'Marketing',
-    title: 'Marketing Director',
-    icon: Eye,
-    color: 'text-brand-2',
-    description: 'Trend analysis, multi-platform strategy, and metadata engineering.',
-    schedule: 'Every 4 Hours',
-  },
-  Watchdog: {
-    name: 'Watchdog',
-    title: 'Production Monitor',
-    icon: Radar,
-    color: 'text-brand-2',
-    description: 'Real-time monitoring and automated failure recovery protocols.',
-    schedule: 'Every 10 Minutes',
-  },
-  SocialResponse: {
-    name: 'Social',
-    title: 'Engagement Agent',
-    icon: MessageSquare,
-    color: 'text-brand-2',
-    description: 'Autonomous neural response to community engagement signals.',
-    schedule: 'Real-time',
-  },
-  Publisher: {
-    name: 'Publisher',
-    title: 'Auto Distribution',
-    icon: Upload,
-    color: 'text-white',
-    description: 'Automated multi-channel deployment upon asset finalization.',
-    schedule: 'Event-driven',
-  },
+const glass = {
+  background: 'rgba(14, 21, 17, 0.6)',
+  backdropFilter: 'blur(20px) saturate(150%)',
+  border: '1px solid rgba(12, 198, 135, 0.2)',
+  boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
 };
 
-export default function Agents() {
-  const [enabledAgents, setEnabledAgents] = useState<string[]>(['COO', 'Watchdog', 'Publisher', 'SocialResponse']);
+const AGENTS = [
+  { id: 'kronos', name: 'KRONOS', icon: Activity, task: 'Continuity Audit', progress: 65, color: '#44e3a1', version: '2.1.4-BETA', status: 'active' },
+  { id: 'nova', name: 'NOVA', icon: Palette, task: 'Grading Design', progress: 42, color: '#8B5CF6', version: '1.8.0-STABLE', status: 'active' },
+  { id: 'pulse', name: 'PULSE', icon: Brain, task: 'Hibernating', progress: 0, color: '#71717a', version: '0.9.1-ALPHA', status: 'offline' },
+];
 
-  const toggleAgent = (id: string) => {
-    setEnabledAgents(prev => 
-      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
-    );
-  };
+const LOG_ENTRIES = [
+  { time: '14:22:01', agent: 'ATLAS', text: 'optimized frame 12,042 for dynamic range clipping.' },
+  { time: '14:18:45', agent: 'KRONOS', text: 'flagged potential narrative loop in scene 3.' },
+  { time: '14:12:30', agent: 'NOVA', text: "generated 12 alternative lighting rigs for 'Sunset Plateau'." },
+  { time: '14:05:11', agent: 'ATLAS', text: "completed color pass for sequence 'Alpha_01'." },
+  { time: '13:58:22', agent: 'SYS', text: 'System integrity check: Optimal.' },
+];
+
+export default function Agents() {
+  const [creativity, setCreativity] = useState(82);
+  const [technicality, setTechnicality] = useState(95);
 
   return (
-    <div className="space-y-16 max-w-[1600px] mx-auto pb-24 px-4 lg:px-0">
-      {/* Header Area */}
-      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-12">
-        <div className="space-y-8">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 text-brand-2 font-mono text-[13px] font-black uppercase tracking-[0.5em]"
-          >
-            <Network size={16} className="animate-pulse" />
-            Autonomous Command Hierarchy v2.0
-          </motion.div>
-          <div className="space-y-2">
-            <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">
-              AI <span className="text-brand-2">Commanders</span>
-            </h1>
+    <div className="max-w-[1600px] mx-auto pb-20 space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="font-['Space_Grotesk'] text-4xl font-bold text-emerald-400" style={{ textShadow: '0 0 10px rgba(68,227,161,0.3)' }}>
+            AI AGENT CLUSTER
+          </h1>
+          <p className="text-zinc-400 text-lg mt-1">Control center for autonomous production personas.</p>
+        </div>
+        <div className="flex gap-4">
+          <div className="px-4 py-2 flex items-center gap-3 rounded" style={glass}>
+            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" style={{ boxShadow: '0 0 8px rgba(68,227,161,0.6)' }} />
+            <span className="font-mono text-xs text-emerald-400 uppercase tracking-widest">System Online</span>
+          </div>
+          <div className="px-4 py-2 flex items-center gap-3 rounded" style={glass}>
+            <span className="font-mono text-xs text-zinc-400">UPTIME: 99.98%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bento Grid */}
+      <div className="grid grid-cols-12 gap-6">
+        {/* Main Agent Card: ATLAS */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="col-span-12 lg:col-span-8 rounded-xl p-6 flex flex-col gap-6"
+          style={{ ...glass, borderTop: '2px solid rgba(68,227,161,0.3)' }}
+        >
+          <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
-               <div className="h-[1px] w-16 bg-brand-2/50" />
-               <p className="text-gray-500 font-bold uppercase tracking-widest text-[13px] italic">Strategic Neural Management Layer</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="card-standard !px-12 !py-8 flex items-center gap-16 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-brand-2/[0.02] blur-3xl group-hover:bg-brand-2/[0.05] transition-all" />
-          <div className="relative z-10 space-y-2">
-            <p className="text-[11px] text-gray-500 uppercase font-black font-mono tracking-[0.3em]">Synapse Load</p>
-            <p className="text-4xl font-black text-brand-2 font-mono italic tracking-tighter uppercase">Optimal</p>
-          </div>
-          <div className="w-[1px] h-16 bg-white/10 relative z-10" />
-          <div className="relative z-10 space-y-2 text-right">
-            <p className="text-[11px] text-gray-500 uppercase font-black font-mono tracking-[0.3em]">Active Nodes</p>
-            <p className="text-4xl font-black text-white font-mono italic tracking-tighter">{enabledAgents.length}<span className="text-gray-800 text-lg">/6</span></p>
-          </div>
-        </div>
-      </div>
-
-      {/* Agents Matrix */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
-        {Object.entries(AGENT_CONFIG).map(([id, agent], i) => {
-          const isActive = enabledAgents.includes(id);
-          const Icon = agent.icon;
-          
-          return (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-              key={id}
-              onClick={() => toggleAgent(id)}
-              className={`group card-standard !p-12 cursor-pointer transition-all duration-700 relative overflow-hidden flex flex-col ${
-                isActive 
-                  ? `!border-brand-2/50 bg-brand-2/[0.03]` 
-                  : 'opacity-50 grayscale hover:opacity-100 hover:grayscale-0 hover:border-white/20'
-              }`}
-            >
-              {/* Dynamic Status Tag */}
-              <div className="absolute top-12 right-12 flex items-center gap-3 px-5 py-2 bg-black/40 rounded-full border border-white/5">
-                <span className={`text-[11px] font-black font-mono uppercase tracking-[0.2em] ${isActive ? 'text-brand-2' : 'text-gray-700'}`}>
-                   {isActive ? 'Live' : 'Off'}
-                </span>
-                <span className="relative flex h-2 w-2">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isActive ? 'bg-brand-2' : 'bg-gray-800'}`}></span>
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isActive ? 'bg-brand-2' : 'bg-gray-900'}`}></span>
-                </span>
+              <div className="w-16 h-16 rounded-lg flex items-center justify-center" style={{ background: 'rgba(9,16,12,0.9)', border: '1px solid rgba(68,227,161,0.2)' }}>
+                <Film size={32} className="text-emerald-400" />
               </div>
-
-              <div className="space-y-10 relative z-10 flex-1">
-                <div className={`w-20 h-20 rounded-3xl flex items-center justify-center bg-white/5 border border-white/10 transition-all duration-700 group-hover:rotate-[360deg] ${agent.color}`}>
-                  <Icon size={40} strokeWidth={1.5} />
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-[0.4em] italic">{agent.name}_SUBSYSTEM</span>
-                    <h3 className="text-2xl font-black text-white group-hover:text-brand-2 transition-colors italic uppercase tracking-tighter leading-none">{agent.title}</h3>
-                  </div>
-                  <p className="text-[14px] text-gray-500 leading-relaxed font-bold italic uppercase tracking-tight opacity-80">
-                    "{agent.description}"
-                  </p>
-                </div>
-
-                <div className="pt-10 mt-auto border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-[11px] font-black font-mono text-gray-700 uppercase tracking-widest italic group-hover:text-gray-400">
-                    <Clock size={14} className="text-brand-2" />
-                    <span>CYCLE: {agent.schedule}</span>
-                  </div>
-                  <div className={`text-[11px] font-black font-mono tracking-[0.3em] ${isActive ? 'text-brand-2' : 'text-gray-900'}`}>
-                    {isActive ? 'CMD_READY' : 'WAIT_SIG'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Advanced Interactive Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-brand-2/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-2/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-all duration-1000" />
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Terminal & Analytics Split */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 pt-8">
-        {/* Modernized Kernel Log */}
-        <div className="card-standard !p-12 space-y-12 relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-brand-2/20" />
-          
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-6">
-              <div className="p-5 bg-brand-2/10 rounded-3xl text-brand-2 border border-brand-2/20 shadow-lg shadow-brand-2/5">
-                <Terminal size={28} />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Command <span className="text-brand-2">Stream</span></h2>
-                <p className="text-[11px] text-gray-600 font-mono font-black uppercase tracking-[0.4em] italic">Real-time Node Telemetry</p>
+              <div>
+                <h2 className="font-['Space_Grotesk'] text-2xl font-semibold text-white">Director Persona: ATLAS</h2>
+                <p className="text-zinc-500 text-sm font-mono">ID: UNIT-A-042 // STATUS: RENDERING_SCENE_04</p>
               </div>
             </div>
-            <button className="p-4 bg-white/5 text-gray-500 rounded-2xl hover:bg-brand-2 hover:text-white transition-all border border-white/5 shadow-xl">
-              <RefreshCw size={22} className="hover:rotate-180 transition-transform duration-500" />
+            <div className="flex flex-col items-end">
+              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest" style={{ background: 'rgba(68,227,161,0.1)', border: '1px solid rgba(68,227,161,0.4)', color: '#44e3a1' }}>Active</span>
+              <div className="mt-2 text-emerald-400/60 font-mono text-xs">Load: 84%</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-8 py-4">
+            {/* Sliders */}
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  <span>Creativity</span>
+                  <span className="text-emerald-400">{creativity}%</span>
+                </div>
+                <input
+                  type="range" min="0" max="100" value={creativity}
+                  onChange={e => setCreativity(Number(e.target.value))}
+                  className="w-full h-1 bg-zinc-800 rounded appearance-none cursor-pointer accent-emerald-400"
+                />
+                <p className="text-[10px] text-zinc-600 italic">Controls narrative divergence and aesthetic experimentation risk levels.</p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  <span>Technicality</span>
+                  <span className="text-emerald-400">{technicality}%</span>
+                </div>
+                <input
+                  type="range" min="0" max="100" value={technicality}
+                  onChange={e => setTechnicality(Number(e.target.value))}
+                  className="w-full h-1 bg-zinc-800 rounded appearance-none cursor-pointer accent-emerald-400"
+                />
+                <p className="text-[10px] text-zinc-600 italic">Strict adherence to technical specs, color gamuts, and frame-rate precision.</p>
+              </div>
+            </div>
+
+            {/* Visual Feedback */}
+            <div className="relative rounded-lg overflow-hidden h-full min-h-[160px]" style={{ background: 'rgba(9,16,12,0.9)', border: '1px solid rgba(60,74,65,0.3)' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/20 via-transparent to-violet-900/10" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Eye size={64} className="text-emerald-500/10" />
+              </div>
+              <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                <div className="font-mono text-[10px] text-emerald-400/80">LIVE_PREVIEW_STREAM_004</div>
+                <div className="flex gap-1">
+                  <div className="w-1 h-3 bg-emerald-400 animate-pulse" />
+                  <div className="w-1 h-5 bg-emerald-400 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                  <div className="w-1 h-2 bg-emerald-400 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-auto pt-4 flex gap-4" style={{ borderTop: '1px solid rgba(60,74,65,0.2)' }}>
+            <button className="flex-grow py-3 bg-emerald-400 text-black font-bold text-xs uppercase tracking-widest hover:bg-emerald-300 transition-all rounded">
+              DEPLOY CONFIGURATION
+            </button>
+            <button className="px-6 py-3 text-emerald-400 font-bold text-xs uppercase tracking-widest hover:bg-emerald-500/5 transition-all rounded" style={{ border: '1px solid rgba(68,227,161,0.4)' }}>
+              OVERRIDE
             </button>
           </div>
-          
-          <div className="space-y-5 font-mono text-[11px] relative z-10">
-            {[
-              { time: '08:42:11', node: 'PUBLISHER', msg: 'Video #V-1777-B uploaded to TikTok API - Status: 200 OK', color: 'text-brand-2' },
-              { time: '04:15:02', node: 'COO', msg: 'Weekly performance synthesis finalized and stored in Vault.', color: 'text-brand-2' },
-              { time: '02:30:44', node: 'WATCHDOG', msg: 'Rendering anomaly detected in #V-1882. Re-queuing job...', color: 'text-brand-2' },
-              { time: '01:12:30', node: 'SOCIAL', msg: 'Processed 14 engagement signals via YouTube Webhook.', color: 'text-brand-2' },
-              { time: '00:05:12', node: 'SYSTEM', msg: 'Global Command Node re-synchronized successfully.', color: 'text-brand-2' },
-            ].map((log, i) => (
-              <div key={i} className="flex items-start gap-6 p-6 bg-black/40 rounded-3xl border border-white/5 text-gray-600 hover:text-white hover:bg-brand-2/5 transition-all group/item cursor-default">
-                <span className={`${log.color} font-black group-hover/item:animate-pulse`}>[{log.time}]</span>
-                <span className="text-gray-400 font-black uppercase tracking-widest">{log.node}</span>
-                <span className="italic font-bold tracking-tight opacity-70 group-hover/item:opacity-100 uppercase text-[13px]">"{log.msg}"</span>
+        </motion.div>
+
+        {/* Agent Log Buffer */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="col-span-12 lg:col-span-4 rounded-xl p-6 flex flex-col gap-4"
+          style={glass}
+        >
+          <h3 className="font-['Space_Grotesk'] text-xl font-semibold text-white pb-4" style={{ borderBottom: '1px solid rgba(60,74,65,0.2)' }}>
+            AGENT_LOG_BUFFER
+          </h3>
+          <div className="flex-grow space-y-4 overflow-y-auto pr-2">
+            {LOG_ENTRIES.map((entry, i) => (
+              <div key={i} className="flex gap-3">
+                <span className="text-emerald-400 font-mono text-xs mt-1 shrink-0">[{entry.time}]</span>
+                <p className="text-sm text-zinc-300">
+                  <span className="text-violet-400">{entry.agent}</span> {entry.text}
+                </p>
               </div>
             ))}
           </div>
-        </div>
+          <button className="w-full py-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-emerald-400 transition-colors text-center" style={{ borderTop: '1px solid rgba(60,74,65,0.2)' }}>
+            DOWNLOAD FULL LOGS (.JSON)
+          </button>
+        </motion.div>
 
-        {/* Efficiency Command Panel */}
-        <div className="card-standard !p-12 relative overflow-hidden group border border-white/5 flex flex-col justify-between">
-          <div className="absolute inset-0 bg-brand-2/[0.01] pointer-events-none" />
-          <div className="absolute -top-20 -right-20 p-24 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-transform duration-1000">
-            <Cpu size={400} className="text-brand-2" />
-          </div>
-
-          <div className="space-y-12 relative z-10">
-            <div className="space-y-4 text-center xl:text-left">
-              <div className="flex items-center justify-center xl:justify-start gap-4 text-brand-2 font-mono text-[13px] font-black uppercase tracking-[0.5em] italic">
-                <ShieldCheck size={20} />
-                Protocol Integrity Verified
-              </div>
-              <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">Global <span className="text-brand-2">Status</span></h2>
-            </div>
-            
-            <div className="space-y-10">
-              {/* Segment Meters */}
-              {[
-                { label: 'Autonomous Load', value: '92%' },
-                { label: 'Neural Efficiency', value: '100%' },
-              ].map((gauge, i) => (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end mb-2">
-                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest italic opacity-70">{gauge.label}</span>
-                    <span className="text-xs font-mono font-bold text-brand-2">{gauge.value}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    {[...Array(12)].map((_, j) => (
-                      <div 
-                        key={j} 
-                        className={`segment-meter-block ${j < (i === 0 ? 10 : 12) ? 'bg-brand-2 shadow-[0_0_8px_rgba(188,19,254,0.5)]' : 'bg-white/5'}`} 
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                 <div className="card-standard !p-8 !rounded-[32px] hover:!border-brand-2/50 transition-all group/stat">
-                    <p className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-[0.3em] mb-3 italic">Total Sync Cycles</p>
-                    <div className="flex items-end gap-3">
-                       <p className="text-3xl font-black text-white italic font-mono tracking-tighter">1.2M+</p>
-                       <Boxes size={20} className="text-brand-2 mb-1 opacity-0 group-hover/stat:opacity-100 transition-opacity" />
-                    </div>
-                 </div>
-                  <div className="card-standard !p-8 !rounded-[32px] hover:!border-brand-2/50 transition-all group/stat">
-                    <p className="text-[11px] font-black font-mono text-gray-600 uppercase tracking-[0.3em] mb-3 italic">Human Overrides</p>
-                    <div className="flex items-end gap-3">
-                       <p className="text-3xl font-black text-brand-2 italic font-mono tracking-tighter">ZERO</p>
-                       <Shield size={20} className="text-brand-2 mb-1 opacity-0 group-hover/stat:opacity-100 transition-opacity" />
-                    </div>
-                  </div>
-              </div>
-            </div>
-          </div>
-
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="btn-standard w-full py-8 text-[13px] !bg-brand-2 !shadow-brand-2/30"
+        {/* Secondary Agent Grid */}
+        {AGENTS.map((agent, i) => (
+          <motion.div
+            key={agent.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 + i * 0.1 }}
+            className={`col-span-12 md:col-span-4 rounded-xl p-4 group transition-all ${agent.status === 'offline' ? 'opacity-60 grayscale hover:grayscale-0 hover:opacity-100' : ''}`}
+            style={{ ...glass, borderColor: agent.status === 'offline' ? 'rgba(60,74,65,0.2)' : `${agent.color}30` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-2/0 via-white/20 to-brand-2/0 -translate-x-full group-hover/btn:animate-shimmer" />
-            <span className="relative z-10 flex items-center justify-center gap-4 italic text-white">
-              Synchronize Neural Grid
-              <Zap size={18} fill="currentColor" />
-            </span>
-          </motion.button>
-        </div>
+            <div className="flex justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <agent.icon size={20} style={{ color: agent.color }} className="group-hover:scale-110 transition-transform" />
+                <span className="font-['Space_Grotesk'] text-lg font-semibold" style={{ color: agent.status === 'offline' ? '#71717a' : '#dde5dd' }}>{agent.name}</span>
+              </div>
+              <span className="w-3 h-3 rounded-full" style={{
+                backgroundColor: agent.status === 'offline' ? '#3f3f46' : '#44e3a1',
+                boxShadow: agent.status === 'offline' ? 'none' : '0 0 8px rgba(68,227,161,0.5)',
+              }} />
+            </div>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
+                <span className="text-zinc-500">{agent.status === 'offline' ? 'Status' : 'Task'}</span>
+                <span className="text-zinc-300">{agent.task}</span>
+              </div>
+              <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: `${agent.progress}%`, backgroundColor: agent.color }} />
+              </div>
+            </div>
+            <div className="flex justify-between items-center mt-4">
+              <span className="text-[10px] text-zinc-600 font-mono">VER: {agent.version}</span>
+              <button className="text-xs font-bold hover:underline" style={{ color: agent.status === 'offline' ? '#71717a' : agent.color }}>
+                {agent.status === 'offline' ? 'WAKE_UP' : 'MANAGE'}
+              </button>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </div>
   );

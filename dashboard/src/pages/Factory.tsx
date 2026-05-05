@@ -1,304 +1,213 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Sparkles, Video, Languages, Mic, Wand2, 
-  Settings2, Smartphone, Send, Globe, Check,
-  AlertTriangle, Play, Users, MessageSquare, RefreshCw, Cpu, Zap, Layers
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { usePipelineStore } from '../store/pipelineStore';
 import { triggerProduction } from '../lib/api';
-import { useLanguage } from '../contexts/LanguageContext';
+import {
+  Cpu, Gauge, Factory, Rocket, Database, Clock,
+  StopCircle, Activity, Terminal, Search, Filter
+} from 'lucide-react';
 
-const VOICE_MAP: Record<string, Record<string, string>> = {
-  'Norsk': {
-    'Female': 'nb-NO-PernilleNeural',
-    'Male': 'nb-NO-FinnNeural'
-  },
-  'English': {
-    'Female': 'en-US-AvaMultilingualNeural',
-    'Male': 'en-US-AndrewMultilingualNeural'
-  },
-  'Tamil': {
-    'Female': 'ta-IN-PallaviNeural',
-    'Male': 'ta-IN-ValluvarNeural'
-  }
+const glass = {
+  background: 'rgba(9, 16, 12, 0.6)',
+  backdropFilter: 'blur(20px) saturate(150%)',
+  border: '1px solid rgba(12, 198, 135, 0.2)',
 };
 
-const ADDITIONAL_VOICES = [
-  { id: 'en-US-AvaMultilingualNeural', label: 'Ava (Smooth Female)', lang: 'EN' },
-  { id: 'en-US-AndrewMultilingualNeural', label: 'Andrew (Deep Male)', lang: 'EN' },
-  { id: 'nb-NO-PernilleNeural', label: 'Pernille (Soft Norsk)', lang: 'NO' },
-  { id: 'nb-NO-FinnNeural', label: 'Finn (Strong Norsk)', lang: 'NO' },
-  { id: 'ta-IN-PallaviNeural', label: 'Pallavi (Tamil Female)', lang: 'TA' },
+const LOG_ENTRIES = [
+  { time: '14:22:01', tag: 'SYS', tagColor: 'text-emerald-400', text: 'Initializing Viral_Shorts_Gen_04 core modules...' },
+  { time: '14:22:05', tag: 'GPU', tagColor: 'text-violet-400', text: 'Allocating 8GB VRAM to primary rendering cluster.' },
+  { time: '14:23:12', tag: 'NET', tagColor: 'text-cyan-400', text: "CDN edge node 'Tokyo-02' established handshake." },
+  { time: '14:25:44', tag: 'WARN', tagColor: 'text-amber-400', text: 'Latency detected on Asset_Server_Alpha. Retrying.' },
+  { time: '14:26:01', tag: 'SYS', tagColor: 'text-emerald-400', text: 'Batch 28-A completed successfully. Yield: 42 videos.' },
+  { time: '14:28:15', tag: 'AI', tagColor: 'text-cyan-400', text: 'Sentiment analysis pass complete for Explainer_Doc.' },
+  { time: '14:30:00', tag: 'EVT', tagColor: 'text-emerald-300', text: 'Auto-scaling group active: Adding 2 nodes.' },
 ];
 
-export default function Factory() {
-  const { language: globalLang, t } = useLanguage();
-  const navigate = useNavigate();
-  const [topic, setTopic] = useState('');
-  const [gender, setGender] = useState<'Female' | 'Male'>('Female');
-  const [language, setLanguage] = useState(globalLang === 'no' ? 'Norsk' : 'English');
-  const [instructions, setInstructions] = useState('');
-  const [isProducing, setIsProducing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Dialog Mode State
-  const [isDialogMode, setIsDialogMode] = useState(false);
-  const [secondaryVoice, setSecondaryVoice] = useState('nb-NO-FinnNeural');
+export default function FactoryPage() {
+  const { orders = [], fetchOrders } = usePipelineStore();
 
-  const handleStartProduction = async () => {
-    if (!topic) return;
-    setIsProducing(true);
-    setError(null);
+  useEffect(() => { fetchOrders(); }, []);
 
-    const primaryVoice = VOICE_MAP[language]?.[gender] || 'nb-NO-PernilleNeural';
-    const orderId = crypto.randomUUID();
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const activeOrders = safeOrders.filter(o => o.status !== 'published' && o.status !== 'complete' && o.status !== 'failed');
 
-    try {
-      const success = await triggerProduction({
-        id: orderId,
-        video_id: orderId,
-        action: 'MANUAL_START',
-        title: topic,
-        topic: topic,
-        style_tone: isDialogMode ? '🎭 Dialogue / Movie' : '⚡ Engaging',
-        target_audience: 'Global',
-        video_format: '📱 9:16 (Vertical)',
-        ai_voice: primaryVoice,
-        secondary_voice: isDialogMode ? secondaryVoice : null,
-        is_dialog: isDialogMode,
-        platforms: ['tiktok', 'youtube'],
-        language,
-        custom_instructions: instructions
-      });
+  const heroMetrics = [
+    { label: 'CPU LOAD', value: '84.2%', pct: 84, color: '#06B6D4', icon: Cpu },
+    { label: 'GPU UTILIZATION', value: '96.8%', pct: 96, color: '#8B5CF6', icon: Gauge },
+    { label: 'DAILY YIELD', value: String(safeOrders.length * 12 || 0), pct: 0, color: '#44e3a1', icon: Factory },
+  ];
 
-      if (success) {
-        navigate('/orders?status=started');
-      } else {
-        setError('Connection to n8n node failed. Verify server integrity.');
-        setIsProducing(false);
-      }
-    } catch (err) {
-      setError('An unexpected neural error occurred. Re-synchronize and try again.');
-      setIsProducing(false);
-    }
+  const pipelines = activeOrders.length > 0 ? activeOrders.slice(0, 3) : [
+    { id: 'demo-1', title: 'Viral_Shorts_Gen_04', status: 'rendering', progress: 80, topic: '' },
+    { id: 'demo-2', title: 'Explainer_Doc_Global', status: 'script_generation', progress: 30, topic: '' },
+    { id: 'demo-3', title: 'AI_Avatar_Training_v4', status: 'uploading', progress: 95, topic: '' },
+  ];
+
+  const getCircleProps = (progress: number) => {
+    const r = 32;
+    const c = 2 * Math.PI * r;
+    return { dasharray: c, dashoffset: c - (c * progress / 100) };
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-12 pb-20">
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-        <div className="space-y-4">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-white font-mono text-[13px] uppercase tracking-[0.4em]"
+    <div className="max-w-[1600px] mx-auto pb-20 space-y-8">
+      {/* Hero Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {heroMetrics.map((m, i) => (
+          <motion.div
+            key={m.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="rounded-xl p-6 relative overflow-hidden"
+            style={glass}
           >
-            <Cpu size={14} className="text-brand-2 animate-spin-slow" />
-            Neural Synthesis Core
+            <div className="absolute top-0 right-0 p-4 opacity-20">
+              <m.icon size={48} style={{ color: m.color }} />
+            </div>
+            <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">{m.label}</h4>
+            <div className="text-4xl font-['Space_Grotesk'] font-bold" style={{ color: m.color, textShadow: `0 0 12px ${m.color}60` }}>
+              {m.value}
+            </div>
+            {m.pct > 0 && (
+              <div className="mt-4 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${m.pct}%`,
+                    backgroundColor: m.color,
+                    boxShadow: `0 0 15px ${m.color}80`,
+                  }}
+                />
+              </div>
+            )}
+            {m.pct === 0 && <p className="text-xs mt-2" style={{ color: m.color }}>+12% from baseline</p>}
           </motion.div>
-          <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter leading-none">
-            Production <span className="text-brand-2">Core</span>
-          </h1>
-          <p className="text-white opacity-80 max-w-lg font-medium leading-relaxed italic uppercase tracking-tight text-[14px]">
-            {t('factory.subtitle')}
-          </p>
-        </div>
+        ))}
 
-         <div className="flex items-center gap-6 p-6 card-standard">
-            <div className="flex -space-x-3">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="w-12 h-12 rounded-full border-2 border-surface bg-white/5 flex items-center justify-center">
-                    <span className="text-[11px] font-black text-brand-2 italic">V{i}</span>
-                  </div>
-                ))}
-            </div>
-            <div className="flex flex-col">
-               <span className="text-[11px] font-black text-white uppercase tracking-widest italic">Production Load</span>
-               <div className="flex items-center gap-2">
-                   <div className="h-1.5 w-32 bg-white/5 rounded-full overflow-hidden">
-                      <motion.div 
-                        animate={{ width: ['0%', '65%'] }}
-                        transition={{ duration: 2 }}
-                        className="h-full bg-brand-2 shadow-[0_0_15px_rgba(157,78,221,0.5)]"
-                      />
-                   </div>
-                   <span className="text-[13px] font-black text-brand-2">65%</span>
-               </div>
-            </div>
-         </div>
+        {/* Spin Up Pipeline Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="rounded-xl flex flex-col justify-center items-center gap-4 cursor-pointer group relative overflow-hidden"
+          style={{ ...glass, background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(0,0,0,0.3))' }}
+        >
+          <Rocket size={48} className="text-violet-400 group-hover:scale-110 transition-transform" style={{ filter: 'drop-shadow(0 0 15px rgba(139,92,246,0.6))' }} />
+          <span className="text-xs font-bold text-violet-300 uppercase tracking-widest">SPIN UP PIPELINE</span>
+        </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Main Configuration Engine */}
-        <div className="lg:col-span-8 space-y-10">
-          <div className="card-standard p-12 space-y-10">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between px-2">
-                    <label className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Production Title / Topic</label>
-                    <span className="text-[11px] font-mono text-brand-2 uppercase tracking-widest italic">ID: {crypto.randomUUID().slice(0, 8)}</span>
-                  </div>
-                  <input 
-                    value={topic}
-                    onChange={e => setTopic(e.target.value)}
-                    className="w-full bg-black/40 border border-white/5 rounded-3xl px-8 py-6 text-white focus:border-brand-2/40 outline-none transition-all font-black text-xl italic uppercase tracking-tight"
-                    placeholder="Eks: The Mystery of the Abyssal Void..."
-                  />
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Active Pipelines */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex justify-between items-end mb-2">
+            <h2 className="font-['Space_Grotesk'] text-2xl font-semibold text-emerald-400 tracking-tight">Active Pipelines</h2>
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" style={{ boxShadow: '0 0 8px rgba(52,211,153,0.6)' }} />
+              Real-time Stream
+            </span>
+          </div>
 
-            <div className="space-y-4">
-              <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em] ml-2">Behavioral Logic & Interaction</label>
-              <div 
-                onClick={() => setIsDialogMode(!isDialogMode)}
-                className={`p-8 rounded-[32px] border cursor-pointer transition-all duration-500 flex items-center justify-between group overflow-hidden relative ${isDialogMode ? 'bg-brand-2/5 border-brand-2/30 shadow-[inset_0_0_20px_rgba(157,78,221,0.05)]' : 'bg-black/40 border-white/5 hover:border-white/10'}`}
-              >
-                <div className="flex items-center gap-6 relative z-10">
-                  <div className={`p-4 rounded-2xl transition-all duration-500 ${isDialogMode ? 'bg-brand-2 text-white shadow-[0_0_20px_rgba(157,78,221,0.4)]' : 'bg-white/5 text-gray-600'}`}>
-                    <Users size={28} />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-black text-white uppercase italic tracking-tight">Dialog Mode</h3>
-                    <p className="text-[13px] text-gray-500 font-mono font-medium uppercase tracking-widest">Multi-agent conversational synthesis active.</p>
-                  </div>
-                </div>
-                <div className={`w-14 h-7 rounded-full relative transition-colors duration-500 z-10 ${isDialogMode ? 'bg-brand-2' : 'bg-white/10'}`}>
-                  <motion.div 
-                    animate={{ x: isDialogMode ? 28 : 4 }}
-                    className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-lg"
-                  />
-                </div>
-                {isDialogMode && (
-                  <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12">
-                     <Layers size={120} />
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="space-y-4">
+            {pipelines.map((pipeline: any, i: number) => {
+              const pct = pipeline.progress || 0;
+              const { dasharray, dashoffset } = getCircleProps(pct);
+              const pipeColor = pct >= 90 ? '#06B6D4' : pct >= 50 ? '#44e3a1' : '#8B5CF6';
+              const statusLabel = pipeline.status === 'rendering' ? 'Rendering' : pipeline.status === 'script_generation' ? 'Audio Sync' : pipeline.status === 'uploading' ? 'Finalizing' : 'Processing';
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <label className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">Neural Programming / Instructions</label>
-                <span className="text-[8px] font-mono text-gray-700 uppercase tracking-widest italic">Optional_Parameters</span>
-              </div>
-               <textarea 
-                value={instructions}
-                onChange={e => setInstructions(e.target.value)}
-                rows={5}
-                className="w-full bg-white/[0.02] border border-white/5 rounded-[32px] px-8 py-6 text-white focus:border-brand-2/40 outline-none transition-all leading-relaxed font-medium italic"
-                placeholder={isDialogMode ? "Define character dynamics. Eks: 'Agent A: Aggressive, Agent B: Logical...'" : "Inject specific narrative constraints or stylistic markers..."}
-              />
-            </div>
+              return (
+                <motion.div
+                  key={pipeline.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="rounded-xl p-6 flex items-center gap-6 group hover:bg-zinc-900/40 transition-all"
+                  style={glass}
+                >
+                  <div className="relative flex-shrink-0">
+                    <svg className="w-20 h-20" viewBox="0 0 80 80" style={{ transform: 'rotate(-90deg)' }}>
+                      <circle cx="40" cy="40" r="32" fill="transparent" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+                      <circle
+                        cx="40" cy="40" r="32" fill="transparent"
+                        stroke={pipeColor} strokeWidth="4"
+                        strokeDasharray={dasharray}
+                        strokeDashoffset={dashoffset}
+                        style={{ filter: `drop-shadow(0 0 5px ${pipeColor})`, transition: 'stroke-dashoffset 1s ease-in-out' }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center text-xs font-bold" style={{ color: pipeColor }}>{pct}%</div>
+                  </div>
+
+                  <div className="flex-grow">
+                    <div className="flex justify-between mb-1">
+                      <h3 className="font-['Space_Grotesk'] text-lg font-semibold text-white">
+                        {(pipeline.title || pipeline.topic || 'PIPELINE').toUpperCase().replace(/\s+/g, '_').slice(0, 25)}
+                      </h3>
+                      <span
+                        className="text-xs px-2 py-1 rounded font-bold uppercase animate-pulse"
+                        style={{ background: `${pipeColor}15`, color: pipeColor, border: `1px solid ${pipeColor}30` }}
+                      >
+                        {statusLabel}
+                      </span>
+                    </div>
+                    <p className="text-sm text-zinc-500 font-mono mb-3">Target: TikTok / Reels • Resolution: 1080x1920 • Engine: vMill-X2</p>
+                    <div className="flex gap-4">
+                      <div className="flex items-center gap-1 text-[10px] text-cyan-400">
+                        <Database size={12} /> STORAGE: {(pct * 0.05).toFixed(1)}GB
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-violet-400">
+                        <Clock size={12} /> EST: {String(Math.max(0, 15 - Math.floor(pct / 7))).padStart(2, '0')}:{String(45 - pct % 60).padStart(2, '0')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="text-zinc-600 hover:text-red-400 transition-colors">
+                    <StopCircle size={24} />
+                  </button>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Tactical Parameters Sidebar */}
-        <div className="lg:col-span-4 space-y-8">
-          <div className="card-standard p-10 space-y-10 sticky top-10">
-            {/* Primary Voice Identity */}
-            <div className="space-y-6">
-              <h3 className="text-[13px] font-black font-mono text-gray-500 uppercase tracking-[0.4em] flex items-center gap-2">
-                 <Mic size={14} className="text-brand-2" />
-                 Primary Voice Core
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {['Female', 'Male'].map(g => (
-                   <button
-                    key={g}
-                    onClick={() => setGender(g as any)}
-                    className={`py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] border transition-all duration-300 ${gender === g ? 'bg-brand-2 text-white border-brand-2 shadow-[0_0_20px_rgba(157,78,221,0.3)]' : 'bg-white/5 text-gray-500 border-white/5 hover:border-white/10 hover:text-white'}`}
-                  >
-                    {g}
-                  </button>
-                ))}
+        {/* Factory Log */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="flex justify-between items-end mb-2">
+            <h2 className="font-['Space_Grotesk'] text-2xl font-semibold text-emerald-400 tracking-tight">Factory Log</h2>
+            <Filter size={14} className="text-zinc-500 hover:text-emerald-400 cursor-pointer transition-colors" />
+          </div>
+
+          <div className="rounded-xl flex flex-col overflow-hidden" style={{ ...glass, height: '600px', borderColor: 'rgba(12,198,135,0.1)' }}>
+            <div className="p-3 border-b flex gap-2" style={{ borderColor: 'rgba(12,198,135,0.1)' }}>
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-amber-400" />
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+
+            <div className="flex-grow overflow-y-auto p-4 space-y-3 font-mono text-xs">
+              {LOG_ENTRIES.map((entry, i) => (
+                <div key={i} className="flex gap-3 hover:bg-emerald-500/5 p-1 rounded transition-colors">
+                  <span className="text-zinc-600 shrink-0">{entry.time}</span>
+                  <span className={entry.tagColor}>[{entry.tag}]</span>
+                  <span className="text-zinc-300">{entry.text}</span>
+                </div>
+              ))}
+              <div className="flex gap-3 text-zinc-600">
+                <span className="shrink-0">14:31:22</span>
+                <span>... system waiting for input ...</span>
+              </div>
+              <div className="flex gap-3 animate-pulse">
+                <span className="text-zinc-600 shrink-0">14:32:04</span>
+                <span className="text-emerald-300">[LIVE]</span>
+                <span className="text-emerald-200">Processing metadata for viral_reels_pack_9.</span>
               </div>
             </div>
 
-            {/* Secondary Voice Synthesis (Dialog Mode Only) */}
-            <AnimatePresence>
-              {isDialogMode && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                  animate={{ opacity: 1, height: 'auto', marginTop: 40 }}
-                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                  className="space-y-6 overflow-hidden"
-                >
-                  <h3 className="text-[10px] font-black font-mono text-neon-cyan uppercase tracking-[0.4em] flex items-center gap-2">
-                     <Layers size={14} />
-                     Secondary Neural Link
-                  </h3>
-                  <div className="relative">
-                    <select 
-                      value={secondaryVoice}
-                      onChange={(e) => setSecondaryVoice(e.target.value)}
-                      className="w-full bg-white/5 border border-brand-2/20 rounded-2xl px-6 py-4 text-[13px] font-black text-white outline-none appearance-none cursor-pointer uppercase tracking-widest italic"
-                    >
-                      {ADDITIONAL_VOICES.map(v => (
-                        <option key={v.id} value={v.id} className="bg-[#0a0a0a] text-white">
-                          [{v.lang}] {v.label.toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-brand-2">
-                       <Settings2 size={16} />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className="space-y-6 pt-10 border-t border-white/5">
-              <h3 className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-[0.4em] flex items-center gap-2">
-                 <Globe size={14} />
-                 Linguistic sector
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {Object.keys(VOICE_MAP).map(lang => (
-                   <button
-                    key={lang}
-                    onClick={() => setLanguage(lang)}
-                    className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border transition-all ${language === lang ? 'bg-brand-2 text-white border-brand-2 shadow-[0_0_15px_rgba(157,78,221,0.3)]' : 'bg-transparent border-white/5 text-gray-600 hover:text-white hover:border-white/10'}`}
-                  >
-                    {lang}
-                  </button>
-                ))}
-              </div>
+            <div className="p-3 bg-black/20 flex items-center gap-3" style={{ borderTop: '1px solid rgba(12,198,135,0.1)' }}>
+              <Terminal size={14} className="text-emerald-400 animate-pulse" />
+              <input className="bg-transparent border-none p-0 text-xs text-emerald-400 placeholder:text-emerald-900/40 focus:ring-0 focus:outline-none w-full" placeholder="Send system command..." />
             </div>
-
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-5 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-4 text-red-400 text-[10px] font-black uppercase tracking-widest italic"
-              >
-                <AlertTriangle size={20} className="shrink-0" />
-                {error}
-              </motion.div>
-            )}
-
-            <button 
-              onClick={() => navigate('/trends')} 
-              className="text-[13px] font-black text-brand-1 uppercase tracking-[0.3em] hover:text-white transition-colors border-b border-brand-1/20 pb-0.5"
-            >
-              Query_All
-            </button>
-
-             <button
-              onClick={handleStartProduction}
-              disabled={!topic || isProducing}
-              className="btn-standard w-full py-6 text-base !bg-brand-2 !shadow-brand-2/30"
-            >
-              {isProducing ? (
-                <>
-                  <RefreshCw className="animate-spin" size={22} />
-                  Synthesizing...
-                </>
-              ) : (
-                <>
-                  <Zap size={20} className="group-hover:animate-pulse" />
-                  Initiate Production
-                </>
-              )}
-            </button>
           </div>
         </div>
       </div>
