@@ -432,9 +432,47 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+// --- AUTONOMOUS POLLING ENGINE ---
+let isProcessing = false;
+
+async function pollForTasks() {
+  if (isProcessing) return;
+  
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/productions?status=eq.pending&order=created_at.asc&limit=1`;
+    const res = await new Promise((resolve) => {
+      https.get(url, { headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => resolve(JSON.parse(data)));
+      }).on('error', () => resolve([]));
+    });
+
+    if (res && res.length > 0) {
+      const task = res[0];
+      console.log(`📡 Auto-Pilot: Fant oppgave "${task.title || task.id}". Starter rendering...`);
+      isProcessing = true;
+      try {
+        await handleCinematicRender(task);
+        console.log(`✅ Auto-Pilot: Ferdig med "${task.title || task.id}".`);
+      } catch (e) {
+        console.error(`❌ Auto-Pilot Feil:`, e.message);
+        await updateStatus(task.id, 'failed', { error: e.message });
+      } finally {
+        isProcessing = false;
+      }
+    }
+  } catch (e) {
+    console.error("⚠️ Polling Error:", e.message);
+  }
+}
+
+// Start polling hvert 10. sekund
+setInterval(pollForTasks, 10000);
+
 scanForFooocus().then(() => {
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Epic Engine (v14.4 PRO) kjører på http://localhost:${PORT}`);
-    console.log(`📡 Lyttetid: ${new Date().toLocaleTimeString()}`);
+    console.log(`📡 Auto-Pilot er AKTIV og lytter etter 'pending' oppgaver...`);
   });
 });
