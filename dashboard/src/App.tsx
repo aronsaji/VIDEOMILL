@@ -8,7 +8,6 @@ import AutoSeries from './pages/AutoSeries';
 import TrendAnalyzer from './pages/TrendAnalyzer';
 import Library from './pages/Library';
 import Settings from './pages/Settings';
-import Archive from './pages/Archive';
 import Factory from './pages/Factory';
 import Login from './pages/Login';
 import Agents from './pages/Agents';
@@ -19,11 +18,9 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initial data fetch
     fetchInitialData();
     const unsubscribeChanges = subscribeToChanges();
 
-    // Auth session check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
@@ -41,7 +38,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center font-mono text-[10px] text-neon-purple tracking-[0.5em] italic">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center font-data-mono text-[10px] text-[#BD00FF] tracking-[0.5em] italic">
         INITIALIZING_SYSTEM_UPLINK...
       </div>
     );
@@ -59,8 +56,7 @@ function App() {
           <Route path="/factory" element={<Factory />} />
           <Route path="/auto-series" element={<AutoSeries />} />
           <Route path="/trends" element={<TrendAnalyzer />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/archive" element={<Archive />} />
+          <Route path="/archive" element={<Library />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
@@ -71,4 +67,3 @@ function App() {
 }
 
 export default App;
-
