@@ -1,221 +1,142 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { usePipelineStore } from '../store/pipelineStore';
-import { History, RefreshCw, CheckCircle2, AlertTriangle, Loader, Search, Filter, Database, ArrowUpRight, Download, Share2 } from 'lucide-react';
-import type { OrderStatus } from '../types';
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  queued:           { label: 'Queued',       color: 'text-gray-400',      bg: 'bg-white/5',       border: 'border-zinc-700' },
-  script_generation:{ label: 'Processing',  color: 'text-violet-400',    bg: 'bg-violet-500/10', border: 'border-violet-500/30' },
-  rendering:        { label: 'Processing',  color: 'text-violet-400',    bg: 'bg-violet-500/10', border: 'border-violet-500/30' },
-  uploading:        { label: 'Uploading',    color: 'text-violet-400',    bg: 'bg-violet-500/10', border: 'border-violet-500/30' },
-  complete:         { label: 'Completed',    color: 'text-emerald-400',   bg: 'bg-emerald-500/10',border: 'border-emerald-500/30' },
-  published:        { label: 'Completed',    color: 'text-emerald-400',   bg: 'bg-emerald-500/10',border: 'border-emerald-500/30' },
-  failed:           { label: 'Failed',       color: 'text-red-400',       bg: 'bg-red-500/10',    border: 'border-red-500/30' },
-};
+const MOCK_VIDEOS = [
+  { id: '1', title: 'CYBER_STREET_01', platform: 'TIKTOK', views: '1.2M', engagement: '18.4%', date: '2024-05-18', status: 'PUBLISHED', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBP0uZ_CKEGWCnNWuEUtPimZtJ1FFakmFUduu5uqKaCIN_z0geTcZ1nsyGMChJ5j_ET6bPjXdlIpxO8VYLJd7gP0xjKl_6yg09G9PHcRIuJzNZuN8JpyGm89l2RRBK4QBQN4OlhoO0sWhT2CQkESvbjfmSQpPnOQqAzJ72PIzJYSDdFxHu9J_MlEa6aMLtcHRa4PbZb1AdNg7S6m3eWIeGY1ipXF5S51zn2Ub4vMWoWAACu_60BSDF1t6JhazUqUQfKUE74M3Ww9Ak' },
+  { id: '2', title: 'NEON_GLITCH_DREAM', platform: 'REELS', views: '842K', engagement: '12.1%', date: '2024-05-17', status: 'PUBLISHED', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuATPlUBGNQo5QaXrmoKV0tQHPMe_EEVp800iXRdmjAVyTHf360rzMkL_7TU6eLIJXPLku0jI91ENtLriV_KxMa6JQf9G8F8mePE54Wy5bLGplxHxqvkSXZw01ZBl75kr5bx9TKfaNuKIv7pJbpnT4Emyta-L5FRVh6Fr9YHk4oSxhZ9jge0T1hltViR9mMfz54DT7WfsSLrqfTzfEHZh6RkutbwBPa30n45jgbB3F3iFrXEetsfLIzLEbQH5hkxdq57ukuICTI-QUQ' },
+  { id: '3', title: 'FUTURE_MINIMALIST', platform: 'SHORTS', views: '450K', engagement: '9.8%', date: '2024-05-16', status: 'ARCHIVED', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBxq5GoUIWHjIdgy1jobi7njr24GCqg4SgWktWBW5FGAtAF7Km-pVcTXidWxXru-ZXOMna8wUVRw9EUaYrVwWO9bYg-3_m2L5dzDZvzlKIAEibZY4uYQFAaSvdPC2iM8zKfVh--7fJaZhP1BXI05AvN5-Y4-vmmLro_i5xaOzlpaaATI_lOWctacvW6cCYx8tUsIY4Wwmaf29HDG4NO4v3kxot3C8fXaoVglSAGxcHMH0zwPrnL0bgPODxw-HoF_s_SF2ewwot7XYQ' },
+  { id: '4', title: 'HYPER_DRIVE_SYNC', platform: 'TIKTOK', views: '2.4M', engagement: '22.5%', date: '2024-05-15', status: 'PUBLISHED', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAlxbEPnOCEnoR_be_AC0UKmF0YuFbEv7Yj3W4cuolzvIkqK_Vm6PHyCy6wIR3kp1mH16a_CMlaN2CQGjDRMMQqtlQljbtlWDwk-nNWZ1ZEtNSr89Z8qyIF_EIH6Lzp0stCPbFw77V932dAyxwcvf_nWmIGRbcHdFxS8mJ1nPW-lKm0Sp5bhMmxK1OuTvc-XyQEc7qnJg7OuAcWbDkDTw28rjuefF_rf5UZpUGqv6ZcQgTydxfRaG16Z1bql8X-muAE6nPNGFfafRM' },
+];
 
 export default function Archive() {
-  const { orders = [], fetchOrders } = usePipelineStore();
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const safeOrders = Array.isArray(orders) ? orders : [];
-  const filteredOrders = safeOrders.filter(o => {
-    const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
-    const matchesSearch = (o.title || o.topic || '').toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
-
-  const isCompleted = (status: string) => status === 'complete' || status === 'published';
-  const isProcessing = (status: string) => status === 'rendering' || status === 'script_generation' || status === 'uploading' || status === 'queued';
+  const [selectedPlatform, setSelectedPlatform] = useState('ALL');
 
   return (
-    <div className="space-y-10 max-w-7xl mx-auto pb-20">
+    <div className="max-w-[1440px] mx-auto space-y-6">
       {/* Header */}
-      <header className="mb-8">
-        <h2 className="font-['Space_Grotesk'] text-3xl font-semibold text-white uppercase tracking-tight mb-1">VIDEO ARCHIVE</h2>
-        <p className="text-xs text-zinc-500 uppercase tracking-widest">Overview of all generated videos and their system status.</p>
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="font-headline text-[40px] font-[800] tracking-[-0.02em] leading-[1.2] text-[#e5e2e3] uppercase">
+            VIDEO_ARCHIVE
+          </h1>
+          <p className="font-data-mono text-[14px] text-zinc-500 uppercase tracking-widest">
+            Permanent Media Storage // Historical Asset Manager
+          </p>
+        </div>
+        <div className="flex gap-4">
+          <div className="bg-[#1c1b1c] border border-white/10 px-6 py-2 flex flex-col items-end">
+            <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase">TOTAL_STORAGE</span>
+            <span className="font-data-mono text-[#ecb2ff] text-lg">1.4 TB / 5.0 TB</span>
+          </div>
+          <div className="bg-[#1c1b1c] border border-white/10 px-6 py-2 flex flex-col items-end">
+            <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase">ASSET_COUNT</span>
+            <span className="font-data-mono text-[#6bff83] text-lg">1,244</span>
+          </div>
+        </div>
       </header>
 
-      {/* Filters */}
-      <section className="flex flex-wrap items-center justify-between gap-4 border-y border-zinc-800 py-4">
+      {/* Toolbar */}
+      <div className="bg-[#0A0A0B] border border-white/10 p-4 flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full">
+          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">search</span>
+          <input 
+            type="text" 
+            placeholder="Search assets by project name, ID, or tag..."
+            className="w-full bg-white/5 border border-white/10 pl-10 pr-4 py-3 text-sm text-[#e5e2e3] focus:outline-none focus:border-[#BD00FF] transition-all font-sans"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2 w-full md:w-auto">
+          {['ALL', 'TIKTOK', 'REELS', 'SHORTS'].map(p => (
+            <button
+              key={p}
+              onClick={() => setSelectedPlatform(p)}
+              className={`flex-1 md:flex-none px-4 py-3 font-label-caps text-[10px] uppercase tracking-widest border transition-all ${
+                selectedPlatform === p ? 'border-[#BD00FF] text-[#BD00FF] bg-[#BD00FF]/5' : 'border-white/10 text-zinc-500 hover:border-white/30'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Asset Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {MOCK_VIDEOS.map((video) => (
+          <motion.div 
+            key={video.id}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileHover={{ y: -5 }}
+            className="bg-[#0A0A0B] border border-white/10 group overflow-hidden"
+          >
+            <div className="relative aspect-[9/16] bg-[#1c1b1c] overflow-hidden">
+               <img 
+                 src={video.img} 
+                 alt={video.title} 
+                 className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+               <div className="absolute top-4 right-4 flex gap-2">
+                 <span className={`px-2 py-1 text-[8px] font-black tracking-widest uppercase rounded-sm ${
+                   video.platform === 'TIKTOK' ? 'bg-[#00f5ff] text-black' : video.platform === 'REELS' ? 'bg-[#ff00ff] text-white' : 'bg-[#ffaa00] text-black'
+                 }`}>
+                   {video.platform}
+                 </span>
+               </div>
+               <div className="absolute bottom-4 left-4 right-4">
+                 <div className="flex justify-between items-end">
+                   <div className="space-y-1">
+                     <h3 className="font-headline text-lg font-bold text-white uppercase italic truncate">{video.title}</h3>
+                     <span className="font-data-mono text-[9px] text-zinc-400 uppercase">{video.date} // {video.status}</span>
+                   </div>
+                 </div>
+               </div>
+               {/* Hover Overlay */}
+               <div className="absolute inset-0 bg-[#BD00FF]/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            </div>
+            
+            <div className="p-4 bg-[#1c1b1c] border-t border-white/5">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="flex flex-col">
+                  <span className="font-label-caps text-[9px] text-zinc-500 uppercase mb-1">Views</span>
+                  <span className="font-data-mono text-sm text-[#6bff83]">{video.views}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-label-caps text-[9px] text-zinc-500 uppercase mb-1">Engagement</span>
+                  <span className="font-data-mono text-sm text-[#00f5ff]">{video.engagement}</span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button className="flex-1 py-2 bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all font-label-caps text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-xs">download</span> Download
+                </button>
+                <button className="flex-1 py-2 bg-white/5 border border-white/10 text-zinc-400 hover:text-[#e90053] hover:border-[#e90053]/30 transition-all font-label-caps text-[9px] uppercase tracking-widest flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-xs">delete</span> Delete
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Pagination Placeholder */}
+      <div className="flex justify-center pt-8">
         <div className="flex gap-2">
-          <button
-            onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded flex items-center gap-1 transition-all ${
-              statusFilter === 'all'
-                ? 'bg-violet-500 text-white'
-                : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-violet-500'
-            }`}
-          >
-            <Search size={14} />
-            ALL
+          <button className="w-10 h-10 flex items-center justify-center border border-white/10 text-zinc-500 hover:border-[#BD00FF] transition-all">
+            <span className="material-symbols-outlined">chevron_left</span>
           </button>
-          <button
-            onClick={() => setStatusFilter('published' as any)}
-            className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded flex items-center gap-1 transition-all ${
-              statusFilter === 'published'
-                ? 'bg-violet-500 text-white'
-                : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-violet-500'
-            }`}
-          >
-            <CheckCircle2 size={14} />
-            COMPLETED
-          </button>
-          <button
-            onClick={() => setStatusFilter('failed' as any)}
-            className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded flex items-center gap-1 transition-all ${
-              statusFilter === 'failed'
-                ? 'bg-violet-500 text-white'
-                : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-violet-500'
-            }`}
-          >
-            <AlertTriangle size={14} />
-            FAILED
+          <button className="w-10 h-10 flex items-center justify-center border border-[#BD00FF] text-[#BD00FF] bg-[#BD00FF]/5">1</button>
+          <button className="w-10 h-10 flex items-center justify-center border border-white/10 text-zinc-500 hover:border-[#BD00FF] transition-all">2</button>
+          <button className="w-10 h-10 flex items-center justify-center border border-white/10 text-zinc-500 hover:border-[#BD00FF] transition-all">3</button>
+          <button className="w-10 h-10 flex items-center justify-center border border-white/10 text-zinc-500 hover:border-[#BD00FF] transition-all">
+            <span className="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-zinc-500 uppercase tracking-tighter">System Health:</span>
-          <div className="flex gap-[2px]">
-            <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-            <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-            <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-            <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-            <div className="w-1 h-3 bg-zinc-800"></div>
-          </div>
-        </div>
-      </section>
-
-      {/* Video Grid */}
-      {filteredOrders.length === 0 ? (
-        <div className="py-32 text-center">
-          <div className="flex flex-col items-center gap-4 opacity-20">
-            <Database size={64} className="text-gray-500" />
-            <span className="text-xs font-bold font-mono uppercase tracking-widest">No Records Found</span>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredOrders.map((order, i) => {
-            const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.queued;
-            return (
-              <motion.div
-                key={order.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="group relative flex flex-col overflow-hidden rounded-sm"
-                style={{
-                  background: 'rgba(31, 31, 35, 0.4)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(149, 142, 160, 0.1)',
-                }}
-              >
-                {/* Thumbnail Area */}
-                <div className="relative aspect-video overflow-hidden">
-                  {isCompleted(order.status) ? (
-                    <>
-                      <div className="w-full h-full bg-gradient-to-br from-zinc-900 via-violet-950/30 to-zinc-900 flex items-center justify-center">
-                        <CheckCircle2 size={48} className="text-violet-500/20" />
-                      </div>
-                      {/* Scanline overlay */}
-                      <div
-                        className="absolute inset-0 opacity-30 pointer-events-none"
-                        style={{
-                          background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1) 50%)',
-                          backgroundSize: '100% 4px',
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
-                    </>
-                  ) : order.status === 'failed' ? (
-                    <div className="w-full h-full bg-red-950/20 flex flex-col items-center justify-center gap-1">
-                      <AlertTriangle size={32} className="text-red-400" />
-                      <p className="font-mono text-[10px] text-red-400 uppercase">RENDER_ERROR</p>
-                    </div>
-                  ) : (
-                    <div className="w-full h-full bg-zinc-900 flex flex-col items-center justify-center gap-2">
-                      <Loader size={28} className="text-violet-500 animate-pulse" />
-                      <div className="w-1/2 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]"
-                          style={{ width: `${order.progress || 30}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-[10px] font-mono text-violet-400 uppercase animate-pulse">
-                        Synthesizing... {order.progress || 30}%
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Status Badge */}
-                  <div className="absolute top-2 right-2">
-                    <span className={`${config.bg} ${config.color} ${config.border} border px-2 py-1 text-[10px] font-bold rounded-sm uppercase`} style={{ backdropFilter: 'blur(8px)' }}>
-                      {config.label}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-4 flex flex-col gap-2 flex-1">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-['Space_Grotesk'] text-base font-medium text-white mb-1 uppercase">
-                        {(order.title || order.topic || 'UNTITLED_RENDER').toUpperCase().replace(/\s+/g, '_').slice(0, 24)}
-                      </h3>
-                      <span className="font-mono text-xs text-zinc-500 tracking-wide">
-                        SYNTH_ID: {order.id?.slice(0, 3).toUpperCase()}-{order.id?.slice(3, 4).toUpperCase()}
-                      </span>
-                    </div>
-                    {isCompleted(order.status) && (
-                      <div className="text-right">
-                        <p className="text-[10px] text-zinc-500 uppercase">Views</p>
-                        <p className="text-violet-400 font-black text-sm">---</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-auto flex gap-2 border-t border-zinc-800/50 pt-3">
-                    {isCompleted(order.status) ? (
-                      <>
-                        <button className="flex-1 border border-zinc-700 hover:border-violet-500 hover:bg-violet-500/10 text-zinc-300 py-2 rounded transition-all flex items-center justify-center gap-1 text-[12px] font-bold uppercase">
-                          <Download size={14} />
-                          Download
-                        </button>
-                        <button className="flex-1 border border-zinc-700 hover:border-violet-500 hover:bg-violet-500/10 text-zinc-300 py-2 rounded transition-all flex items-center justify-center gap-1 text-[12px] font-bold uppercase">
-                          <Share2 size={14} />
-                          Share
-                        </button>
-                      </>
-                    ) : order.status === 'failed' ? (
-                      <button
-                        onClick={() => fetchOrders()}
-                        className="flex-1 bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 py-2 rounded transition-all flex items-center justify-center gap-1 text-[12px] font-bold uppercase"
-                      >
-                        <RefreshCw size={14} />
-                        Retry Generation
-                      </button>
-                    ) : (
-                      <button
-                        className="flex-1 border border-zinc-800 text-zinc-700 py-2 rounded flex items-center justify-center gap-1 text-[12px] font-bold uppercase cursor-not-allowed"
-                        disabled
-                      >
-                        <Loader size={14} className="animate-spin" />
-                        Pending
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

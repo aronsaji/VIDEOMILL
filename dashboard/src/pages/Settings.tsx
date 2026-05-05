@@ -1,205 +1,163 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  User, Key, Zap, Database, GitBranch,
-  CreditCard, LifeBuoy, FileText, Shield
-} from 'lucide-react';
-
-const glass = {
-  background: 'rgba(14, 21, 17, 0.6)',
-  backdropFilter: 'blur(20px) saturate(150%)',
-  border: '1px solid rgba(139, 92, 246, 0.15)',
-  boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
-};
-
-const API_INTEGRATIONS = [
-  { name: 'Groq LPU Acceleration', desc: 'Ultra-fast inference for script generation', icon: Zap, active: true },
-  { name: 'Supabase Vector Vault', desc: 'Decentralized asset and metadata storage', icon: Database, active: true },
-  { name: 'n8n Workflow Engine', desc: 'Automated distribution and hand-off', icon: GitBranch, active: false },
-];
 
 export default function Settings() {
-  const [fullName, setFullName] = useState('Alexander Sterling');
-  const [email, setEmail] = useState('sterling@videomill.ai');
-  const [role, setRole] = useState('Chief Production Officer');
-  const [integrations, setIntegrations] = useState(API_INTEGRATIONS);
+  const [profile, setProfile] = useState({
+    name: 'OPERATOR_01',
+    email: 'admin@videomill.ai',
+    role: 'EXECUTIVE_COMMANDER',
+  });
 
-  const toggleIntegration = (index: number) => {
-    setIntegrations(prev => prev.map((item, i) => i === index ? { ...item, active: !item.active } : item));
-  };
+  const [apis, setApis] = useState({
+    groq: { status: 'ACTIVE', key: '••••••••••••••••' },
+    supabase: { status: 'ACTIVE', key: '••••••••••••••••' },
+    n8n: { status: 'STABLE', key: '••••••••••••••••' },
+    youtube: { status: 'CONNECTED', key: 'verified_auth' },
+  });
 
   return (
-    <div className="max-w-6xl mx-auto pb-20 space-y-8">
+    <div className="max-w-[1440px] mx-auto space-y-8">
       {/* Header */}
-      <header className="mb-8">
-        <h1 className="font-['Space_Grotesk'] text-3xl font-semibold text-white">System Configuration</h1>
-        <p className="text-zinc-500 mt-1 max-w-2xl">Manage your executive profile, scaling parameters, and secure infrastructure integrations for the VideoMill engine.</p>
+      <header>
+        <h1 className="font-headline text-[40px] font-[800] tracking-[-0.02em] leading-[1.2] text-[#e5e2e3] uppercase">
+          SYSTEM_CONFIGURATION
+        </h1>
+        <p className="font-data-mono text-[14px] text-zinc-500 uppercase tracking-widest">
+          Core Infrastructure // Security Protocols // API Management
+        </p>
       </header>
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* Profile + API Section (Left) */}
-        <section className="col-span-12 lg:col-span-8 space-y-6">
-          {/* Profile Editor */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl p-6"
-            style={{ ...glass, borderTop: '1px solid rgba(139,92,246,0.3)' }}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-['Space_Grotesk'] text-xl font-semibold text-white flex items-center gap-2">
-                <User size={20} className="text-violet-400" />
-                Executive Profile
-              </h2>
-              <button className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-violet-400 hover:bg-violet-500/10 transition-all rounded" style={{ border: '1px solid rgba(139,92,246,0.4)' }}>
-                Update Credentials
+      <div className="grid grid-cols-12 gap-8">
+        {/* Left Column: Profile & Subscription */}
+        <div className="col-span-12 lg:col-span-4 space-y-8">
+          {/* Profile Card */}
+          <section className="bg-[#0A0A0B] border border-white/10 p-8 relative overflow-hidden group">
+            <div className="scanline-overlay absolute inset-0 opacity-10" />
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#BD00FF] to-[#00f5ff] p-[2px] mb-6">
+                <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
+                   <img 
+                     src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Operator" 
+                     alt="Profile" 
+                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all"
+                   />
+                </div>
+              </div>
+              <h2 className="font-headline text-2xl font-bold text-white uppercase italic">{profile.name}</h2>
+              <p className="font-label-caps text-[10px] tracking-[0.2em] text-[#BD00FF] uppercase mt-1">{profile.role}</p>
+              
+              <div className="w-full mt-8 space-y-4">
+                <div className="text-left">
+                  <label className="font-label-caps text-[10px] text-zinc-500 uppercase block mb-1">Email_Address</label>
+                  <input 
+                    type="text" 
+                    value={profile.email} 
+                    readOnly
+                    className="w-full bg-white/5 border border-white/10 px-4 py-2 text-xs text-zinc-400 font-data-mono focus:outline-none"
+                  />
+                </div>
+                <button className="w-full py-3 bg-white/5 border border-white/10 text-xs font-label-caps uppercase tracking-widest text-zinc-400 hover:text-white hover:border-white/30 transition-all">
+                  UPDATE_SECURITY_TOKEN
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Billing Card */}
+          <section className="bg-[#0A0A0B] border border-white/10 p-8">
+            <h3 className="font-label-caps text-xs tracking-[0.1em] font-bold text-zinc-500 uppercase mb-6 flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">payments</span> SUBSCRIPTION_PLAN
+            </h3>
+            <div className="bg-[#BD00FF]/5 border border-[#BD00FF]/20 p-6 mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-headline text-2xl font-bold text-white uppercase italic">ENTERPRISE</span>
+                <span className="bg-[#BD00FF] text-black text-[10px] font-black px-2 py-0.5 uppercase">ACTIVE</span>
+              </div>
+              <p className="text-xs text-zinc-500 font-data-mono">Unlimited AI-Visual Renders // Multi-Agent Orchestration</p>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between text-[10px] font-data-mono mb-1">
+                  <span className="text-zinc-500 uppercase">Compute Usage</span>
+                  <span className="text-[#6bff83]">42.8 GB / 100 GB</span>
+                </div>
+                <div className="w-full bg-white/5 h-1">
+                   <div className="bg-[#6bff83] h-full" style={{ width: '42.8%' }} />
+                </div>
+              </div>
+              <button className="w-full py-3 bg-transparent border border-[#BD00FF] text-[#BD00FF] text-xs font-label-caps uppercase tracking-widest hover:bg-[#BD00FF] hover:text-black transition-all font-bold italic">
+                UPGRADE_COMMAND_TIER
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Full Name</label>
-                <input
-                  value={fullName} onChange={e => setFullName(e.target.value)}
-                  className="w-full bg-zinc-900/80 border-b border-zinc-700 hover:border-violet-500 focus:border-violet-400 focus:ring-0 text-white py-3 px-4 rounded-t-lg text-sm transition-colors"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Email Identity</label>
-                <input
-                  value={email} onChange={e => setEmail(e.target.value)}
-                  className="w-full bg-zinc-900/80 border-b border-zinc-700 hover:border-violet-500 focus:border-violet-400 focus:ring-0 text-white py-3 px-4 rounded-t-lg text-sm transition-colors"
-                />
-              </div>
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Organization Role</label>
-                <input
-                  value={role} onChange={e => setRole(e.target.value)}
-                  className="w-full bg-zinc-900/80 border-b border-zinc-700 hover:border-violet-500 focus:border-violet-400 focus:ring-0 text-white py-3 px-4 rounded-t-lg text-sm transition-colors"
-                />
-              </div>
-            </div>
-          </motion.div>
+          </section>
+        </div>
 
-          {/* API Infrastructure */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="rounded-xl p-6"
-            style={{ ...glass, borderTop: '1px solid rgba(139,92,246,0.3)' }}
-          >
-            <h2 className="font-['Space_Grotesk'] text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <Key size={20} className="text-violet-400" />
-              API Infrastructure
-            </h2>
+        {/* Right Column: API Infrastructure */}
+        <div className="col-span-12 lg:col-span-8 space-y-8">
+          <section className="bg-[#0A0A0B] border border-white/10 p-8">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="font-label-caps text-xs tracking-[0.1em] font-bold text-white uppercase flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm text-[#00f5ff]">api</span> API_INFRASTRUCTURE
+              </h3>
+              <button className="text-[10px] font-data-mono text-[#00f5ff] hover:underline uppercase">RESCAN_ALL_CONNECTIONS</button>
+            </div>
+
             <div className="space-y-4">
-              {integrations.map((api, i) => (
-                <div
-                  key={api.name}
-                  className="flex items-center justify-between p-4 rounded-lg"
-                  style={{ background: 'rgba(9,16,12,0.85)', border: '1px solid rgba(60,74,65,0.3)' }}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(26,33,29,0.6)', border: `1px solid ${api.active ? 'rgba(139,92,246,0.2)' : 'rgba(60,74,65,0.3)'}` }}>
-                      <api.icon size={18} className={api.active ? 'text-violet-400' : 'text-zinc-600'} />
+              {Object.entries(apis).map(([id, data]) => (
+                <div key={id} className="flex flex-col md:flex-row md:items-center justify-between p-6 bg-white/[0.02] border border-white/5 group hover:border-white/10 transition-all">
+                  <div className="flex items-center gap-4 mb-4 md:mb-0">
+                    <div className="w-10 h-10 bg-black border border-white/10 flex items-center justify-center">
+                       <span className="font-data-mono text-xs text-[#BD00FF]">{id.toUpperCase().slice(0, 2)}</span>
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white">{api.name}</div>
-                      <div className="text-xs text-zinc-500">{api.desc}</div>
+                      <h4 className="font-headline text-lg font-bold text-white uppercase italic">{id.toUpperCase()}</h4>
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#6bff83] animate-pulse" />
+                        <span className="font-data-mono text-[9px] text-[#6bff83] uppercase">{data.status}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs font-mono px-2 py-1 rounded ${api.active ? 'bg-violet-500/10 text-violet-400' : 'bg-zinc-800 text-zinc-600'}`}>
-                      {api.active ? 'ACTIVE' : 'INACTIVE'}
-                    </span>
-                    <button
-                      onClick={() => toggleIntegration(i)}
-                      className="relative w-11 h-6 rounded-full transition-colors cursor-pointer"
-                      style={{ background: api.active ? '#8B5CF6' : 'rgba(47,55,50,1)' }}
-                    >
-                      <div
-                        className="absolute top-1 w-4 h-4 rounded-full bg-white transition-transform"
-                        style={{ left: api.active ? '24px' : '4px' }}
-                      />
-                    </button>
+                  <div className="flex items-center gap-4">
+                    <div className="font-data-mono text-xs text-zinc-600 bg-black px-4 py-2 border border-white/5 min-w-[200px]">
+                      {data.key}
+                    </div>
+                    <button className="material-symbols-outlined text-sm text-zinc-500 hover:text-[#BD00FF] transition-colors">edit</button>
+                    <button className="material-symbols-outlined text-sm text-zinc-500 hover:text-[#e90053] transition-colors">refresh</button>
                   </div>
                 </div>
               ))}
             </div>
-          </motion.div>
-        </section>
+          </section>
 
-        {/* Billing Section (Right) */}
-        <section className="col-span-12 lg:col-span-4 space-y-6">
-          {/* Subscription */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="rounded-xl p-6 relative overflow-hidden"
-            style={{ ...glass, borderTop: '1px solid rgba(139,92,246,0.4)' }}
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
-            <h2 className="font-['Space_Grotesk'] text-xl font-semibold text-white mb-6">Subscription</h2>
-            <div className="mb-6">
-              <div className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-1">Current Plan</div>
-              <div className="text-3xl font-['Space_Grotesk'] font-bold text-violet-400" style={{ textShadow: '0 0 10px rgba(139,92,246,0.3)' }}>Enterprise</div>
-              <div className="text-sm text-zinc-500 mt-1">Next billing: Oct 24, 2024</div>
+          {/* Security Audit Log */}
+          <section className="bg-[#0A0A0B] border border-white/10">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+              <h3 className="font-label-caps text-xs tracking-[0.1em] font-bold text-white uppercase">SECURITY_AUDIT_LOG</h3>
+              <span className="font-data-mono text-[9px] text-zinc-500 uppercase tracking-widest">REAL-TIME MONITORING ACTIVE</span>
             </div>
-            <div className="space-y-4 mb-6">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-zinc-500">Compute Cycles</span>
-                  <span className="text-white">840/1,000</span>
-                </div>
-                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full w-[84%] rounded-full relative" style={{ background: 'linear-gradient(90deg, #8B5CF6, #06B6D4)' }}>
-                    <div className="absolute right-0 top-0 h-full w-2 bg-white/40 blur-sm" />
-                  </div>
-                </div>
+            <div className="p-6 space-y-4 font-data-mono text-[11px]">
+              <div className="flex gap-4 items-start border-l-2 border-[#6bff83] pl-4">
+                <span className="text-zinc-600 shrink-0">14:22:01</span>
+                <p className="text-zinc-300 uppercase">ACCESS_GRANTED // <span className="text-[#6bff83]">OPERATOR_01</span> // IP: 192.168.1.44</p>
               </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-zinc-500">Video Tokens</span>
-                  <span className="text-white">12,500/20k</span>
-                </div>
-                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full w-[62%] rounded-full relative" style={{ background: 'linear-gradient(90deg, #8B5CF6, #06B6D4)' }}>
-                    <div className="absolute right-0 top-0 h-full w-2 bg-white/40 blur-sm" />
-                  </div>
-                </div>
+              <div className="flex gap-4 items-start border-l-2 border-[#BD00FF] pl-4">
+                <span className="text-zinc-600 shrink-0">13:58:12</span>
+                <p className="text-zinc-300 uppercase">API_KEY_ROTATED // <span className="text-[#BD00FF]">GROQ_INFRA</span> // SYSTEM_AUTO_MAINTENANCE</p>
+              </div>
+              <div className="flex gap-4 items-start border-l-2 border-[#e90053] pl-4">
+                <span className="text-zinc-600 shrink-0">12:14:55</span>
+                <p className="text-zinc-300 uppercase text-[#e90053]">LOGIN_ATTEMPT_FAILED // <span className="font-bold">UNKNOWN_ORIGIN</span> // PROTOCOL: BLOCKED</p>
+              </div>
+              <div className="flex gap-4 items-start border-l-2 border-zinc-700 pl-4">
+                <span className="text-zinc-600 shrink-0">10:05:33</span>
+                <p className="text-zinc-400 uppercase">DATABASE_SYNC_STABLE // SUPABASE_PRIMARY_CLUSTER</p>
               </div>
             </div>
-            <button className="w-full py-3 text-violet-400 text-xs font-bold uppercase tracking-widest hover:bg-violet-500/5 transition-all mb-3 rounded" style={{ border: '1px solid rgba(139,92,246,0.4)' }}>
-              Manage Billing
+            <button className="w-full py-3 border-t border-white/10 font-label-caps text-[9px] text-zinc-500 uppercase tracking-[0.2em] hover:bg-white/5 transition-all">
+              VIEW_FULL_SECURITY_MANIFEST
             </button>
-            <button className="w-full py-3 bg-zinc-900 text-zinc-500 text-xs font-bold uppercase tracking-widest rounded">
-              View Invoices
-            </button>
-          </motion.div>
-
-          {/* Support */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="rounded-xl p-6"
-            style={{ ...glass, background: 'rgba(9,16,12,0.9)', borderTop: '1px solid rgba(139,92,246,0.3)' }}
-          >
-            <h3 className="font-['Space_Grotesk'] text-lg font-semibold text-white mb-3">Concierge Support</h3>
-            <p className="text-sm text-zinc-500 mb-4">Access your dedicated account manager for custom infrastructure scaling or enterprise SLAs.</p>
-            <div className="flex items-center gap-4 mb-4 p-2 bg-zinc-900/50 rounded">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">SC</div>
-              <div>
-                <div className="text-sm font-bold text-white">Sarah Chen</div>
-                <div className="text-xs text-violet-400">Senior Solutions Architect</div>
-              </div>
-            </div>
-            <a href="#" className="block text-center text-violet-400 text-xs font-bold uppercase tracking-widest pb-1 hover:text-violet-300 transition-colors" style={{ borderBottom: '1px solid rgba(139,92,246,0.2)' }}>
-              Open Priority Ticket
-            </a>
-          </motion.div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   );

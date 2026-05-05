@@ -8,201 +8,118 @@ interface LogoProps {
 
 export default function Logo({ size = 'md', hideText = false }: LogoProps) {
   const sizes = {
-    sm: { container: 'w-16 h-16', text: 'text-xl', scale: 0.6 },
-    md: { container: 'w-24 h-24', text: 'text-3xl', scale: 1 },
-    lg: { container: 'w-36 h-36', text: 'text-5xl', scale: 1.5 },
+    sm: { container: 'w-10 h-10', text: 'text-lg', tagline: 'text-[8px]' },
+    md: { container: 'w-14 h-14', text: 'text-2xl', tagline: 'text-[10px]' },
+    lg: { container: 'w-20 h-20', text: 'text-4xl', tagline: 'text-xs' },
   };
 
   return (
-    <div className="flex items-center gap-6 group cursor-pointer select-none">
-      {/* 3D Animated Identity Mark */}
-      <motion.div 
-        animate={{ 
-          rotateY: [0, 15, 0, -15, 0],
-          rotateX: [0, 5, 0, -5, 0],
-          y: [0, -5, 0]
-        }}
-        transition={{ 
-          duration: 8, 
-          repeat: Infinity, 
-          ease: "easeInOut" 
-        }}
-        className={`relative ${sizes[size].container} perspective-1000 flex items-center justify-center`}
+    <div className="flex items-center gap-3 group cursor-pointer select-none">
+      {/* Animated Logo Mark */}
+      <motion.div
+        className={`relative ${sizes[size].container} flex items-center justify-center`}
       >
-        {/* Deep Atmospheric Glows */}
-        <div className="absolute top-1/2 left-0 w-full h-full bg-neon-purple/20 blur-[60px] rounded-full -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute top-1/2 right-0 w-full h-full bg-neon-cyan/20 blur-[60px] rounded-full translate-x-1/2 -translate-y-1/2" />
-
-        {/* The 'M' Frame SVG */}
-        <svg 
-          viewBox="0 0 200 200" 
-          className="w-full h-full relative z-10 drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]"
-          style={{ transform: `scale(${sizes[size].scale})` }}
-        >
-          <defs>
-            <linearGradient id="metal-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#2a2d3e" />
-              <stop offset="50%" stopColor="#1a1c2c" />
-              <stop offset="100%" stopColor="#0a0b16" />
-            </linearGradient>
-            <linearGradient id="purple-neon" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#bc13fe" />
-              <stop offset="100%" stopColor="#6a0dad" />
-            </linearGradient>
-            <linearGradient id="cyan-neon" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#00f5ff" />
-              <stop offset="100%" stopColor="#008b8b" />
-            </linearGradient>
-            <linearGradient id="green-neon" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#00ff00" />
-              <stop offset="100%" stopColor="#008000" />
-            </linearGradient>
-          </defs>
-
-          {/* Main 'M' Structure */}
-          <path 
-            d="M40 160 L40 40 L100 80 L160 40 L160 160" 
-            fill="none" 
-            stroke="url(#metal-grad)" 
-            strokeWidth="24" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-          />
-          <path 
-            d="M40 160 L40 40 L100 80 L160 40 L160 160" 
-            fill="none" 
-            stroke="white" 
-            strokeWidth="1" 
-            opacity="0.1"
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-          />
-
-          {/* Left Conveyor Track */}
-          <mask id="mask-left">
-            <path d="M40 160 L40 40" stroke="white" strokeWidth="18" strokeLinecap="round" />
-          </mask>
-          <g mask="url(#mask-left)">
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <motion.rect
-                key={`left-${i}`}
-                x="32"
-                y={i * 25}
-                width="16"
-                height="8"
-                rx="2"
-                fill="#bc13fe"
-                animate={{ y: [i * 25, (i + 1) * 25] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              />
-            ))}
-          </g>
-
-          {/* Right Conveyor Track */}
-          <mask id="mask-right">
-            <path d="M160 40 L160 160" stroke="white" strokeWidth="18" strokeLinecap="round" />
-          </mask>
-          <g mask="url(#mask-right)">
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <motion.rect
-                key={`right-${i}`}
-                x="152"
-                y={i * 25}
-                width="16"
-                height="8"
-                rx="2"
-                fill="#00ff00"
-                animate={{ y: [i * 25, (i + 1) * 25] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              />
-            ))}
-          </g>
-
-          {/* Central Camera Iris Housing */}
-          <circle cx="100" cy="80" r="38" fill="#1a1c2c" stroke="#bc13fe" strokeWidth="4" />
-          <circle cx="100" cy="80" r="34" fill="none" stroke="#00f5ff" strokeWidth="1" opacity="0.5" />
-          
-          {/* Rotating Iris Blades */}
-          <g transform="translate(100, 80)">
-            <motion.g
-              animate={{ rotate: 360 }}
-              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-            >
-              {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
-                <path
-                  key={i}
-                  d="M0 -30 C15 -30, 25 -15, 25 0 L0 0 Z"
-                  fill="#2a2d3e"
-                  stroke="#bc13fe"
-                  strokeWidth="0.5"
-                  transform={`rotate(${angle})`}
-                />
-              ))}
-            </motion.g>
-          </g>
-
-          {/* Central Lens Eye */}
-          <circle cx="100" cy="80" r="12" fill="#000" />
-          <motion.circle 
-            cx="100" cy="80" r="6" 
-            fill="#00f5ff"
-            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          />
-          <circle cx="98" cy="78" r="2" fill="white" opacity="0.5" />
-
-          {/* Neon Circuit Paths */}
-          <motion.path 
-            d="M100 120 L100 160 L140 180" 
-            stroke="#00ff00" 
-            strokeWidth="2" 
-            fill="none" 
-            strokeDasharray="100"
-            animate={{ strokeDashoffset: [100, 0] }}
-            transition={{ duration: 4, repeat: Infinity }}
-          />
-          <motion.path 
-            d="M100 120 L100 160 L60 180" 
-            stroke="#bc13fe" 
-            strokeWidth="2" 
-            fill="none" 
-            strokeDasharray="100"
-            animate={{ strokeDashoffset: [100, 0] }}
-            transition={{ duration: 4, repeat: Infinity, delay: 2 }}
-          />
-        </svg>
-
-        {/* Ambient Ring */}
-        <motion.div 
-          animate={{ rotate: 360, scale: [1, 1.05, 1] }}
-          transition={{ rotate: { duration: 20, repeat: Infinity, ease: "linear" }, scale: { duration: 4, repeat: Infinity } }}
-          className="absolute inset-[-10px] border border-white/5 rounded-full z-0"
+        {/* Glow Ring */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+          className="absolute inset-[-3px] rounded-lg"
+          style={{
+            background: 'conic-gradient(from 0deg, #BD00FF, #00fe66, #e90053, #BD00FF)',
+            opacity: 0.4,
+            filter: 'blur(4px)',
+          }}
         />
+
+        {/* Core Container */}
+        <div
+          className="relative w-full h-full rounded-lg flex items-center justify-center overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #0A0A0B 0%, #1a1a1d 100%)',
+            border: '1px solid rgba(189, 0, 255, 0.3)',
+            boxShadow: '0 0 20px rgba(189, 0, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        >
+          {/* SVG Logo */}
+          <svg viewBox="0 0 100 100" className="w-[70%] h-[70%]">
+            <defs>
+              <linearGradient id="logo-grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#BD00FF" />
+                <stop offset="100%" stopColor="#ecb2ff" />
+              </linearGradient>
+              <linearGradient id="logo-grad-green" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#00fe66" />
+                <stop offset="100%" stopColor="#6bff83" />
+              </linearGradient>
+            </defs>
+
+            {/* Play Triangle */}
+            <motion.path
+              d="M30 20 L30 80 L78 50 Z"
+              fill="none"
+              stroke="url(#logo-grad-primary)"
+              strokeWidth="5"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 2, ease: 'easeInOut' }}
+            />
+
+            {/* Inner Pulse */}
+            <motion.circle
+              cx="46"
+              cy="50"
+              r="8"
+              fill="#BD00FF"
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.6, 1, 0.6],
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+
+            {/* Factory Gear Teeth (small accents) */}
+            <motion.path
+              d="M68 35 L78 30 M68 65 L78 70 M78 50 L88 50"
+              stroke="url(#logo-grad-green)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              fill="none"
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+          </svg>
+
+          {/* Scanline */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(transparent 50%, rgba(189, 0, 255, 0.03) 50%)',
+              backgroundSize: '100% 4px',
+            }}
+          />
+        </div>
       </motion.div>
 
-      {/* Typography Area */}
+      {/* Text */}
       {!hideText && (
         <div className="flex flex-col">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-3"
+          <motion.span
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className={`${sizes[size].text} font-black text-[#BD00FF] italic tracking-tighter uppercase leading-none font-headline`}
+            style={{ textShadow: '0 0 20px rgba(189, 0, 255, 0.4)' }}
           >
-            <span className={`${sizes[size].text} font-black text-white italic tracking-tighter uppercase leading-none drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]`}>
-              Video<span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-purple to-neon-cyan">Mill</span>
-            </span>
-          </motion.div>
-          <motion.div 
+            VIDEOMILL
+          </motion.span>
+          <motion.span
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.8 }}
+            animate={{ opacity: 0.5 }}
             transition={{ delay: 0.5 }}
-            className="flex items-center gap-2 mt-2"
+            className={`${sizes[size].tagline} font-data-mono text-zinc-500 uppercase tracking-[0.2em] mt-1`}
           >
-            <div className="h-[1.5px] w-12 bg-gradient-to-r from-neon-purple to-neon-cyan" />
-            <span className="text-[13px] font-black text-gray-400 uppercase tracking-[0.2em] italic group-hover:text-neon-cyan transition-colors">
-              The Non-Stop Viral Engine
-            </span>
-          </motion.div>
+            NON-STOP VIRAL ENGINE
+          </motion.span>
         </div>
       )}
     </div>

@@ -1,382 +1,211 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
-import { 
-  Flame, Video, RefreshCw, Search, ArrowUpRight, 
-  X, Activity, Globe, Sparkles, TrendingUp,
-  BarChart3, Zap, ShieldAlert, Cpu, Radio, Terminal, Target,
-  Filter, ChevronRight, Play
-} from 'lucide-react';
-import type { TrendingTopic } from '../types';
-import { triggerProduction } from '../lib/api';
-import { useLanguage } from '../contexts/LanguageContext';
+
+const VISUAL_PATTERNS = [
+  { tag: '#FAST_TRANSITION', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBsOtmbvux2LJD5-xafcqdfqHVxc6GHDWf4Mj3651t3j0trVcmabLOnV92dqxV9F94ZYIccbII3jYZfPhAOVePGrAzdh6WHLW719ZYNxfwK7q67EJP8ONxvpFIBSoWoxqlP1fiMktS8T6fxCjIPlALshFtuYBs72UOUv-DAtg9jtjS-Kl3VRRWNAgo7r-ZgIoNqwPGL-tJ4erilE6ejBQTi88ZnuKDMnOJszB2YYHyfowT_eIiQDgE8kZobf8x2d4Z2e8ffPUKajNY' },
+  { tag: '#CYBER_GLITCH', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4oJtsGfNuYkrpb9J5UIl2nO7mHED7tf-8dNnsUbgShTOU_qt6MElfzMbB_jRTSNa0z11E-yS7uH6e4KazgHIqmvExfZKU6VRjhEeFjTHyuYKZlZGq69enyi0-tk5btbvmcYn-1V454t_9kPreTTOFD3643xSVs1cTElnmRUjns6UUJ5BITCdf0xDUXWP0CrHja19WxdkIe9hIkODIOzsiVGS2t17XXrGVJFwANuGN2G8-KsSV1n3n5wGoT-OkpN04s_Cuk0bJvic' },
+  { tag: '#RETRO_CORE', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDJL8rrmI39KdOJLlBHJLSponIRvf5ptYDvKegyyvlROqu1zJ2Fr7doTILuQTEsAws7fVns1t87eUbALXHKVUUzLxDG4jJdgNOS2yCJnngucYdovOuk8E-6_qbtgrSXn7Orp4xCJjUVMBnt2wshix64qzMWe5DX0PtotwlFhRVNvsZfQzvqHCRCR9gmvoaF6LFIVZ4pf7b_u-6__bYE_kLUnijy1_uiNMUaoYcY8-tP7_-MJZdcKuy7G--9ITPa32KDqbiFevtsxLY' },
+  { tag: '#GLASS_FLUX', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCGExvovo_tSko458BiE2KbSWzZhxmv-wVJcCyPOc0VmcMMXAfyQXP1kNRjOZ6TugtQs7LNGvJ1L9hTatN6Tc-msUNgFh-zLZ5wnqH6szwPAIq_PcPpIdT-Qw4GgChIWof6f_IBv7CZt9F1JLAq6bdgmpcuIelVlYvEptILqgIo2ATHgoAp2xbD_8drzhlkS1CO3meIkqtElXO6KYEFJiFxR9-jglE-5zK8FIagexGESVxbO0KzJHca2DFHCgcCVbW8LYmzRCxrI-c' },
+  { tag: '#GLOBAL_PULSE', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBzEST40rFayP4vRKa0ITO9wnV6WCtgL3M15PcBwFi99uxuHl8bqAQ7TtViDXBoyZQcz8GXfOPTcLBV1x4a_pfBMe6bPRS4uciSLAsIrk906IUC4guPYaIMj2f81EAIWb2R37wRVvoTAFOPPnTo-C-CFw0cvAuf__plJziwO7yIhR7J5oV3BfShMkNBrQAJnb6xX9a8ItX52UW4cKIwU_ch-KzFRttHMlEFCZoOtDIqd5X6IYPU0Jl5iMgyPWp2AU8q15h8c4YAZlE' },
+  { tag: '#COMPUTE_CORE', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZoRRzCB-qqyYgcjK9l7IoxSVMe6D94EPMRvKzEEnNMNS65V2320RSsR8LTX49AJZwmnke932hEs9s4vi9RZzNyxIG10oQ7Uy-T-miBPCW9AyAYbKNYvOIUlPedpwloGTBlNCBtOWBiFM8ixeqyHnDYLPqST2z_uhDrsfFnwkNBiTFJEHuIBG-vZh57RqnVP91OiftlbMaiLLcx0mVzScF6FJyZLo6PSqz3zucZ8F_7Z6DQtnb14-slVa3ODGeUtpDZsGybJIadac' },
+];
 
 export default function TrendAnalyzer() {
-  const { t } = useLanguage();
-  const { trends = [], isLoading, fetchInitialData, fetchTrends } = usePipelineStore();
-  const [platformFilter, setPlatformFilter] = useState<'all' | 'tiktok' | 'youtube' | 'instagram' | 'snapchat'>('all');
-  const [countryFilter, setCountryFilter] = useState('all');
-  const [languageFilter, setLanguageFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  const [selectedTrend, setSelectedTrend] = useState<TrendingTopic | null>(null);
-  const [isOrdering, setIsOrdering] = useState(false);
+  const { trends = [], fetchTrends, subscribeToChanges } = usePipelineStore();
 
   useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
+    fetchTrends();
+    const unsubscribe = subscribeToChanges();
+    return () => unsubscribe();
+  }, []);
 
-  const filteredTrends = trends.filter(t => {
-    const matchesPlatform = platformFilter === 'all' || t.platform?.toLowerCase() === platformFilter;
-    const matchesCountry = countryFilter === 'all' || t.country === countryFilter;
-    const matchesLanguage = languageFilter === 'all' || t.language === languageFilter;
-    const matchesSearch = (t.title || '').toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesPlatform && matchesCountry && matchesLanguage && matchesSearch;
-  });
-
-  const handleStartProduction = async (trend: TrendingTopic) => {
-    setIsOrdering(true);
-    const orderId = crypto.randomUUID();
-    
-    try {
-      await triggerProduction({
-        id: orderId,
-        video_id: orderId,
-        action: 'TREND_START',
-        trend_id: trend.id,
-        title: trend.title,
-        topic: trend.tags?.[0] || trend.title,
-        style_tone: '⚡ Engaging',
-        target_audience: trend.country || 'Global',
-        video_format: '📱 9:16 (Vertical)',
-        ai_voice: 'nb-NO-PernilleNeural',
-        language: trend.language || 'Norsk',
-        platforms: ['tiktok', 'youtube']
-      });
-      setSelectedTrend(null);
-    } catch (err) {
-      console.error('Trend production failed:', err);
-    } finally {
-      setIsOrdering(false);
-    }
-  };
-
-  const glassStyle = {
-    background: 'rgba(31, 31, 35, 0.6)',
-    backdropFilter: 'blur(12px)',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
-    boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.03)',
-  };
-
-  // Top 3 trends for hot concepts
-  const hotConcepts = filteredTrends.slice(0, 3);
-  // Pulse wave heights (simulated from trends data)
-  const pulseHeights = [40, 60, 85, 100, 70, 50, 30, 45, 65, 90, 75, 40];
+  const safeTrends = Array.isArray(trends) ? trends : [];
 
   return (
-    <div className="space-y-8 max-w-[1600px] mx-auto pb-20 px-4 lg:px-0">
-      {/* Hero Header */}
-      <section className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]"></span>
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Live Data Stream</span>
-            </div>
-            <h2 className="font-['Space_Grotesk'] text-3xl font-semibold text-white uppercase tracking-tight">TREND RADAR</h2>
-            <p className="text-base text-zinc-400 max-w-xl mt-1">
-              Real-time social media analysis across global neural networks. Instant content synthesis available for all detected clusters.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => fetchTrends()}
-              className="bg-zinc-900 border border-zinc-700 px-3 py-1 rounded hover:border-violet-500 transition-colors flex items-center gap-2"
-            >
-              <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-              <span className="text-xs font-bold uppercase tracking-widest">Sync</span>
-            </button>
-          </div>
+    <div className="max-w-[1440px] mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="font-headline text-[40px] font-[800] tracking-[-0.02em] leading-[1.2] text-[#e5e2e3] uppercase">Trend Radar</h1>
+          <p className="font-data-mono text-xs text-zinc-500 tracking-[0.2em] uppercase mt-1">Real-time engagement pulse • Global scan active</p>
         </div>
-      </section>
-
-      {/* Radar Visualization + Pulse Wave */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
-        {/* Radar Display */}
-        <div
-          className="xl:col-span-8 rounded-xl overflow-hidden relative min-h-[500px] p-4 flex items-center justify-center"
-          style={{
-            ...glassStyle,
-            backgroundImage: 'radial-gradient(circle, rgba(53,52,54,0.5) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
-        >
-          {/* Scanline */}
-          <div
-            className="absolute inset-0 opacity-30 pointer-events-none"
-            style={{
-              background: 'linear-gradient(to bottom, transparent 50%, rgba(139,92,246,0.02) 50%)',
-              backgroundSize: '100% 4px',
-            }}
-          />
-
-          {/* Radar Circles */}
-          <div className="relative w-full max-w-[450px] aspect-square rounded-full border border-zinc-800 flex items-center justify-center">
-            <div className="absolute w-[80%] h-[80%] border border-zinc-800 rounded-full"></div>
-            <div className="absolute w-[60%] h-[60%] border border-zinc-800 rounded-full"></div>
-            <div className="absolute w-[40%] h-[40%] border border-zinc-800 rounded-full"></div>
-            <div className="absolute w-[20%] h-[20%] border border-zinc-800 rounded-full"></div>
-
-            {/* Radar Sweep Line */}
-            <div className="absolute top-1/2 left-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent to-violet-500 origin-left -rotate-45"></div>
-
-            {/* Dynamic Trend Nodes */}
-            {filteredTrends.slice(0, 5).map((trend, i) => {
-              const positions = [
-                { top: '20%', right: '30%' },
-                { bottom: '25%', left: '20%' },
-                { top: '60%', right: '15%' },
-                { top: '35%', left: '25%' },
-                { bottom: '40%', right: '25%' },
-              ];
-              const sizes = ['w-3 h-3', 'w-2 h-2', 'w-4 h-4', 'w-2 h-2', 'w-3 h-3'];
-              const colors = ['bg-violet-500', 'bg-emerald-400', 'bg-violet-400', 'bg-violet-500', 'bg-emerald-400'];
-              const shadows = [
-                'shadow-[0_0_12px_rgba(139,92,246,0.6)]',
-                'shadow-[0_0_10px_rgba(52,211,153,0.6)]',
-                'shadow-[0_0_15px_rgba(139,92,246,0.6)]',
-                'shadow-[0_0_10px_rgba(139,92,246,0.6)]',
-                'shadow-[0_0_10px_rgba(52,211,153,0.6)]',
-              ];
-              return (
-                <div
-                  key={trend.id}
-                  className="absolute group cursor-pointer"
-                  style={positions[i]}
-                >
-                  <div className={`${sizes[i]} ${colors[i]} rounded-full ${shadows[i]} animate-pulse`}></div>
-                  <div
-                    className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                    style={glassStyle}
-                  >
-                    <span className="text-xs font-mono text-white">#{trend.tags?.[0] || trend.title?.slice(0, 15)}</span>
-                  </div>
-                </div>
-              );
-            })}
+        <div className="flex gap-4">
+          <div className="bg-[#0A0A0B] border border-white/10 px-4 py-2 flex flex-col items-end">
+            <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase">Live Signals</span>
+            <span className="font-data-mono text-[#6bff83] text-lg">{safeTrends.length * 124 || 1204551}</span>
           </div>
-
-          {/* Radar Stats Overlays */}
-          <div className="absolute top-6 left-6 flex flex-col gap-1">
-            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Signal strength</span>
-            <div className="flex gap-[2px]">
-              <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-              <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-              <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-              <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-              <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-              <div className="w-1 h-3 bg-zinc-800"></div>
-            </div>
-          </div>
-          <div className="absolute bottom-6 right-6 text-right">
-            <p className="text-[10px] font-mono text-zinc-500 uppercase">Tracking {filteredTrends.length} nodes</p>
-            <p className="text-xl font-['Space_Grotesk'] font-medium text-white">ACTIVE_RADAR.v4</p>
-          </div>
-        </div>
-
-        {/* Pulse Wave + Hot Concepts */}
-        <div className="xl:col-span-4 flex flex-col gap-4">
-          {/* Pulse Metric */}
-          <div className="p-4 rounded-xl" style={glassStyle}>
-            <h3 className="text-xs font-bold text-violet-400 mb-4 uppercase tracking-widest">Social Pulse Wave</h3>
-            <div className="h-32 w-full relative flex items-end gap-[2px]">
-              {pulseHeights.map((h, i) => (
-                <div
-                  key={i}
-                  className="flex-1 rounded-t-sm transition-all"
-                  style={{
-                    height: `${h}%`,
-                    background: h >= 90 ? '#8B5CF6' : `rgba(139, 92, 246, ${0.15 + (h / 200)})`,
-                    boxShadow: h >= 90 ? '0 0 10px rgba(139,92,246,0.3)' : 'none',
-                  }}
-                ></div>
-              ))}
-            </div>
-            <div className="flex justify-between mt-4 text-[10px] text-zinc-500 font-mono">
-              <span>00:00:00</span>
-              <span>PEAK DETECTED</span>
-              <span>LIVE_SYNC</span>
-            </div>
-          </div>
-
-          {/* Hot Concepts List */}
-          <div className="p-4 rounded-xl flex-1" style={glassStyle}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xs font-bold text-white uppercase tracking-widest">Hot Concepts</h3>
-              <span className="text-xs text-emerald-400 font-mono">+24% VELOCITY</span>
-            </div>
-            <div className="space-y-3">
-              {hotConcepts.length > 0 ? hotConcepts.map((trend) => (
-                <div
-                  key={trend.id}
-                  onClick={() => setSelectedTrend(trend)}
-                  className="flex items-center justify-between p-3 border border-zinc-800 rounded bg-zinc-900/50 group hover:border-violet-500 transition-all cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <Zap size={16} className="text-violet-400" />
-                    <div>
-                      <p className="text-sm font-bold text-white uppercase tracking-tight">{trend.title?.slice(0, 25)}</p>
-                      <p className="text-[10px] text-zinc-500">{trend.viral_score}% Viral Score</p>
-                    </div>
-                  </div>
-                  <ChevronRight size={16} className="text-zinc-600 group-hover:text-violet-400 transition-colors" />
-                </div>
-              )) : (
-                <div className="text-center py-8 text-zinc-600 text-xs uppercase tracking-widest">
-                  No trends detected
-                </div>
-              )}
-            </div>
+          <div className="bg-[#0A0A0B] border border-white/10 px-4 py-2 flex flex-col items-end">
+            <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase">Scan Velocity</span>
+            <span className="font-data-mono text-[#ecb2ff] text-lg">42.8 GB/S</span>
           </div>
         </div>
       </div>
 
-      {/* Bento Trend Analysis */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-xl flex flex-col justify-between h-64 relative group overflow-hidden p-4" style={glassStyle}>
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent"></div>
-          <div className="relative z-10">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Visual Style</span>
-            <h4 className="text-xl font-['Space_Grotesk'] font-medium text-white uppercase mt-1">Brutalism x Neon</h4>
-          </div>
-          <div className="relative z-10 flex justify-between items-center">
-            <p className="text-xs text-zinc-500 font-mono">ADOPTION RATE: 78%</p>
-            <button className="bg-violet-500 text-white p-2 rounded flex items-center justify-center hover:bg-violet-600 transition-colors">
-              <ArrowUpRight size={14} />
-            </button>
-          </div>
-        </div>
-
-        <div className="rounded-xl flex flex-col justify-between h-64 relative group overflow-hidden p-4" style={glassStyle}>
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent"></div>
-          <div className="relative z-10">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Audio Signature</span>
-            <h4 className="text-xl font-['Space_Grotesk'] font-medium text-white uppercase mt-1">Industrial Ambient</h4>
-          </div>
-          <div className="relative z-10 flex justify-between items-center">
-            <p className="text-xs text-zinc-500 font-mono">TRENDING_REVERB: HIGH</p>
-            <button className="bg-violet-500 text-white p-2 rounded flex items-center justify-center hover:bg-violet-600 transition-colors">
-              <Play size={14} />
-            </button>
-          </div>
-        </div>
-
-        <div className="rounded-xl flex flex-col justify-between h-64 p-4" style={{ ...glassStyle, borderColor: 'rgba(139,92,246,0.3)' }}>
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Quick Synthesis</span>
-              <h4 className="text-xl font-['Space_Grotesk'] font-medium text-white uppercase mt-1">Deploy Content</h4>
+      {/* Grid */}
+      <div className="grid grid-cols-12 gap-4">
+        {/* Global Trend Heatmap */}
+        <div className="col-span-12 lg:col-span-8 bg-[#0A0A0B] border border-white/10 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-8 flex items-center px-4 bg-white/5 border-b border-white/5 z-10">
+            <span className="material-symbols-outlined text-xs text-[#ecb2ff] mr-2">public</span>
+            <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-400 uppercase">Global Trend Heatmap // Signal Density</span>
+            <div className="ml-auto flex gap-2">
+              <span className="w-2 h-2 bg-red-500 rounded-full" />
+              <span className="w-2 h-2 bg-yellow-500 rounded-full" />
+              <span className="w-2 h-2 bg-green-500 rounded-full" />
             </div>
-            <Sparkles size={20} className="text-violet-500 animate-pulse" />
           </div>
-          <p className="text-sm text-zinc-400">Instantly generate a 15s series based on the top 3 detected trends.</p>
-          <button className="w-full bg-violet-500 hover:bg-violet-600 text-white font-['Space_Grotesk'] font-bold uppercase tracking-widest py-3 rounded shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-colors">
-            Launch Video Factory
-          </button>
+          <div className="p-4 pt-12 min-h-[400px] flex items-center justify-center relative">
+            <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ background: 'linear-gradient(rgba(189,0,255,0.05) 50%, transparent 50%)', backgroundSize: '100% 4px' }} />
+            <img
+              alt="Global Heatmap"
+              className="w-full h-full object-cover opacity-40 mix-blend-screen"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmIbWqP787A0kcq9TjPbS7Ynfs_JMfUtaQTSKtWkbVh5xzWAkB_W9Erxi8iIUm_WpmmeXtqD45CSnxi8jaTjwsQ8C4ObzUUil2nJTTJvL5cfAidEQJV5ZpQm8LkhkRKNPhzfmIUEM7diLj3cwc1vxBM10H7SlTl6vdX1DFod1Pq28dyhGw7ACBAnftWFkUEn0GqK31H_sxzEndnPX8j7cuxlvF1Add7HFKdBSs-OphIIpQLcWhMfI3WIYMW_xEXdypp9pGDDub5Sw"
+            />
+            {/* Data Points */}
+            <div className="absolute inset-0 p-8 pointer-events-none">
+              <div className="absolute top-[30%] left-[25%] flex flex-col items-center">
+                <div className="w-4 h-4 bg-[#BD00FF] rounded-full animate-ping opacity-75" />
+                <div className="bg-black/80 backdrop-blur-md border border-[#BD00FF] px-2 py-1 mt-2 font-data-mono text-[10px] text-white">TOKYO_CORE: +88%</div>
+              </div>
+              <div className="absolute top-[45%] left-[60%] flex flex-col items-center">
+                <div className="w-6 h-6 bg-[#00fe66] rounded-full animate-ping opacity-75" />
+                <div className="bg-black/80 backdrop-blur-md border border-[#00fe66] px-2 py-1 mt-2 font-data-mono text-[10px] text-white">LONDON_HUB: +124%</div>
+              </div>
+              <div className="absolute bottom-[20%] left-[15%] flex flex-col items-center">
+                <div className="w-3 h-3 bg-[#e90053] rounded-full animate-ping opacity-75" />
+                <div className="bg-black/80 backdrop-blur-md border border-[#e90053] px-2 py-1 mt-2 font-data-mono text-[10px] text-white">NY_SECTOR: +42%</div>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
 
-      {/* Production Extraction Modal */}
-      <AnimatePresence>
-        {selectedTrend && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6"
-          >
-            <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setSelectedTrend(null)} />
-            
-            <motion.div 
-              initial={{ scale: 0.9, y: 30, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.9, y: 30, opacity: 0 }}
-              className="w-full max-w-3xl relative z-10 overflow-hidden rounded-xl p-10 lg:p-16"
-              style={glassStyle}
-            >
-              <div className="absolute top-0 left-0 w-full h-1 bg-violet-500/50" />
-              
-              <button 
-                onClick={() => setSelectedTrend(null)}
-                className="absolute top-6 right-6 p-3 bg-zinc-800 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-700 transition-all border border-zinc-700 group"
-              >
-                <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
+        {/* Right Panel */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
+          {/* Engagement Peak */}
+          <div className="bg-[#0A0A0B] border border-white/10 p-6 flex flex-col">
+            <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase mb-2">Engagement Peak</span>
+            <div className="flex items-baseline gap-2">
+              <h2 className="font-headline text-[72px] font-[900] tracking-[-0.04em] leading-[1.1] text-[#ffb2ba]">94.2M</h2>
+              <span className="material-symbols-outlined text-[#ffb2ba] animate-bounce">trending_up</span>
+            </div>
+            <div className="mt-4 h-16 w-full flex items-end gap-1">
+              {[20, 35, 25, 60, 85, 100].map((h, i) => (
+                <div key={i} className="flex-1 transition-all" style={{ height: `${h}%`, background: i === 5 ? '#e90053' : `rgba(255,178,186,${0.1 + i * 0.1})` }} />
+              ))}
+            </div>
+            <p className="font-data-mono text-[10px] text-zinc-500 mt-4 uppercase tracking-widest">Global cross-platform surge detected in &apos;Hyper-Casual&apos; category.</p>
+          </div>
+
+          {/* AI Recommendation CTA */}
+          <div className="bg-[#BD00FF] p-6 clipped-corner group cursor-pointer overflow-hidden relative">
+            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="material-symbols-outlined text-white text-4xl mb-4">auto_awesome</span>
+            <h3 className="font-headline text-[24px] font-bold text-white leading-tight uppercase">THE NEXT VIRAL WAVE IS PREDICTED.</h3>
+            <p className="text-white/80 mt-2 text-sm">Deploy &apos;Cyber-Y2K&apos; aesthetic across all short-form series for 4.2x reach.</p>
+            <div className="mt-4 flex justify-end">
+              <span className="material-symbols-outlined text-white">arrow_forward</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Trending Topics Table */}
+        <div className="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div className="col-span-1 md:col-span-2">
+            <div className="bg-[#0A0A0B] border border-white/10 h-full">
+              <div className="p-4 border-b border-white/5 flex justify-between items-center">
+                <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-400 uppercase">Top Trending Topics</span>
+                <span className="font-data-mono text-[10px] text-[#ecb2ff]">SCAN_INTERVAL: 0.5s</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-data-mono text-sm">
+                  <thead className="bg-white/5 text-zinc-500 uppercase text-[10px]">
+                    <tr>
+                      <th className="px-6 py-3">Topic / Hashtag</th>
+                      <th className="px-6 py-3">Growth</th>
+                      <th className="px-6 py-3">Sentiment</th>
+                      <th className="px-6 py-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {(safeTrends.length > 0 ? safeTrends : [
+                      { title: '#AIGENERATED_CHALLENGE', growth_stat: '+422%', viral_score: 95 },
+                      { title: '#VAPORWAVE_LUMINAL', growth_stat: '+318%', viral_score: 82 },
+                      { title: '#MAX_VELOCITY_EDIT', growth_stat: '+155%', viral_score: 75 },
+                    ]).map(t => (
+                      <tr key={t.title} className="hover:bg-white/5 transition-colors">
+                        <td className="px-6 py-4 font-bold text-[#e5e2e3] truncate max-w-[200px]">{t.title}</td>
+                        <td className="px-6 py-4 text-[#6bff83]">{t.growth_stat || '+50%'}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-1">
+                            {[0, 1, 2, 3].map(i => (
+                              <span key={i} className="w-2 h-1" style={{ background: i < (t.viral_score / 25) ? '#6bff83' : '#27272a' }} />
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button className="border border-[#6bff83] text-[#6bff83] text-[10px] px-2 py-1 uppercase hover:bg-[#6bff83] hover:text-black transition-all">FACTORY_READY</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Agent Recommendation */}
+          <div className="col-span-1 bg-[#0A0A0B] border border-white/10 p-6 flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-2">
+              <span className="w-3 h-3 bg-[#00fe66] rounded-full animate-pulse inline-block" style={{ boxShadow: '0 0 10px #00fe66' }} />
+            </div>
+            <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase mb-4">AI AGENT RECOMMENDATION</span>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full border border-[#ecb2ff] overflow-hidden">
+                <img
+                  alt="AI Agent"
+                  className="w-full h-full object-cover"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSnZuXxAy5ICwztpDs95LokFbo_csIiN_ZL_Nn4ErDP_OSFtQM6_2QYYI0FNFEXWYw68gfkSIAApWJ6NhAemY0ZoAEFCzc7D7PcHcKYPdGZ764M3L_1xfgcNZVnkZo28P9Na1vFLqOOXJa72V08PdfPTZaP-raJMj5tF5KORXNUe7SfZiU-MZQ6iNpNlylpwl-ndjXebgUcJQ9ARNA2MUsJ9GjRx-s3cI_jEinn1GWwMQNVQcpRrAjZ6CRnBIIfI9ENhigUc8njAo"
+                />
+              </div>
+              <div>
+                <h4 className="font-headline text-sm text-[#ecb2ff] uppercase font-bold">Agent &apos;Nexus&apos;</h4>
+                <span className="font-data-mono text-[10px] text-zinc-500">VIRAL PREDICTOR ACTIVE</span>
+              </div>
+            </div>
+            <div className="bg-white/5 p-4 border-l-2 border-[#BD00FF]">
+              <p className="text-xs italic text-zinc-300">&quot;Trend &apos;Neo-Noir Retro&apos; is peaking in the US East Coast. Recommend immediate generation of 3 content nodes with high-contrast shadows and 80s synth scores.&quot;</p>
+            </div>
+            <div className="mt-auto space-y-4 pt-4">
+              <div className="flex justify-between items-center text-[10px] font-data-mono">
+                <span className="text-zinc-500 uppercase">Confidence Score</span>
+                <span className="text-[#6bff83]">98.4%</span>
+              </div>
+              <div className="w-full bg-white/10 h-1">
+                <div className="bg-[#6bff83] h-full" style={{ width: '98%' }} />
+              </div>
+              <button className="w-full py-2 bg-transparent border border-[#6bff83] text-[#6bff83] font-label-caps text-[10px] uppercase tracking-widest hover:bg-[#6bff83] hover:text-black transition-all duration-300">
+                EXECUTE FACTORY BATCH
               </button>
+            </div>
+          </div>
+        </div>
 
-              <div className="space-y-10">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 text-violet-400 font-mono text-xs font-bold uppercase tracking-widest">
-                    <Terminal size={16} />
-                    Extraction Protocol Initialized
-                  </div>
-                  <h2 className="text-4xl lg:text-5xl font-['Space_Grotesk'] font-bold text-white uppercase tracking-tighter leading-none">
-                    Trigger <span className="text-violet-400">Synthesis</span>
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-8 bg-zinc-900/50 rounded-xl border border-zinc-800 space-y-6 relative overflow-hidden">
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <span className="text-[11px] font-bold font-mono text-zinc-500 uppercase tracking-widest">Viral Signal</span>
-                        <p className="text-lg font-bold text-white uppercase leading-tight">{selectedTrend.title}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[11px] font-bold font-mono text-zinc-500 uppercase tracking-widest">Origin Node</span>
-                        <p className="text-lg font-bold text-violet-400 uppercase">{selectedTrend.country || 'GLOBAL_CORE'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-8 bg-zinc-900/30 rounded-xl border border-zinc-800 flex flex-col justify-center gap-4 text-center">
-                    <div className="space-y-2">
-                      <span className="text-[11px] font-bold font-mono text-zinc-500 uppercase tracking-widest">Probability Matrix</span>
-                      <p className="text-5xl font-black text-white tracking-tighter leading-none">{selectedTrend.viral_score}%</p>
-                      <p className="text-[11px] font-bold text-violet-400 uppercase tracking-widest pt-2">Yield Optimistic</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4 justify-center">
-                    <div className="h-px flex-1 bg-zinc-800" />
-                    <p className="text-[10px] text-zinc-600 font-bold font-mono uppercase tracking-widest">Operations Core</p>
-                    <div className="h-px flex-1 bg-zinc-800" />
-                  </div>
-                  
-                  <button 
-                    disabled={isOrdering}
-                    onClick={() => handleStartProduction(selectedTrend)}
-                    className="w-full bg-violet-500 hover:bg-violet-600 text-white font-['Space_Grotesk'] font-bold uppercase tracking-widest py-5 rounded shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
-                  >
-                    {isOrdering ? (
-                      <RefreshCw size={20} className="animate-spin" />
-                    ) : (
-                      <>
-                        Commence Extraction Cycle
-                        <Zap size={20} />
-                      </>
-                    )}
-                  </button>
-                  <p className="text-[9px] text-zinc-600 text-center font-bold uppercase tracking-widest opacity-50">
-                    Executing this action will consume 1 production credit and initialize automated asset synthesis.
-                  </p>
+        {/* Emerging Visual Patterns */}
+        <div className="col-span-12 mt-4">
+          <h3 className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase mb-4">Emerging Visual Patterns</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {VISUAL_PATTERNS.map(p => (
+              <div key={p.tag} className="aspect-[9/16] bg-[#0A0A0B] border border-white/10 overflow-hidden relative group">
+                <img alt={p.tag} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={p.img} />
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black to-transparent">
+                  <span className="font-data-mono text-[10px] text-white">{p.tag}</span>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

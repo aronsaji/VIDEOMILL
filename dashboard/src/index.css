@@ -1,39 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&family=Be+Vietnam+Pro:wght@400;500;700&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #020205;
-  --surface: #0a0a12;
-  --brand-1: #00f5ff; 
-  --brand-2: #bc13fe; /* Original Neon Purple */
-  --text-main: #ffffff;
-  --text-muted: #888899;
-  --neon-purple: #bc13fe;
+  --background: #131314;
+  --surface: #201f20;
+  --brand-1: #6bff83;
+  --brand-2: #bd00ff;
+  --text-main: #e5e2e3;
+  --text-muted: #71717a;
+  --neon-purple: #bd00ff;
   --neon-cyan: #00f5ff;
 }
 
 body {
   background-color: var(--background);
   color: var(--text-main);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   margin: 0;
   overflow-x: hidden;
 }
 
-/* Global Typography Standardization */
+/* Global Typography */
 h1, h2, h3, h4 {
+  font-family: 'Epilogue', sans-serif;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #ffffff;
+  color: #e5e2e3;
 }
 
-/* Base text size (14px default for clarity) */
-p, span, div {
-  font-size: 14px;
+/* Scanline Overlay */
+.scanline-overlay {
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+/* Clipped Corner */
+.clipped-corner {
+  clip-path: polygon(10px 0%, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0% 10px);
+}
+
+/* Glass Panel */
+.glass-ultra {
+  background: rgba(10, 10, 11, 0.8);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Standard Card with Depth */
@@ -50,7 +65,7 @@ p, span, div {
 
 /* Standard Button (Base) */
 .btn-standard {
-  @apply relative overflow-hidden px-8 py-3 rounded-xl font-black uppercase tracking-[0.2em] transition-all duration-300 flex items-center justify-center gap-2;
+  @apply relative overflow-hidden px-8 py-3 font-black uppercase transition-all duration-300 flex items-center justify-center gap-2;
   color: #000000;
 }
 
@@ -82,19 +97,13 @@ p, span, div {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Fix for small text (Legibility Protocol) */
-.text-xs, .text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\], .text-\[12px\] {
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  color: #ffffff !important;
-  letter-spacing: 0.02em !important;
-}
-
-.font-mono {
-  font-family: 'JetBrains Mono', monospace !important;
-}
-
 .glass-ultra select option {
-  background-color: #05060f !important;
+  background-color: #0a0a0b !important;
   color: white !important;
+}
+
+/* Scanline for Layout */
+.scanline {
+  background: linear-gradient(rgba(189, 0, 255, 0.03) 50%, transparent 50%);
+  background-size: 100% 4px;
 }

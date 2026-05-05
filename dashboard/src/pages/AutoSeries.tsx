@@ -1,396 +1,238 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Film, Sparkles, Play, Camera, Smartphone,
-  Plus, Minus, Globe, History, Check, ArrowRight,
-  Tv, Wand2, Zap, Layers, Clock, Cpu, Layout, Radio,
-  RefreshCw, Lock
-} from 'lucide-react';
-import { triggerProduction } from '../lib/api';
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
 
-const LANGUAGES = [
-  { id: 'no', label: 'Norsk', flag: '🇳🇴' },
-  { id: 'en', label: 'English', flag: '🇬🇧' },
-  { id: 'es', label: 'Español', flag: '🇪🇸' },
-  { id: 'de', label: 'Deutsch', flag: '🇩🇪' },
+const SERIES = [
+  {
+    name: 'CYBER_CHRONICLES', agent: 'NOIR_V3', platforms: 'YouTube, TikTok', status: 'ACTIVE',
+    schedule: 'Daily @ 18:00 UTC', nextOutput: 'Rendering (42%)', nextColor: 'text-[#6bff83]',
+    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCUH8gVLj5WCXSmT1QUNwYb5jOemZKOhTRD3IfBEw_gy69RTl0ZMomQI3V6elgn8ItaLvi2Tzg208xq45FtI8yno_dcT_m6mN8Z3xHhJstGHTEzkjpFnUdo5fOCwGVcxRsmAxbVwdODMm5_Dm6zrbnuflPGjE4pIXL_BNl5WDN1XnoczzolKDkiEq8BAOxG25hgMwiM8kNrCqr2PhPzOC04zpPqXHhpMsF0f_gBX82I54BE1YNUZAVMi6OXKd-kJOIHSKChJeOnmZM',
+  },
+  {
+    name: 'TECH_STRIKE_LITE', agent: 'NEXUS_CORE', platforms: 'Reels, Shorts', status: 'ACTIVE',
+    schedule: 'Mon, Wed, Fri', nextOutput: 'Queue: 14h 22m', nextColor: 'text-zinc-400',
+    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAOksxWk7V7O-S2fRvuasB-WDUk90yAImdMYuy7IvVlSLw_bj2h-yPtjMbzEK531_SEl-94r7sIykNn0Rlm0FrTbgBj_NbYGBP25xmDcadfD9LEoqZC9xSln6hWEwVXNUxcKRVAy41AmF_21k0kjAoIEFfLhPgk6ch0wsq2Se8zNrLRrAr8J-zs5NCPx9PRws2WmIf-2lRnD2kXyzErHSBKy_B6Ipcm69zjPgKJ63PeRXN_JbHSbgaXuJ7GPZL56wMmrZg2L2s6kr8',
+  },
 ];
 
-const PLATFORMS = [
-  { id: 'youtube', label: 'YouTube', icon: Play, color: 'text-violet-400', bg: 'bg-violet-500/10' },
-  { id: 'tiktok', label: 'TikTok', icon: Smartphone, color: 'text-violet-400', bg: 'bg-violet-500/10' },
-  { id: 'instagram', label: 'Instagram', icon: Camera, color: 'text-violet-400', bg: 'bg-violet-500/10' },
+const LOG_ENTRIES = [
+  { time: '2024-05-18 14:22:01', task: 'Semantic Analysis & Script Gen', series: 'CYBER_CHRONICLES', status: 'SUCCESS', statusColor: 'text-[#6bff83]', dotColor: 'bg-[#00fe66]' },
+  { time: '2024-05-18 14:15:33', task: 'Multi-Platform Asset Assembly', series: 'TECH_STRIKE_LITE', status: 'PROCESSING', statusColor: 'text-[#BD00FF]', dotColor: 'bg-[#BD00FF]', pulse: true },
+  { time: '2024-05-18 13:58:12', task: 'Trend Pulse Data Ingestion', series: 'GLOBAL_SYNC', status: 'SUCCESS', statusColor: 'text-[#6bff83]', dotColor: 'bg-[#00fe66]' },
+  { time: '2024-05-18 13:45:00', task: 'Video Post-Processing Layer 2', series: 'CYBER_CHRONICLES', status: 'RETRYING', statusColor: 'text-[#ffb4ab]', dotColor: 'bg-[#ffb4ab]' },
 ];
 
 export default function AutoSeries() {
-  const [activeTab, setActiveTab] = useState<'new' | 'mine'>('new');
-  const { orders = [] } = usePipelineStore();
-
-  // Form State
-  const [title, setTitle] = useState('New Production Stream');
-  const [description, setDescription] = useState('Define your core series concept here...');
-  const [selectedLanguage, setSelectedLanguage] = useState('no');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['tiktok']);
-  const [episodesCount, setEpisodesCount] = useState(10);
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const togglePlatform = (id: string) => {
-    setSelectedPlatforms(prev =>
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    );
-  };
-
-  const handleGenerate = async () => {
-    if (!title || !description) return;
-    setIsGenerating(true);
-    
-    try {
-      const orderId = crypto.randomUUID();
-      await triggerProduction({
-        id: orderId,
-        video_id: orderId,
-        action: 'SERIES_START',
-        title: `[SERIE] ${title}`,
-        description,
-        language: LANGUAGES.find(l => l.id === selectedLanguage)?.label || 'Norsk',
-        platforms: selectedPlatforms,
-        episodes_count: episodesCount
-      });
-      setActiveTab('mine');
-    } catch (err) {
-      console.error('Series production failed:', err);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const seriesOrders = orders.filter(o => (o.title || '').startsWith('[SERIE]'));
+  const { fetchOrders } = usePipelineStore();
+  useEffect(() => { fetchOrders(); }, []);
 
   return (
-    <div className="space-y-8 max-w-[1600px] mx-auto pb-20">
-      {/* Header Section */}
-      <section className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-        <div>
-          <h2 className="font-['Space_Grotesk'] text-5xl font-bold text-violet-400 uppercase tracking-tighter leading-none">AUTO SERIES</h2>
-          <p className="text-base text-zinc-400 max-w-xl mt-2">
-            Plan and automate full seasons of AI-generated content with precision scheduling and industrial-grade synthesis.
-          </p>
+    <div className="max-w-[1440px] mx-auto space-y-8">
+      {/* Header & Metrics */}
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between items-end">
+          <div>
+            <h1 className="font-headline text-[40px] font-[800] tracking-[-0.02em] leading-[1.2] text-[#e5e2e3] uppercase">AUTO SERIES TERMINAL</h1>
+            <p className="font-data-mono text-[14px] text-zinc-500 uppercase tracking-widest">Autonomous Content Production &amp; Distribution Pipeline</p>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2 bg-[#1c1b1c] px-4 py-2 border border-white/10">
+              <span className="w-2 h-2 bg-[#00fe66] rounded-full animate-pulse" style={{ boxShadow: '0 0 8px #00fe66' }} />
+              <span className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-[#e5e2e3] uppercase">System Status: Optimal</span>
+            </div>
+          </div>
         </div>
-        <button
-          onClick={() => setActiveTab('new')}
-          className="bg-violet-500 text-white px-6 py-3 rounded-lg font-['Space_Grotesk'] font-black uppercase text-sm tracking-widest flex items-center gap-2 hover:bg-violet-600 transition-colors shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+
+        {/* Health Bento Grid */}
+        <div className="grid grid-cols-12 gap-4">
+          {/* Engagement Velocity */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="col-span-12 lg:col-span-4 bg-[#0A0A0B] border border-white/10 p-6 relative overflow-hidden"
+          >
+            <div className="absolute inset-0 pointer-events-none opacity-5" style={{ background: 'linear-gradient(rgba(189,0,255,0.05) 50%, transparent 50%)', backgroundSize: '100% 4px' }} />
+            <div className="flex justify-between items-start mb-6">
+              <p className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase">ENGAGEMENT VELOCITY</p>
+              <span className="material-symbols-outlined text-[#BD00FF]">insights</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="font-headline text-[72px] font-[900] tracking-[-0.04em] leading-[1.1] text-[#e5e2e3]">148.2</span>
+              <span className="font-data-mono text-[#6bff83] text-lg">K/HR</span>
+            </div>
+            <div className="mt-4 h-12 w-full flex items-end gap-1">
+              {[40, 60, 55, 80, 100].map((h, i) => (
+                <div key={i} className="w-full" style={{ height: `${h}%`, background: '#e90053', opacity: 0.3 + i * 0.17 }} />
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Render Stack Health */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="col-span-12 lg:col-span-3 bg-[#0A0A0B] border border-white/10 p-6"
+          >
+            <p className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase mb-6">RENDER STACK HEALTH</p>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-data-mono text-xs uppercase text-zinc-300">Blade Cluster-A</span>
+                  <span className="font-data-mono text-xs text-[#6bff83]">92%</span>
+                </div>
+                <div className="w-full bg-white/5 h-1">
+                  <div className="bg-[#00fe66] h-full" style={{ width: '92%', boxShadow: '0 0 8px #00fe66' }} />
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-data-mono text-xs uppercase text-zinc-300">AI Compute Node</span>
+                  <span className="font-data-mono text-xs text-[#6bff83]">87%</span>
+                </div>
+                <div className="w-full bg-white/5 h-1">
+                  <div className="bg-[#00fe66] h-full" style={{ width: '87%', boxShadow: '0 0 8px #00fe66' }} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Pipeline Queue */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="col-span-12 lg:col-span-5 bg-[#0A0A0B] border border-white/10 p-6 flex flex-col justify-between"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <p className="font-label-caps text-[12px] tracking-[0.1em] font-bold text-zinc-500 uppercase">Automated Pipeline Queue</p>
+              <span className="font-data-mono text-xs text-zinc-500 uppercase">Next Sync: 02:14:00</span>
+            </div>
+            <div className="flex gap-4">
+              {[
+                { label: 'Active Agents', value: '14', borderColor: '#BD00FF' },
+                { label: 'Series Live', value: '08', borderColor: '#00fe66' },
+                { label: 'Fail Rate', value: '0.02%', borderColor: '#e90053' },
+              ].map(m => (
+                <div key={m.label} className="flex-1 bg-[#2a2a2b] p-4 flex flex-col gap-1" style={{ borderLeft: `2px solid ${m.borderColor}` }}>
+                  <span className="font-data-mono text-[10px] text-zinc-500 uppercase">{m.label}</span>
+                  <span className="font-headline text-[24px] font-bold text-[#e5e2e3]">{m.value}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Series Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {SERIES.map((s, i) => (
+          <motion.div
+            key={s.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="bg-[#0A0A0B] border border-white/10 overflow-hidden flex flex-col group hover:border-[#BD00FF]/40 transition-all duration-300"
+          >
+            <div className="relative h-48">
+              <img className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" src={s.img} alt={s.name} />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] to-transparent" />
+              <div className="absolute top-4 left-4 flex gap-2">
+                <span className="bg-[#00fe66] text-black font-label-caps text-[10px] px-2 py-1 rounded-sm uppercase font-bold">{s.status}</span>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="font-headline text-[24px] font-bold text-[#e5e2e3] uppercase mb-1">{s.name}</h3>
+                  <p className="font-data-mono text-[10px] text-zinc-500 uppercase">Agent: {s.agent} | {s.platforms}</p>
+                </div>
+                <button className="text-zinc-500 hover:text-[#BD00FF]">
+                  <span className="material-symbols-outlined">more_vert</span>
+                </button>
+              </div>
+              <div className="bg-black/40 p-4 mb-6 border border-white/5 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-label-caps text-[10px] tracking-[0.1em] font-bold text-zinc-500 uppercase">SCHEDULE</span>
+                  <span className="font-data-mono text-xs uppercase text-zinc-300">{s.schedule}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-label-caps text-[10px] tracking-[0.1em] font-bold text-zinc-500 uppercase">NEXT OUTPUT</span>
+                  <span className={`font-data-mono text-xs uppercase ${s.nextColor}`}>{s.nextOutput}</span>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button className="flex-1 py-2 bg-white/5 border border-white/10 text-[#e5e2e3] font-label-caps text-[10px] uppercase hover:bg-white/10 transition-all flex items-center justify-center gap-2 tracking-[0.1em]">
+                  <span className="material-symbols-outlined text-sm">pause</span> PAUSE
+                </button>
+                <button className="flex-1 py-2 bg-[#BD00FF] text-black font-label-caps text-[10px] uppercase hover:shadow-[0_0_10px_rgba(189,0,255,0.4)] transition-all flex items-center justify-center gap-2 tracking-[0.1em] font-bold">
+                  <span className="material-symbols-outlined text-sm">rocket_launch</span> DEPLOY
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+
+        {/* New Series Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-[#0A0A0B] border border-white/10 border-dashed overflow-hidden flex flex-col group hover:border-zinc-500 transition-all duration-300 opacity-70 hover:opacity-100"
         >
-          <Plus size={16} />
-          Schedule New Series
-        </button>
-      </section>
-
-      {/* Dashboard Grid */}
-      <div className="grid grid-cols-12 gap-4">
-        {/* Controls Panel */}
-        <div className="col-span-12 lg:col-span-4 space-y-4">
-          <div
-            className="p-6 rounded-xl relative overflow-hidden"
-            style={{
-              background: 'rgba(31, 31, 35, 0.6)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.03)',
-            }}
-          >
-            {/* Scanline */}
-            <div
-              className="absolute inset-0 opacity-10 pointer-events-none"
-              style={{
-                background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1) 50%)',
-                backgroundSize: '100% 4px',
-              }}
-            />
-
-            <h3 className="text-xs font-bold text-violet-400 mb-6 flex items-center gap-2 uppercase tracking-widest">
-              <Cpu size={12} />
-              Global Parameters
-            </h3>
-
-            <div className="space-y-6 relative z-10">
-              {/* Series Title */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Series Title</label>
-                <input
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-white font-mono text-sm focus:border-violet-500 outline-none transition-colors"
-                  placeholder="CYBER_INDUSTRIAL_V2"
-                />
-              </div>
-
-              {/* Frequency */}
-              <div className="flex justify-between items-center bg-zinc-900 p-3 rounded-lg border border-zinc-800">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-500 block uppercase tracking-widest">Frequency</label>
-                  <span className="font-mono text-sm text-violet-400">Daily_08:00</span>
-                </div>
-                <div className="w-12 h-12 rounded-full border-2 border-violet-500/30 flex items-center justify-center relative">
-                  <div className="w-1 h-4 bg-violet-500 absolute -top-1 rounded-full"></div>
-                  <RefreshCw size={12} className="text-violet-500/50" />
-                </div>
-              </div>
-
-              {/* Platform Selector */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Platform Target</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {PLATFORMS.slice(0, 2).map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => togglePlatform(p.id)}
-                      className={`py-2 rounded border flex items-center justify-center gap-2 font-['Space_Grotesk'] text-[10px] font-bold tracking-widest uppercase transition-all ${
-                        selectedPlatforms.includes(p.id)
-                          ? 'border-violet-500 bg-violet-500/10 text-violet-400'
-                          : 'border-zinc-800 text-zinc-500 hover:border-zinc-600'
-                      }`}
-                      style={{
-                        background: selectedPlatforms.includes(p.id)
-                          ? 'rgba(139,92,246,0.1)'
-                          : 'rgba(31, 31, 35, 0.6)',
-                        backdropFilter: 'blur(12px)',
-                      }}
-                    >
-                      <p.icon size={14} /> {p.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Episode Count */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Episodes</label>
-                <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded p-2">
-                  <button onClick={() => setEpisodesCount(Math.max(1, episodesCount - 1))} className="w-10 h-10 flex items-center justify-center bg-zinc-800 hover:bg-violet-500/10 rounded text-violet-400 transition-colors">
-                    <Minus size={16} />
-                  </button>
-                  <div className="flex flex-col items-center">
-                    <span className="text-2xl font-black text-white">{episodesCount}</span>
-                    <span className="text-[10px] font-mono text-zinc-600 uppercase">Episodes</span>
-                  </div>
-                  <button onClick={() => setEpisodesCount(episodesCount + 1)} className="w-10 h-10 flex items-center justify-center bg-zinc-800 hover:bg-violet-500/10 rounded text-violet-400 transition-colors">
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Concept</label>
-                <textarea
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-white font-mono text-sm focus:border-violet-500 outline-none transition-colors resize-none"
-                  placeholder="Detail the narrative arc..."
-                />
-              </div>
-
-              {/* Status LEDs */}
-              <div className="pt-3 border-t border-zinc-800/50 flex gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
-                  <span className="text-[10px] uppercase font-bold text-zinc-400">Engine_Ready</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
-                  <span className="text-[10px] uppercase font-bold text-zinc-400">Queue_Active</span>
-                </div>
-              </div>
-
-              {/* Launch Button */}
-              <button
-                disabled={isGenerating}
-                onClick={handleGenerate}
-                className="w-full bg-violet-500 hover:bg-violet-600 text-white font-['Space_Grotesk'] font-bold uppercase tracking-widest py-3 rounded shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isGenerating ? 'Deploying Nodes...' : 'Commence Auto-Stream'}
-              </button>
-            </div>
+          <div className="relative h-48 bg-zinc-900/20 flex items-center justify-center">
+            <span className="material-symbols-outlined text-6xl text-zinc-800">add_circle</span>
           </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            <div
-              className="p-3 rounded-xl text-center border-l-2 border-violet-500"
-              style={{
-                background: 'rgba(31, 31, 35, 0.6)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-              }}
-            >
-              <div className="text-zinc-500 text-[10px] uppercase font-bold">Total_Assets</div>
-              <div className="text-2xl font-['Space_Grotesk'] text-white font-black">{orders.length}</div>
-            </div>
-            <div
-              className="p-3 rounded-xl text-center border-l-2 border-emerald-400"
-              style={{
-                background: 'rgba(31, 31, 35, 0.6)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-              }}
-            >
-              <div className="text-zinc-500 text-[10px] uppercase font-bold">Active_Series</div>
-              <div className="text-2xl font-['Space_Grotesk'] text-white font-black">{String(seriesOrders.length).padStart(2, '0')}</div>
-            </div>
+          <div className="p-6 flex flex-col items-center justify-center text-center">
+            <h3 className="font-headline text-[24px] font-bold text-zinc-500 uppercase mb-2">INITIALIZE NEW SERIES</h3>
+            <p className="text-zinc-600 mb-6 text-sm">Create an autonomous content stream with custom AI agent behaviors and scheduled distribution.</p>
+            <button className="w-full py-3 border border-zinc-700 text-zinc-500 font-label-caps text-[10px] uppercase hover:border-[#BD00FF] hover:text-[#BD00FF] transition-all tracking-[0.1em]">
+              CONFIGURE PIPELINE
+            </button>
           </div>
+        </motion.div>
+      </div>
+
+      {/* Agent Logs Table */}
+      <div className="bg-[#0A0A0B] border border-white/10">
+        <div className="p-6 border-b border-white/10 flex justify-between items-center">
+          <h3 className="font-headline text-[24px] font-bold uppercase text-[#e5e2e3]">RECURRING AGENT LOGS</h3>
+          <select className="bg-black border border-white/10 font-label-caps text-[10px] text-zinc-400 uppercase px-4 py-2 focus:ring-0 focus:border-[#BD00FF] tracking-[0.1em]">
+            <option>ALL AGENTS</option>
+            <option>NOIR_V3</option>
+            <option>NEXUS_CORE</option>
+          </select>
         </div>
-
-        {/* Vertical Timeline View */}
-        <div className="col-span-12 lg:col-span-8">
-          <div
-            className="rounded-xl overflow-hidden flex flex-col h-full"
-            style={{
-              background: 'rgba(31, 31, 35, 0.6)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.03)',
-            }}
-          >
-            <div className="px-6 py-3 bg-zinc-900/50 border-b border-zinc-800 flex justify-between items-center">
-              <h3 className="text-xs font-bold text-violet-400 uppercase tracking-widest">Automation Pipeline / Vertical Timeline</h3>
-              <div className="flex gap-2">
-                <Layers size={16} className="text-zinc-600 hover:text-white cursor-pointer transition-colors" />
-                <Layout size={16} className="text-violet-400 cursor-pointer" />
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 max-h-[700px]">
-              {seriesOrders.length === 0 ? (
-                /* Empty State — show placeholder timeline */
-                <>
-                  {/* Timeline Item 01 - Demo */}
-                  <div className="flex gap-6 group">
-                    <div className="flex flex-col items-center">
-                      <div className="w-12 h-12 rounded bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center">
-                        <span className="text-[10px] font-bold text-zinc-500">NEXT</span>
-                        <span className="text-lg font-['Space_Grotesk'] text-violet-400 font-black">01</span>
-                      </div>
-                      <div className="w-px flex-1 bg-zinc-800 mt-2"></div>
-                    </div>
-                    <div
-                      className="flex-1 p-3 rounded-lg border-l-4 border-violet-500/50 group-hover:border-violet-500 transition-all flex flex-col md:flex-row gap-4"
-                      style={{ background: 'rgba(31, 31, 35, 0.6)', border: '1px solid rgba(255,255,255,0.05)', borderLeft: '4px solid rgba(139,92,246,0.5)' }}
-                    >
-                      <div className="w-full md:w-32 h-20 bg-zinc-800 rounded overflow-hidden flex items-center justify-center border border-zinc-800 border-dashed">
-                        <Film size={24} className="text-zinc-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-['Space_Grotesk'] font-bold text-white uppercase tracking-wider text-sm">AWAITING_CONFIG</h4>
-                          <span className="px-2 py-0.5 rounded text-[9px] bg-violet-500/20 text-violet-400 font-bold uppercase border border-violet-500/30">QUEUED</span>
-                        </div>
-                        <p className="text-xs text-zinc-500 mt-1">Configure parameters on the left panel and launch your first automated series.</p>
-                        <div className="mt-4 flex items-center gap-4">
-                          <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-violet-500 w-0"></div>
-                          </div>
-                          <span className="text-[10px] font-mono text-zinc-400 uppercase">0% Sync</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Timeline Item 02 - Locked */}
-                  <div className="flex gap-6 group">
-                    <div className="flex flex-col items-center">
-                      <div className="w-12 h-12 rounded bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center">
-                        <span className="text-[10px] font-bold text-zinc-500">NEXT</span>
-                        <span className="text-lg font-['Space_Grotesk'] text-white font-black">02</span>
-                      </div>
-                      <div className="w-px flex-1 bg-zinc-800 mt-2"></div>
-                    </div>
-                    <div
-                      className="flex-1 p-3 rounded-lg flex flex-col md:flex-row gap-4 opacity-60"
-                      style={{ background: 'rgba(31, 31, 35, 0.6)', border: '1px solid rgba(255,255,255,0.05)', borderLeft: '4px solid rgba(63,63,70,1)' }}
-                    >
-                      <div className="w-full md:w-32 h-20 bg-zinc-800 rounded overflow-hidden flex items-center justify-center border border-zinc-800 border-dashed">
-                        <Lock size={20} className="text-zinc-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-['Space_Grotesk'] font-bold text-zinc-500 uppercase tracking-wider text-sm">PENDING_EPISODE</h4>
-                          <span className="px-2 py-0.5 rounded text-[9px] bg-zinc-800 text-zinc-500 font-bold uppercase border border-zinc-700">LOCKED</span>
-                        </div>
-                        <p className="text-xs text-zinc-600 mt-1">System awaiting previous episode validation.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Timeline Item 03 - Locked */}
-                  <div className="flex gap-6 group">
-                    <div className="flex flex-col items-center">
-                      <div className="w-12 h-12 rounded bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center">
-                        <span className="text-[10px] font-bold text-zinc-500">NEXT</span>
-                        <span className="text-lg font-['Space_Grotesk'] text-white font-black">03</span>
-                      </div>
-                    </div>
-                    <div
-                      className="flex-1 p-3 rounded-lg flex flex-col md:flex-row gap-4 opacity-60"
-                      style={{ background: 'rgba(31, 31, 35, 0.6)', border: '1px solid rgba(255,255,255,0.05)', borderLeft: '4px solid rgba(63,63,70,1)' }}
-                    >
-                      <div className="w-full md:w-32 h-20 bg-zinc-800 rounded overflow-hidden flex items-center justify-center border border-zinc-800 border-dashed">
-                        <Lock size={20} className="text-zinc-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-['Space_Grotesk'] font-bold text-zinc-500 uppercase tracking-wider text-sm">PENDING_EPISODE</h4>
-                          <span className="px-2 py-0.5 rounded text-[9px] bg-zinc-800 text-zinc-500 font-bold uppercase border border-zinc-700">LOCKED</span>
-                        </div>
-                        <p className="text-xs text-zinc-600 mt-1">System awaiting previous episode validation.</p>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                /* Real series orders */
-                seriesOrders.map((order, i) => (
-                  <div key={order.id} className="flex gap-6 group">
-                    <div className="flex flex-col items-center">
-                      <div className="w-12 h-12 rounded bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center">
-                        <span className="text-[10px] font-bold text-zinc-500">EP</span>
-                        <span className="text-lg font-['Space_Grotesk'] text-violet-400 font-black">{String(i + 1).padStart(2, '0')}</span>
-                      </div>
-                      {i < seriesOrders.length - 1 && <div className="w-px flex-1 bg-zinc-800 mt-2"></div>}
-                    </div>
-                    <div
-                      className="flex-1 p-3 rounded-lg flex flex-col md:flex-row gap-4 transition-all"
-                      style={{ background: 'rgba(31, 31, 35, 0.6)', border: '1px solid rgba(255,255,255,0.05)', borderLeft: '4px solid rgba(139,92,246,0.5)' }}
-                    >
-                      <div className="w-full md:w-32 h-20 bg-zinc-800 rounded overflow-hidden flex items-center justify-center">
-                        <Film size={24} className="text-violet-500/30" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-['Space_Grotesk'] font-bold text-white uppercase tracking-wider text-sm">
-                            {(order.title || '').replace('[SERIE] ', '')} // E{String(i + 1).padStart(2, '0')}
-                          </h4>
-                          <span className="px-2 py-0.5 rounded text-[9px] bg-violet-500/20 text-violet-400 font-bold uppercase border border-violet-500/30">
-                            {order.status?.toUpperCase() || 'QUEUED'}
-                          </span>
-                        </div>
-                        <p className="text-xs text-zinc-500 mt-1 line-clamp-1">{order.description || 'Synthesizing visual layers...'}</p>
-                        <div className="mt-4 flex items-center gap-4">
-                          <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-violet-500"
-                              style={{ width: `${order.progress || 0}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-[10px] font-mono text-zinc-400 uppercase">{order.progress || 0}% Sync</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-white/5">
+              <tr>
+                {['Timestamp', 'Agent Task', 'Series Link', 'Status', 'Action'].map(h => (
+                  <th key={h} className="px-6 py-4 font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.1em]">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5 font-data-mono text-xs">
+              {LOG_ENTRIES.map((entry, i) => (
+                <tr key={i} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="px-6 py-4 text-zinc-500">{entry.time}</td>
+                  <td className="px-6 py-4 text-[#e5e2e3]">{entry.task}</td>
+                  <td className={`px-6 py-4 ${entry.series === 'GLOBAL_SYNC' ? 'text-zinc-400' : 'text-[#BD00FF]'}`}>{entry.series}</td>
+                  <td className="px-6 py-4">
+                    <span className={`flex items-center gap-2 ${entry.statusColor} ${entry.pulse ? 'animate-pulse' : ''}`}>
+                      <span className={`w-1.5 h-1.5 ${entry.dotColor} rounded-full`} />
+                      {entry.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button className="text-zinc-500 hover:text-[#e5e2e3] underline decoration-zinc-700">
+                      {entry.status === 'RETRYING' ? 'MANUAL OVERRIDE' : 'DETAILS'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
