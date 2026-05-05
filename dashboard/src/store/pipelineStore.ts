@@ -210,7 +210,11 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
       const { data, error } = await query;
       if (error) throw error;
-      set({ trends: data || [] });
+      
+      // Sikre at vi alltid sorterer etter viral_score (høyest først)
+      const sortedTrends = (data || []).sort((a, b) => (b.viral_score || 0) - (a.viral_score || 0));
+      
+      set({ trends: sortedTrends });
     } catch (err) {
       console.error('Error fetching trends:', err);
     } finally {
