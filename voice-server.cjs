@@ -59,7 +59,7 @@ async function refreshSystemTrends() {
 refreshSystemTrends();
 
 const IMAGE_PROVIDER = process.env.IMAGE_PROVIDER || 'local';
-let FOOOCUS_URL = process.env.FOOOCUS_URL || 'http://127.0.0.1:7865';
+const FOOOCUS_URL = 'http://127.0.0.1:7865'; // FAST_LOCKED_URL FOR RTX_4080
 
 // --- HJELPEFUNKSJONER ---
 
@@ -503,9 +503,10 @@ async function pollForTasks() {
 // Start polling hvert 10. sekund
 setInterval(pollForTasks, 10000);
 
-scanForFooocus().then(() => {
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Epic Engine (v14.4 PRO) kjører på http://localhost:${PORT}`);
-    console.log(`📡 Auto-Pilot er AKTIV og lytter etter 'pending' oppgaver...`);
-  });
+// Start serveren direkte med fast RTX 4080 link
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`\x1b[36m%s\x1b[0m`, `⚡ RTX 4080 LINK: FIXED [${FOOOCUS_URL}]`);
+  console.log(`\x1b[32m%s\x1b[0m`, `🚀 Epic Engine (v14.4 PRO) kjører på http://localhost:${PORT}`);
+  console.log(`📡 Auto-Pilot er AKTIV og lytter etter 'pending' oppgaver...`);
+  pollForTasks();
 });

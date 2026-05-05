@@ -299,8 +299,8 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-3">
                   {[...safeTrends]
-                    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
-                    .slice(0, 3)
+                    .sort((a, b) => (b.viral_score || 0) - (a.viral_score || 0))
+                    .slice(0, 5)
                     .map((trend: any, i: number) => (
                     <div key={trend.id || i} className="flex justify-between items-center bg-white/[0.03] p-3 border-l-2 border-[#BD00FF]">
                       <span className="font-data-mono text-[10px] text-white font-bold uppercase tracking-widest truncate mr-4">

@@ -57,6 +57,22 @@ export default function Layout() {
     }
   };
 
+  const [isEngineOnline, setIsEngineOnline] = useState(false);
+
+  useEffect(() => {
+    const checkEngine = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/health');
+        setIsEngineOnline(res.ok);
+      } catch {
+        setIsEngineOnline(false);
+      }
+    };
+    checkEngine();
+    const interval = setInterval(checkEngine, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#131314] text-[#e5e2e3] font-sans selection:bg-[#BD00FF]/30 overflow-hidden relative">
       {/* Kinetic Background Layer */}
@@ -210,6 +226,23 @@ export default function Layout() {
             </div>
             
             <div className="flex items-center gap-8">
+              <a 
+                href="http://localhost:3001" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`flex items-center gap-3 px-6 py-2 border clipped-corner-sm transition-all group ${
+                  isEngineOnline 
+                    ? 'bg-[#6bff83]/5 border-[#6bff83]/20 hover:border-[#6bff83]/50' 
+                    : 'bg-red-500/5 border-red-500/20 grayscale opacity-50'
+                }`}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full ${isEngineOnline ? 'bg-[#6bff83] animate-pulse-led' : 'bg-red-500'}`} />
+                <span className={`font-data-mono text-[10px] font-black uppercase tracking-[0.2em] ${isEngineOnline ? 'text-[#6bff83]' : 'text-red-500'}`}>
+                  {isEngineOnline ? 'LOCAL_ENGINE: ONLINE' : 'LOCAL_ENGINE: OFFLINE'}
+                </span>
+                <Terminal size={12} className={`transition-colors ${isEngineOnline ? 'text-[#6bff83]' : 'text-red-500'}`} />
+              </a>
+
               <div className="flex bg-black/40 p-1 border border-white/5 clipped-corner-sm">
                 {(['NO', 'EN'] as const).map((lang) => (
                   <button

@@ -125,7 +125,9 @@ const TrendAnalyzer = () => {
         </div>
       ) : trends.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {trends.map((trend) => (
+          {[...trends]
+            .sort((a, b) => (b.viral_score || 0) - (a.viral_score || 0))
+            .map((trend) => (
             <div 
               key={trend.id}
               onClick={() => handleDispatch(trend)}
