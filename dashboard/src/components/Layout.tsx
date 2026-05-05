@@ -42,7 +42,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-background text-white font-sans selection:bg-neon-purple selection:text-white relative overflow-hidden">
-      {/* Dynamic Background Particles */}
+      {/* Dynamic Background Particles - REINFORCED */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-cyber-grid opacity-20" />
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-2/15 blur-[120px] rounded-full animate-pulse" />
@@ -160,7 +160,7 @@ export default function Layout() {
         </motion.aside>
 
         {/* Main Viewport */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative">
           {/* Top Bar / Breadcrumb */}
           <header className="h-20 flex items-center justify-between px-10 border-b border-white/5 bg-background/50 backdrop-blur-md sticky top-0 z-30">
             <div className="flex items-center gap-4">
@@ -184,9 +184,9 @@ export default function Layout() {
           {/* Scanline Overlay */}
           <div className="absolute inset-0 scanline z-[60] pointer-events-none opacity-50" />
           
-          <main className="relative z-10 p-4 md:p-8">
+          <div className="relative z-10 p-4 md:p-8">
             <Outlet />
-          </main>
+          </div>
         </div>
       </div>
     </div>

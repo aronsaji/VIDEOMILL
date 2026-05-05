@@ -39,10 +39,10 @@ export default function Dashboard() {
       {/* Tactical Telemetry Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: t('dash.network_integrity'), value: 'OPTIMAL', color: 'brand-1', val: 12 },
-          { label: t('dash.neural_activity'), value: activeProductions.length, color: 'brand-2', val: 8 },
-          { label: t('dash.cognition_rate'), value: '98.4%', color: 'brand-2', val: 11 },
-          { label: t('dash.data_velocity'), value: '4.2GB/S', color: 'brand-1', val: 6 },
+          { label: t('dash.network_integrity'), value: 'OPTIMAL', icon: Shield, color: 'text-brand-1', detail: 'Encrypted_Link_1' },
+          { label: t('dash.neural_activity'), value: activeProductions.length, icon: Cpu, color: 'text-brand-2', detail: t('common.active_nodes') },
+          { label: t('dash.cognition_rate'), value: '98.4%', icon: Sparkles, color: 'text-brand-2', detail: t('common.stable') },
+          { label: t('dash.data_velocity'), value: '4.2GB/S', icon: Database, color: 'text-brand-1', detail: 'Burst_Active' },
         ].map((stat, i) => (
           <div key={i} className="card-standard group hover:border-brand-2/30 transition-all duration-500 overflow-hidden relative">
             <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
@@ -58,7 +58,7 @@ export default function Dashboard() {
                 {[...Array(12)].map((_, j) => (
                   <div 
                     key={j} 
-                    className={`segment-meter-block ${j < stat.val ? `bg-${stat.color}` : 'bg-white/5'}`} 
+                    className={`segment-meter-block ${j < stat.val ? `bg-${stat.color} shadow-[0_0_8px_rgba(var(--${stat.color}-rgb),0.5)]` : 'bg-white/5'}`} 
                   />
                 ))}
               </div>
@@ -82,6 +82,10 @@ export default function Dashboard() {
               <p className="text-[13px] text-gray-500 font-bold uppercase tracking-widest italic opacity-70">The Non-Stop Viral Engine Control Interface</p>
             </div>
             
+            <div className="flex items-center gap-4">
+                 <div className="h-[1px] w-12 bg-brand-1/50" />
+                 <span className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{t('dash.live_stream')}</span>
+            </div>
             <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 backdrop-blur-md">
                <Layers size={14} className="text-brand-1" />
                <span className="text-[11px] font-black font-mono text-white uppercase tracking-widest">{activeProductions.length} {t('common.active_nodes')}</span>
@@ -233,7 +237,7 @@ export default function Dashboard() {
           </div>
 
           {/* Neural Expansion Module */}
-          <div className="card-standard bg-gradient-to-br from-brand-1/10 to-transparent relative overflow-hidden group">
+        <div className="card-standard bg-gradient-to-br from-brand-1/10 to-transparent relative overflow-hidden group">
             <div className="space-y-6 relative z-10">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-brand-1 font-black text-[13px] uppercase tracking-[0.4em]">
