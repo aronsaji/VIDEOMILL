@@ -10,11 +10,14 @@ interface PipelineState {
   episodes: any[];
   agentLogs: any[];
   socialAccounts: any[];
+  videos: any[]; 
   isLoading: boolean;
   error: string | null;
 
+  fetchInitialData: () => Promise<void>;
   fetchOrders: () => Promise<void>;
   fetchProductions: () => Promise<void>;
+  fetchVideos: () => Promise<void>;
   fetchTrends: () => Promise<void>;
   fetchAnalytics: () => Promise<void>;
   fetchSeries: () => Promise<void>;
@@ -33,72 +36,148 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   episodes: [],
   agentLogs: [],
   socialAccounts: [],
+  videos: [],
   isLoading: false,
   error: null,
 
+  fetchInitialData: async () => {
+    // Avoid multiple concurrent initial fetches
+    if (get().isLoading) return;
+    
+    set({ isLoading: true });
+    try {
+      // Execute all core fetches in parallel
+      const results = await Promise.allSettled([
+        get().fetchOrders(),
+        get().fetchProductions(),
+        get().fetchTrends(),
+        get().fetchAnalytics()
+      ]);
+      
+      const failed = results.filter(r => r.status === 'rejected');
+      if (failed.length > 0) {
+        console.warn('⚠️ Some initial data fetches failed:', failed);
+      }
+    } catch (err: any) {
+      console.error('❌ critical_fetch_failure:', err);
+      set({ error: err.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   fetchOrders: async () => {
-    const { data } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-    set({ orders: data || [] });
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      set({ orders: data || [] });
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+    }
   },
 
   fetchProductions: async () => {
-    const { data } = await supabase
-      .from('productions')
-      .select('*')
-      .order('created_at', { ascending: false });
-    set({ productions: data || [] });
+    try {
+      const { data, error } = await supabase
+        .from('productions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      set({ productions: data || [], videos: data || [] });
+    } catch (err) {
+      console.error('Error fetching productions:', err);
+    }
+  },
+
+  fetchVideos: async () => {
+    return get().fetchProductions();
   },
 
   fetchTrends: async () => {
-    const { data } = await supabase
-      .from('trending_topics')
-      .select('*')
-      .order('viral_score', { ascending: false });
-    set({ trends: data || [] });
+    try {
+      const { data, error } = await supabase
+        .from('trending_topics')
+        .select('*')
+        .order('viral_score', { ascending: false });
+      if (error) throw error;
+      set({ trends: data || [] });
+    } catch (err) {
+      console.error('Error fetching trends:', err);
+    }
   },
 
   fetchAnalytics: async () => {
-    const { data } = await supabase
-      .from('performance_snapshots')
-      .select('*')
-      .order('timestamp', { ascending: false });
-    set({ analytics: data || [] });
+    try {
+      const { data, error } = await supabase
+        .from('performance_snapshots')
+        .select('*')
+        .order('timestamp', { ascending: false });
+      if (error) throw error;
+      set({ analytics: data || [] });
+    } catch (err) {
+      console.error('Error fetching analytics:', err);
+    }
   },
 
   fetchSeries: async () => {
-    const { data } = await supabase.from('series').select('*');
-    set({ series: data || [] });
+    try {
+      const { data, error } = await supabase.from('series').select('*');
+      if (error) throw error;
+      set({ series: data || [] });
+    } catch (err) {
+      console.error('Error fetching series:', err);
+    }
   },
 
   fetchEpisodes: async () => {
-    const { data } = await supabase.from('episodes').select('*, series:series_id(title)');
-    set({ episodes: data || [] });
+    try {
+      const { data, error } = await supabase.from('episodes').select('*, series:series_id(title)');
+      if (error) throw error;
+      set({ episodes: data || [] });
+    } catch (err) {
+      console.error('Error fetching episodes:', err);
+    }
   },
 
   fetchAgentLogs: async () => {
-    const { data } = await supabase.from('agent_logs').select('*').order('created_at', { ascending: false }).limit(50);
-    set({ agentLogs: data || [] });
+    try {
+      const { data, error } = await supabase.from('agent_logs').select('*').order('created_at', { ascending: false }).limit(50);
+      if (error) throw error;
+      set({ agentLogs: data || [] });
+    } catch (err) {
+      console.error('Error fetching agent logs:', err);
+    }
   },
 
   fetchSocialAccounts: async () => {
-    const { data } = await supabase.from('user_social_accounts').select('*');
-    set({ socialAccounts: data || [] });
+    try {
+      const { data, error } = await supabase.from('user_social_accounts').select('*');
+      if (error) throw error;
+      set({ socialAccounts: data || [] });
+    } catch (err) {
+      console.error('Error fetching social accounts:', err);
+    }
   },
 
   subscribeToChanges: () => {
-    const channel = supabase
-      .channel('pipeline-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => get().fetchOrders())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'productions' }, () => get().fetchProductions())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, () => get().fetchTrends())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'agent_logs' }, () => get().fetchAgentLogs())
-      .subscribe();
+    try {
+      const channel = supabase
+        .channel('pipeline-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => get().fetchOrders())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'productions' }, () => get().fetchProductions())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, () => get().fetchTrends())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'agent_logs' }, () => get().fetchAgentLogs())
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel).catch(console.error);
+      };
+    } catch (err) {
+      console.error('Failed to subscribe to changes:', err);
+      return () => {};
+    }
   },
 }));

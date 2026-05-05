@@ -18,7 +18,12 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard() {
-  const { orders = [], trends = [], fetchInitialData, subscribeToChanges } = usePipelineStore();
+  const orders = usePipelineStore(state => state.orders);
+  const trends = usePipelineStore(state => state.trends);
+  const videos = usePipelineStore(state => state.videos);
+  const fetchInitialData = usePipelineStore(state => state.fetchInitialData);
+  const subscribeToChanges = usePipelineStore(state => state.subscribeToChanges);
+
   const [mounted, setMounted] = useState(false);
   const [systemHealth, setSystemHealth] = useState({
     commandCenter: 'ONLINE',
@@ -37,15 +42,18 @@ export default function Dashboard() {
       .then(() => setSystemHealth(prev => ({ ...prev, voiceServer: 'ONLINE' })))
       .catch(() => setSystemHealth(prev => ({ ...prev, voiceServer: 'OFFLINE' })));
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [fetchInitialData, subscribeToChanges]);
 
   const safeOrders = Array.isArray(orders) ? orders : [];
   const safeTrends = Array.isArray(trends) ? trends : [];
+  const safeVideos = Array.isArray(videos) ? videos : [];
 
   const stats = [
     { label: 'RENDER_FLOW', value: safeOrders.filter(o => o.status === 'processing' || o.status === 'rendering').length || 0, sub: 'ACTIVE_NODES', color: 'text-[#6bff83]', icon: Cpu },
-    { label: 'ARCHIVE_SIZE', value: (usePipelineStore.getState().videos || []).length, sub: 'FINISHED_ASSETS', color: 'text-[#BD00FF]', icon: TrendingUp },
+    { label: 'ARCHIVE_SIZE', value: safeVideos.length, sub: 'FINISHED_ASSETS', color: 'text-[#BD00FF]', icon: TrendingUp },
     { label: 'QUEUE_DEPTH', value: safeOrders.filter(o => o.status === 'queued' || o.status === 'pending').length || 0, sub: 'TASKS_PENDING', color: 'text-[#00f5ff]', icon: Layers },
     { label: 'LIVE_TRENDS', value: safeTrends.length, sub: 'RADAR_ACTIVE', color: 'text-[#ffaa00]', icon: Activity },
   ];

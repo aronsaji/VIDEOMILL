@@ -7,15 +7,20 @@ import {
 } from 'lucide-react';
 
 export default function Library() {
-  const { videos = [], fetchVideos, subscribeToChanges } = usePipelineStore();
+  const videos = usePipelineStore(state => state.videos);
+  const fetchVideos = usePipelineStore(state => state.fetchVideos);
+  const subscribeToChanges = usePipelineStore(state => state.subscribeToChanges);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
 
   useEffect(() => {
     fetchVideos();
     const unsubscribe = subscribeToChanges();
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [fetchVideos, subscribeToChanges]);
 
   const safeVideos = Array.isArray(videos) ? videos : [];
   const filteredVideos = safeVideos.filter(v => 
@@ -27,10 +32,10 @@ export default function Library() {
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
         <div>
-          <h1 className="font-headline text-[40px] font-[800] tracking-[-0.02em] leading-[1.2] text-[#e5e2e3] uppercase">
+          <h1 className="font-headline text-[40px] font-[800] tracking-[-0.02em] leading-[1.2] text-[#e5e2e3] uppercase italic">
             MEDIA_VAULT
           </h1>
-          <p className="font-data-mono text-[14px] text-zinc-500 uppercase tracking-widest">
+          <p className="font-data-mono text-[14px] text-zinc-500 uppercase tracking-[0.4em]">
             Permanent Media Storage // Historical Asset Manager
           </p>
         </div>

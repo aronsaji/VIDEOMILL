@@ -13,7 +13,9 @@ import Login from './pages/Login';
 import Agents from './pages/Agents';
 
 function App() {
-  const { fetchInitialData, subscribeToChanges } = usePipelineStore();
+  const fetchInitialData = usePipelineStore(state => state.fetchInitialData);
+  const subscribeToChanges = usePipelineStore(state => state.subscribeToChanges);
+  
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,8 +33,8 @@ function App() {
     });
 
     return () => {
-      if (unsubscribeChanges) unsubscribeChanges();
-      subscription.unsubscribe();
+      if (typeof unsubscribeChanges === 'function') unsubscribeChanges();
+      if (subscription) subscription.unsubscribe();
     };
   }, [fetchInitialData, subscribeToChanges]);
 
