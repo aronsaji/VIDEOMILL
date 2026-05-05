@@ -11,6 +11,8 @@ interface PipelineState {
   agentLogs: any[];
   socialAccounts: any[];
   videos: any[]; 
+  uniqueCountries: string[];
+  uniqueLanguages: string[];
   isLoading: boolean;
   error: string | null;
 
@@ -19,6 +21,7 @@ interface PipelineState {
   fetchProductions: () => Promise<void>;
   fetchVideos: () => Promise<void>;
   fetchTrends: (country?: string, language?: string) => Promise<void>;
+  fetchFilterOptions: () => Promise<void>;
   fetchAnalytics: () => Promise<void>;
   fetchSeries: () => Promise<void>;
   fetchEpisodes: () => Promise<void>;
@@ -37,6 +40,8 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   agentLogs: [],
   socialAccounts: [],
   videos: [],
+  uniqueCountries: [],
+  uniqueLanguages: [],
   isLoading: false,
   error: null,
 
@@ -48,13 +53,35 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
         get().fetchOrders(),
         get().fetchProductions(),
         get().fetchTrends(),
-        get().fetchAnalytics()
+        get().fetchAnalytics(),
+        get().fetchFilterOptions()
       ]);
     } catch (err: any) {
       console.error('❌ critical_fetch_failure:', err);
       set({ error: err.message });
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  fetchFilterOptions: async () => {
+    try {
+      // Vi henter unike land og språk direkte fra databasen
+      const { data, error } = await supabase
+        .from('trending_topics')
+        .select('country, language');
+      
+      if (error) throw error;
+
+      const countries = Array.from(new Set(data.map(i => i.country).filter(Boolean))) as string[];
+      const languages = Array.from(new Set(data.map(i => i.language).filter(Boolean))) as string[];
+      
+      set({ 
+        uniqueCountries: countries.sort(), 
+        uniqueLanguages: languages.sort() 
+      });
+    } catch (err) {
+      console.error('Error fetching filter options:', err);
     }
   },
 
@@ -89,6 +116,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   },
 
   fetchTrends: async (country?: string, language?: string) => {
+    set({ trends: [], isLoading: true }); // Clear trends and show loading immediately
     try {
       let query = supabase
         .from('trending_topics')
@@ -100,7 +128,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
       }
 
       if (language && language !== 'ALL') {
-        query = query.eq('language', language);
+        query = query.eq('language', language.toLowerCase());
       }
 
       const { data, error } = await query;
@@ -108,6 +136,8 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
       set({ trends: data || [] });
     } catch (err) {
       console.error('Error fetching trends:', err);
+    } finally {
+      set({ isLoading: false });
     }
   },
 

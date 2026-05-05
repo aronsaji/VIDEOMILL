@@ -12,24 +12,21 @@ import {
 import { usePipelineStore } from '../store/pipelineStore';
 import { triggerProduction } from '../lib/api';
 
-const LANGUAGES = [
-  { id: 'ALL', label: 'ALL', code: 'ALL' },
-  { id: 'NO', label: 'NORSK', code: 'NO' },
-  { id: 'EN', label: 'ENGLISH', code: 'EN' },
-  { id: 'TA', label: 'TAMIL', code: 'TA' },
-  { id: 'HI', label: 'HINDI', code: 'HI' },
-  { id: 'ES', label: 'ESPAÑOL', code: 'ES' },
-];
-
 const TrendAnalyzer = () => {
-  const { trends, loading, error, fetchTrends } = usePipelineStore();
+  const { trends, isLoading, uniqueCountries, uniqueLanguages, fetchTrends, fetchFilterOptions } = usePipelineStore();
   const [selectedLanguage, setSelectedLanguage] = useState('ALL');
-  const [selectedCountry, setSelectedCountry] = useState('NORWAY');
+  const [selectedCountry, setSelectedCountry] = useState('ALL');
   const [lastDispatched, setLastDispatched] = useState<string | null>(null);
 
   useEffect(() => {
-    // If ALL is selected, we pass undefined to fetchTrends to show everything
-    fetchTrends(selectedCountry, selectedLanguage === 'ALL' ? undefined : selectedLanguage);
+    fetchFilterOptions();
+  }, []);
+
+  useEffect(() => {
+    fetchTrends(
+      selectedCountry === 'ALL' ? undefined : selectedCountry,
+      selectedLanguage === 'ALL' ? undefined : selectedLanguage
+    );
   }, [selectedCountry, selectedLanguage]);
 
   const handleDispatch = async (trend: any) => {
@@ -40,7 +37,7 @@ const TrendAnalyzer = () => {
       video_id: `trend-${trend.id}`,
       title: trend.title,
       visual_style: 'kinetic_industrial',
-      ai_voice: trend.language === 'NO' ? 'nor_male_1' : 'eng_male_premium'
+      ai_voice: trend.language === 'no' ? 'nor_male_1' : 'eng_male_premium'
     });
 
     if (success) {
@@ -62,25 +59,66 @@ const TrendAnalyzer = () => {
         </h1>
       </div>
 
-      {/* Language Tabs - Midnight Style */}
-      <div className="flex flex-wrap gap-2 p-1 bg-zinc-900/50 rounded-xl border border-white/5 w-fit">
-        {LANGUAGES.map((lang) => (
+      {/* Region & Language Controls - NOW 100% DYNAMIC */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest whitespace-nowrap">Target Region:</span>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCountry('ALL')}
+              className={`text-[10px] font-bold px-3 py-1 rounded border transition-all ${
+                selectedCountry === 'ALL'
+                  ? 'bg-zinc-800 text-green-500 border-green-500/50'
+                  : 'text-zinc-500 border-white/5 hover:border-white/20'
+              }`}
+            >
+              ALL
+            </button>
+            {uniqueCountries.map((r) => (
+              <button
+                key={r}
+                onClick={() => setSelectedCountry(r)}
+                className={`text-[10px] font-bold px-3 py-1 rounded border transition-all ${
+                  selectedCountry === r
+                    ? 'bg-zinc-800 text-green-500 border-green-500/50'
+                    : 'text-zinc-500 border-white/5 hover:border-white/20'
+                }`}
+              >
+                {r.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 p-1 bg-zinc-900/50 rounded-xl border border-white/5 w-fit">
           <button
-            key={lang.id}
-            onClick={() => setSelectedLanguage(lang.code)}
+            onClick={() => setSelectedLanguage('ALL')}
             className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
-              selectedLanguage === lang.code
+              selectedLanguage === 'ALL'
                 ? 'bg-green-500 text-black'
                 : 'text-zinc-500 hover:text-white hover:bg-white/5'
             }`}
           >
-            {lang.label}
+            ALL
           </button>
-        ))}
+          {uniqueLanguages.map((langCode) => (
+            <button
+              key={langCode}
+              onClick={() => setSelectedLanguage(langCode)}
+              className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+                selectedLanguage === langCode
+                  ? 'bg-green-500 text-black'
+                  : 'text-zinc-500 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {langCode.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Main Grid */}
-      {loading ? (
+      {isLoading ? (
         <div className="h-64 flex flex-col items-center justify-center bg-black/20 rounded-2xl border border-white/5 border-dashed">
           <div className="w-6 h-6 border-2 border-green-500/20 border-t-green-500 rounded-full animate-spin mb-4" />
           <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Scanning Frequencies...</span>
@@ -98,7 +136,7 @@ const TrendAnalyzer = () => {
                   {trend.category || 'Viral'}
                 </div>
                 <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-tighter">
-                  {trend.viral_score}% Match
+                  {trend.viral_score}% MATCH
                 </div>
               </div>
 
