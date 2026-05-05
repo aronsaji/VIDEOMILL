@@ -1,24 +1,56 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  BarChart2, TrendingUp, Users, Clock, Eye, 
-  Activity, Zap, Globe, ArrowUpRight, BarChart3,
-  Cpu, Database as DatabaseIcon, Layers, Shield
+  Eye, Clock, Users, Activity, Shield, BarChart3, Target, ArrowUpRight, Cpu
 } from 'lucide-react';
+import { usePipelineStore } from '../store/pipelineStore';
+
+const formatNumber = (num: number) => {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+};
 
 export default function Analytics() {
-  // Enhanced metrics with modern styling
-  const metrics = [
-    { label: 'TOTAL_NETWORK_VIEWS', value: '1.2M', change: '+14%', isPositive: true, icon: Eye, color: 'text-[#00f5ff]' },
-    { label: 'WATCH_TIME_ACCUMULATED', value: '45.2K', change: '+8%', isPositive: true, icon: Clock, color: 'text-[#BD00FF]' },
-    { label: 'AUDIENCE_RETENTION', value: '62%', change: '-2%', isPositive: false, icon: Users, color: 'text-[#ffaa00]' },
-    { label: 'NEURAL_ENGAGEMENT', value: '84.3K', change: '+24%', isPositive: true, icon: Activity, color: 'text-[#6bff83]' },
-  ];
+  const { analyticsData, fetchAnalytics, isLoading } = usePipelineStore();
 
-  const topVideos = [
-    { id: 'VM-8289', title: 'The Quiet Luxury trend explained', views: '890K', ctr: '8.4%', trend: '+12%' },
-    { id: 'VM-8280', title: 'Why software engineering is changing forever', views: '210K', ctr: '6.2%', trend: '+5%' },
-    { id: 'VM-8275', title: 'Tech news you missed this week', views: '95K', ctr: '4.1%', trend: '+2%' },
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  const metrics = [
+    { 
+      label: 'TOTAL_NETWORK_VIEWS', 
+      value: formatNumber(analyticsData.totalViews), 
+      change: '+14%', 
+      isPositive: true, 
+      icon: Eye, 
+      color: 'text-[#00f5ff]' 
+    },
+    { 
+      label: 'WATCH_TIME_ACCUMULATED', 
+      value: formatNumber(analyticsData.totalWatchTime), 
+      change: '+8%', 
+      isPositive: true, 
+      icon: Clock, 
+      color: 'text-[#BD00FF]' 
+    },
+    { 
+      label: 'AUDIENCE_RETENTION', 
+      value: `${analyticsData.avgRetention}%`, 
+      change: 'STABLE', 
+      isPositive: true, 
+      icon: Users, 
+      color: 'text-[#ffaa00]' 
+    },
+    { 
+      label: 'NEURAL_ENGAGEMENT', 
+      value: formatNumber(analyticsData.engagement), 
+      change: '+24%', 
+      isPositive: true, 
+      icon: Activity, 
+      color: 'text-[#6bff83]' 
+    },
   ];
 
   return (
@@ -36,6 +68,7 @@ export default function Analytics() {
         </div>
         
         <div className="flex gap-4 relative z-10">
+           {isLoading && <span className="animate-pulse text-[10px] font-mono text-green-500">SYNCING_LIVE_NODE...</span>}
            <div className="flex items-center gap-2 px-4 py-2 bg-black/40 border border-white/5 clipped-corner-sm">
               <Shield size={14} className="text-[#6bff83]" />
               <span className="font-data-mono text-[9px] text-zinc-400 font-black tracking-widest uppercase">ENCRYPTION: AES-256</span>
@@ -113,33 +146,33 @@ export default function Analytics() {
               </div>
 
               <div className="space-y-6">
-                 {topVideos.map((video, i) => (
-                   <motion.div 
-                     key={i}
-                     initial={{ opacity: 0, x: 20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     transition={{ delay: 0.3 + (i * 0.1) }}
-                     className="p-6 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#BD00FF]/30 transition-all group cursor-crosshair"
-                   >
-                      <div className="flex justify-between items-start mb-4">
-                         <span className="font-data-mono text-[10px] text-[#BD00FF] font-black tracking-widest">{video.id}</span>
-                         <ArrowUpRight size={14} className="text-zinc-700 group-hover:text-[#BD00FF] transition-colors" />
-                      </div>
-                      <h4 className="font-headline text-lg font-black text-white uppercase italic tracking-tight mb-6 group-hover:text-[#BD00FF] transition-colors line-clamp-2 leading-tight">
-                         {video.title}
-                      </h4>
-                      <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4">
-                         <div>
-                            <span className="font-label-caps text-[8px] text-zinc-600 uppercase block font-bold tracking-widest">IMPRESSIONS</span>
-                            <span className="font-headline text-xl text-white font-black italic tracking-tighter">{video.views}</span>
-                         </div>
-                         <div>
-                            <span className="font-label-caps text-[8px] text-zinc-600 uppercase block font-bold tracking-widest">CONVERSION</span>
-                            <span className="font-headline text-xl text-[#6bff83] font-black italic tracking-tighter">{video.ctr}</span>
-                         </div>
-                      </div>
-                   </motion.div>
-                 ))}
+                  {analyticsData.topPerformers.map((video, i) => (
+                    <motion.div 
+                      key={video.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 + (i * 0.1) }}
+                      className="p-6 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#BD00FF]/30 transition-all group cursor-crosshair"
+                    >
+                       <div className="flex justify-between items-start mb-4">
+                          <span className="font-data-mono text-[10px] text-[#BD00FF] font-black tracking-widest">{video.id.slice(0, 8)}</span>
+                          <ArrowUpRight size={14} className="text-zinc-700 group-hover:text-[#BD00FF] transition-colors" />
+                       </div>
+                       <h4 className="font-headline text-lg font-black text-white uppercase italic tracking-tight mb-6 group-hover:text-[#BD00FF] transition-colors line-clamp-2 leading-tight">
+                          {video.title || 'Untitled Production'}
+                       </h4>
+                       <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4">
+                          <div>
+                             <span className="font-label-caps text-[8px] text-zinc-600 uppercase block font-bold tracking-widest">STATUS</span>
+                             <span className="font-headline text-xl text-white font-black italic tracking-tighter uppercase">{video.status}</span>
+                          </div>
+                          <div>
+                             <span className="font-label-caps text-[8px] text-zinc-600 uppercase block font-bold tracking-widest">PLATFORM</span>
+                             <span className="font-headline text-xl text-[#6bff83] font-black italic tracking-tighter uppercase">{video.platform || 'N/A'}</span>
+                          </div>
+                       </div>
+                    </motion.div>
+                  ))}
               </div>
 
               <button className="w-full py-4 bg-white/[0.02] border border-white/10 text-zinc-600 hover:text-white hover:bg-white/[0.05] transition-all font-headline font-black uppercase italic text-[11px] tracking-widest clipped-corner-sm mt-4">

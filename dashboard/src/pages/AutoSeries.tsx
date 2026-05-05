@@ -9,34 +9,16 @@ import {
 } from 'lucide-react';
 
 export default function AutoSeries() {
-  const { orders = [], subscribeToChanges } = usePipelineStore();
-  const [seriesList, setSeriesList] = useState<any[]>([]);
-  const [upcomingEpisodes, setUpcomingEpisodes] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { series, episodes, analyticsData, fetchInitialData, isLoading } = usePipelineStore();
 
   useEffect(() => {
-    fetchSeriesData();
-    const unsubscribe = subscribeToChanges();
-    return () => {
-      if (typeof unsubscribe === 'function') unsubscribe();
-    };
-  }, [subscribeToChanges]);
+    fetchInitialData();
+  }, []);
 
-  const fetchSeriesData = async () => {
-    setIsLoading(true);
-    try {
-      const [seriesRes, episodesRes] = await Promise.all([
-        supabase.from('series').select('*').order('created_at', { ascending: false }),
-        supabase.from('episodes').select('*, series:series_id(title)').order('scheduled_at', { ascending: true }).limit(10)
-      ]);
-
-      setSeriesList(seriesRes.data || []);
-      setUpcomingEpisodes(episodesRes.data || []);
-    } catch (err) {
-      console.error('Error fetching series data:', err);
-    } finally {
-      setIsLoading(false);
-    }
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
   };
 
   return (
@@ -54,6 +36,7 @@ export default function AutoSeries() {
         </div>
         
         <div className="flex gap-6 relative z-10">
+          {isLoading && <span className="animate-pulse text-[10px] font-mono text-pink-500">SYNCING_PIPELINE_NODES...</span>}
           <button className="btn-kinetic btn-kinetic-primary py-8 px-12 group">
              <span className="text-2xl font-headline font-black italic tracking-wider">NEW_PIPELINE_NODE</span>
              <Zap size={28} className="fill-current" />
@@ -65,10 +48,10 @@ export default function AutoSeries() {
       {/* Stats Cluster - Industrial Panel Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
          {[
-           { label: 'ACTIVE_PIPELINES', value: seriesList.filter(s => s.status === 'active').length || '03', icon: RotateCcw, color: 'text-[#BD00FF]' },
-           { label: 'SCHEDULED_UPLOADS', value: upcomingEpisodes.length || '12', icon: Clock, color: 'text-[#00f5ff]' },
+           { label: 'ACTIVE_PIPELINES', value: series.filter(s => s.status === 'active').length.toString().padStart(2, '0'), icon: RotateCcw, color: 'text-[#BD00FF]' },
+           { label: 'SCHEDULED_UPLOADS', value: episodes.length.toString().padStart(2, '0'), icon: Clock, color: 'text-[#00f5ff]' },
            { label: 'ENGINE_VELOCITY', value: '98.4%', icon: Activity, color: 'text-[#6bff83]' },
-           { label: 'TOTAL_REACH', value: '1.2M', icon: BarChart3, color: 'text-[#ffaa00]' },
+           { label: 'TOTAL_REACH', value: formatNumber(analyticsData.totalViews), icon: BarChart3, color: 'text-[#ffaa00]' },
          ].map((stat, i) => (
            <div key={i} className="panel-kinetic p-8 flex flex-col group border-white/5 bg-white/[0.01] clipped-corner">
               <div className="flex justify-between items-start mb-6">
@@ -95,7 +78,7 @@ export default function AutoSeries() {
               <div className="flex-1 space-y-8 relative">
                  <div className="absolute left-[13px] top-0 bottom-0 w-[1px] bg-white/5" />
                  
-                 {upcomingEpisodes.length > 0 ? upcomingEpisodes.map((ep, i) => (
+                 {episodes.length > 0 ? episodes.map((ep, i) => (
                    <motion.div 
                      initial={{ opacity: 0, x: -10 }}
                      animate={{ opacity: 1, x: 0 }}
@@ -137,7 +120,7 @@ export default function AutoSeries() {
         {/* Right Column: Pipeline Grid */}
         <section className="col-span-12 lg:col-span-8 space-y-8">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {seriesList.length > 0 ? seriesList.map((series, i) => (
+              {series.length > 0 ? series.map((series, i) => (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

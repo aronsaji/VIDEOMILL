@@ -283,10 +283,12 @@ export default function Dashboard() {
                    <Radar size={20} className="text-[#BD00FF] animate-radar" />
                 </div>
                 <div className="space-y-3">
-                  {(safeTrends.length > 0 ? safeTrends : []).slice(0, 3).map((trend: any, i: number) => (
-                    <div key={i} className="flex justify-between items-center bg-white/[0.03] p-3 border-l-2 border-[#BD00FF]">
-                      <span className="font-data-mono text-[10px] text-white font-bold uppercase tracking-widest truncate mr-4">{trend.topic}</span>
-                      <span className="font-data-mono text-[9px] text-[#6bff83] font-black italic">{trend.growth_stat || '+124%'}</span>
+                  {safeTrends.slice(0, 3).map((trend: any, i: number) => (
+                    <div key={trend.id || i} className="flex justify-between items-center bg-white/[0.03] p-3 border-l-2 border-[#BD00FF]">
+                      <span className="font-data-mono text-[10px] text-white font-bold uppercase tracking-widest truncate mr-4">
+                        {trend.title || trend.topic || 'NEURAL_SIGNAL'}
+                      </span>
+                      <span className="font-data-mono text-[9px] text-[#6bff83] font-black italic">{trend.growth_stat || 'STABLE'}</span>
                     </div>
                   ))}
                 </div>
