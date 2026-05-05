@@ -6,7 +6,6 @@ import {
   Shield, 
   Activity, 
   AlertCircle,
-  LayoutGrid,
   Filter,
   Languages
 } from 'lucide-react';
@@ -29,6 +28,7 @@ const TrendAnalyzer = () => {
   const [lastDispatched, setLastDispatched] = useState<string | null>(null);
 
   useEffect(() => {
+    // If ALL is selected, we pass undefined to fetchTrends to show everything
     fetchTrends(selectedCountry, selectedLanguage === 'ALL' ? undefined : selectedLanguage);
   }, [selectedCountry, selectedLanguage]);
 
@@ -39,7 +39,7 @@ const TrendAnalyzer = () => {
       language: trend.language || selectedLanguage,
       video_id: `trend-${trend.id}`,
       title: trend.title,
-      visual_style: 'industrial_kinetic',
+      visual_style: 'kinetic_industrial',
       ai_voice: trend.language === 'NO' ? 'nor_male_1' : 'eng_male_premium'
     });
 
@@ -50,34 +50,28 @@ const TrendAnalyzer = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-cyan-500/20 rounded-lg border border-cyan-500/30">
-              <Activity className="w-5 h-5 text-cyan-400" />
-            </div>
-            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">
-              TREND <span className="text-cyan-500">RADAR</span>
-            </h1>
-          </div>
-          <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-[0.2em]">
-            GEOSPATIAL_TREND_LOCATOR_v3.2 | LIVE_INTERCEPT_STREAM
-          </p>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Header - Industrial Style */}
+      <div className="border-b border-white/10 pb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Activity className="w-4 h-4 text-green-500" />
+          <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em]">Geospatial_Trend_Locator_v3.2</span>
         </div>
+        <h1 className="text-3xl font-black text-white uppercase tracking-tighter italic">
+          Trend <span className="text-green-500 text-outline">Radar</span>
+        </h1>
       </div>
 
-      {/* Clean Language Selector */}
-      <div className="bg-black/40 p-1 rounded-xl border border-white/5 backdrop-blur-md inline-flex flex-wrap gap-1">
+      {/* Language Tabs - Midnight Style */}
+      <div className="flex flex-wrap gap-2 p-1 bg-zinc-900/50 rounded-xl border border-white/5 w-fit">
         {LANGUAGES.map((lang) => (
           <button
             key={lang.id}
             onClick={() => setSelectedLanguage(lang.code)}
-            className={`px-8 py-3 rounded-lg text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+            className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
               selectedLanguage === lang.code
-                ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(6,182,212,0.4)]'
-                : 'text-zinc-600 hover:text-white hover:bg-white/5'
+                ? 'bg-green-500 text-black'
+                : 'text-zinc-500 hover:text-white hover:bg-white/5'
             }`}
           >
             {lang.label}
@@ -85,13 +79,11 @@ const TrendAnalyzer = () => {
         ))}
       </div>
 
-      {/* Results Matrix */}
+      {/* Main Grid */}
       {loading ? (
-        <div className="h-64 flex items-center justify-center bg-zinc-900/20 rounded-3xl border border-dashed border-white/10">
-          <div className="flex flex-col items-center gap-4 font-mono">
-            <div className="w-8 h-8 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
-            <span className="text-[10px] text-cyan-500/50 uppercase tracking-[0.3em]">Decoding Signals...</span>
-          </div>
+        <div className="h-64 flex flex-col items-center justify-center bg-black/20 rounded-2xl border border-white/5 border-dashed">
+          <div className="w-6 h-6 border-2 border-green-500/20 border-t-green-500 rounded-full animate-spin mb-4" />
+          <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Scanning Frequencies...</span>
         </div>
       ) : trends.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -99,53 +91,44 @@ const TrendAnalyzer = () => {
             <div 
               key={trend.id}
               onClick={() => handleDispatch(trend)}
-              className="group relative bg-zinc-900/20 rounded-2xl border border-white/5 p-6 hover:border-cyan-500/50 hover:bg-zinc-900/40 transition-all duration-500 cursor-pointer overflow-hidden"
+              className="group bg-zinc-900/30 border border-white/5 rounded-xl p-5 hover:border-green-500/30 hover:bg-zinc-900/60 transition-all cursor-pointer relative overflow-hidden"
             >
-              {/* Scanline Effect */}
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] pointer-events-none opacity-10" />
-              
-              <div className="relative z-10">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="px-2 py-1 bg-cyan-500/10 border border-cyan-500/20 rounded text-[9px] font-bold text-cyan-400 uppercase tracking-tighter">
-                    {trend.category || 'Viral'}
-                  </div>
-                  <div className="text-[10px] font-black text-white/40 italic">{trend.viral_score}% MATCH</div>
+              <div className="flex justify-between items-start mb-4">
+                <div className="text-[9px] font-black text-green-500 uppercase px-2 py-0.5 bg-green-500/10 rounded border border-green-500/20">
+                  {trend.category || 'Viral'}
                 </div>
-
-                <h3 className="text-lg font-bold text-white mb-4 leading-tight group-hover:text-cyan-400 transition-colors uppercase italic tracking-tighter">
-                  {trend.title}
-                </h3>
-
-                <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
-                  <span>{trend.platform}</span>
-                  <span className="w-1 h-1 bg-zinc-800 rounded-full" />
-                  <span>{trend.growth_stat}</span>
+                <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-tighter">
+                  {trend.viral_score}% Match
                 </div>
               </div>
 
-              {/* Progress Bar Decor */}
-              <div className="absolute bottom-0 left-0 h-[2px] bg-cyan-500/10 w-full">
-                <div className="h-full bg-cyan-500 w-1/3 animate-[slide_3s_infinite]" />
+              <h3 className="text-white font-bold text-lg leading-tight mb-4 group-hover:text-green-400 transition-colors uppercase italic">
+                {trend.title}
+              </h3>
+
+              <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                <div className="text-[10px] font-mono text-zinc-500 uppercase">{trend.platform}</div>
+                <div className="text-[10px] font-bold text-white">{trend.growth_stat}</div>
               </div>
+
+              {/* Status Indicator */}
+              {lastDispatched === trend.id && (
+                <div className="absolute inset-0 bg-green-500/90 backdrop-blur-sm flex items-center justify-center">
+                  <span className="text-black font-black uppercase text-xs tracking-widest">Neural Dispatch Sent</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
       ) : (
-        <div className="h-64 flex flex-col items-center justify-center bg-black/20 rounded-3xl border border-dashed border-white/10 space-y-4">
-          <AlertCircle className="w-6 h-6 text-zinc-800" />
+        <div className="h-64 flex flex-col items-center justify-center bg-black/20 rounded-2xl border border-white/5 border-dashed space-y-4">
+          <AlertCircle className="w-5 h-5 text-zinc-800" />
           <div className="text-center">
-            <h3 className="text-zinc-700 font-black text-[10px] uppercase tracking-[0.3em]">No Signal Matrix Available</h3>
-            <p className="text-zinc-800 text-[9px] font-mono mt-2 uppercase tracking-widest">Adjust filters to intercept data streams</p>
+            <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest">No Signals Detected</h3>
+            <p className="text-zinc-700 text-[9px] font-mono mt-1">Adjust regional matrix or linguistic filters.</p>
           </div>
         </div>
       )}
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes slide {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(300%); }
-        }
-      `}} />
     </div>
   );
 };
