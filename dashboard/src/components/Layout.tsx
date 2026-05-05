@@ -10,7 +10,6 @@ import { useI18nStore } from '../store/i18nStore';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedLogo from './AnimatedLogo';
-import LiveStatusTracker from './LiveStatusTracker';
 
 export default function Layout() {
   const { language, setLanguage, t } = useI18nStore();
@@ -63,7 +62,7 @@ export default function Layout() {
     { path: '/auto-series', label: t('AUTO_SERIES'), icon: Zap },
     { path: '/agents', label: t('AI_AGENTS'), icon: Bot },
     { path: '/archive', label: t('VIDEO_ARCHIVE'), icon: Archive },
-    { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+    { path: '/settings', label: t('SETTINGS'), icon: Settings },
   ];
 
   return (
@@ -74,7 +73,7 @@ export default function Layout() {
           <AnimatedLogo size="sm" />
         </div>
 
-        <nav className="flex-1 px-4 space-y-1">
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -82,14 +81,14 @@ export default function Layout() {
                 key={item.path}
                 to={item.path}
                 className={`
-                  flex items-center gap-3 px-4 py-3 font-label-sm text-[10px] uppercase tracking-[0.15em] transition-all duration-200 group rounded-xl
+                  flex items-center gap-3 px-4 py-3 font-label-sm text-[11px] uppercase tracking-[0.12em] transition-all duration-200 group rounded-xl
                   ${isActive 
-                    ? 'bg-primary/10 text-primary border-r-2 border-primary' 
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'}
+                    ? 'bg-[#4169E1]/10 text-[#4169E1] border-r-2 border-[#4169E1]' 
+                    : 'text-on-surface-variant hover:text-[#4169E1] hover:bg-surface-container'}
                 `}
               >
-                <item.icon size={16} className={isActive ? 'text-primary' : 'group-hover:text-primary transition-colors'} />
-                <span className="font-bold">{item.label}</span>
+                <item.icon size={18} className={isActive ? 'text-[#4169E1]' : 'group-hover:text-[#4169E1] transition-colors'} />
+                <span className="font-black italic">{item.label}</span>
               </Link>
             );
           })}
@@ -97,22 +96,22 @@ export default function Layout() {
 
         {/* System Health / GPU Telemetry */}
         <div className="px-4 mb-6">
-          <div className="p-4 bg-surface-container border border-outline rounded-2xl space-y-3">
+          <div className="p-4 bg-surface-container border border-outline rounded-2xl space-y-3 shadow-inner">
             <div className="flex justify-between items-center">
-              <span className="text-[9px] font-label-sm uppercase font-black text-on-surface-variant/40 tracking-widest">RTX_4080_LINK</span>
+              <span className="text-[9px] font-label-sm uppercase font-black text-[#4169E1]/60 tracking-widest italic">RTX_4080_LINK</span>
               <div className={`w-1.5 h-1.5 rounded-full ${engineStatus === 'online' ? 'bg-success animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
             </div>
             {gpuInfo && (
               <div className="space-y-2">
-                <div className="flex justify-between text-[9px] font-label-sm">
-                  <span className="text-on-surface-variant uppercase">Temp</span>
-                  <span className="text-on-surface font-bold">{gpuInfo.temp}°C</span>
+                <div className="flex justify-between text-[9px] font-label-sm font-black italic">
+                  <span className="text-on-surface-variant uppercase">Core_Temp</span>
+                  <span className="text-[#1E3A8A]">{gpuInfo.temp}°C</span>
                 </div>
                 <div className="h-1 bg-outline rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${(gpuInfo.temp / 90) * 100}%` }}
-                    className="h-full bg-primary"
+                    className="h-full bg-[#4169E1]"
                   />
                 </div>
               </div>
@@ -120,31 +119,23 @@ export default function Layout() {
           </div>
         </div>
 
-        <div className="px-4 mb-8">
+        <div className="px-4 mb-4">
           <Link 
             to="/create-order" 
-            className="w-full py-4 bg-primary text-white font-headline-md text-xs font-black rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:brightness-110 uppercase tracking-widest"
+            className="w-full py-5 bg-[#4169E1] text-white font-headline-md text-xs font-black rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3 shadow-xl shadow-[#4169E1]/20 hover:brightness-110 uppercase tracking-[0.2em] italic"
           >
             <Plus size={18} />
             {t('INITIATE_PRODUCTION')}
           </Link>
         </div>
 
-        <div className="px-4 mb-8">
-          <LiveStatusTracker />
-        </div>
-
         <footer className="px-4 space-y-1 border-t border-outline pt-6 mt-auto">
-          <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-sm text-[10px] uppercase tracking-widest transition-all rounded-lg">
-            <Settings size={16} />
-            <span>{t('SETTINGS')}</span>
-          </Link>
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-error hover:bg-error/5 font-label-sm text-[10px] uppercase tracking-widest transition-all rounded-lg"
+            className="w-full flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-error hover:bg-error/5 font-label-sm text-[11px] uppercase tracking-widest transition-all rounded-xl font-black italic"
           >
-            <LogOut size={16} />
-            <span>Sign Out</span>
+            <LogOut size={18} />
+            <span>Terminate_Session</span>
           </button>
         </footer>
       </aside>
@@ -154,8 +145,8 @@ export default function Layout() {
         {/* TopAppBar */}
         <header className="flex justify-between items-center w-full px-12 h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline">
           <div className="flex items-center gap-6">
-            <h2 className="font-label-sm text-[11px] font-black tracking-widest text-primary uppercase">
-              {location.pathname === '/' ? t('COMMAND_CENTER') : location.pathname.split('/')[1].toUpperCase().replace('-', '_')}
+            <h2 className="font-label-sm text-[12px] font-black tracking-[0.2em] text-[#4169E1] uppercase italic">
+              {location.pathname === '/' ? t('COMMAND_CENTER') : location.pathname.split('/')[1].toUpperCase().replace(/-/g, '_')}
             </h2>
             <div className="h-4 w-[1px] bg-outline hidden md:block" />
             <div className="hidden md:flex bg-surface-container p-1 border border-outline rounded-xl">
@@ -163,10 +154,10 @@ export default function Layout() {
                 <button
                   key={lang}
                   onClick={() => setLanguage(lang)}
-                  className={`px-3 py-1 text-[9px] font-black transition-all rounded-lg ${
+                  className={`px-3 py-1 text-[10px] font-black transition-all rounded-lg ${
                     language === lang 
-                      ? 'bg-surface text-primary shadow-sm' 
-                      : 'text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-surface text-[#4169E1] shadow-sm' 
+                      : 'text-on-surface-variant hover:text-[#4169E1]'
                   }`}
                 >
                   {lang}
@@ -177,19 +168,19 @@ export default function Layout() {
 
           <div className="flex items-center gap-6">
             <div className="relative hidden lg:block group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/40 group-focus-within:text-primary transition-colors" size={14} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/40 group-focus-within:text-[#4169E1] transition-colors" size={14} />
               <input 
-                className="bg-surface-container border border-outline rounded-xl pl-10 pr-4 py-2 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-on-surface w-64 transition-all" 
-                placeholder="Neural search..." 
+                className="bg-surface-container border border-outline rounded-xl pl-10 pr-4 py-2.5 text-xs focus:ring-2 focus:ring-[#4169E1]/20 focus:border-[#4169E1] outline-none text-[#1E3A8A] w-72 transition-all font-mono font-black placeholder:italic" 
+                placeholder="Neural search intercept..." 
                 type="text"
               />
             </div>
-            <div className="flex items-center gap-3 border-l border-outline pl-6">
-              <button className="p-2 text-on-surface-variant/40 hover:bg-surface-container hover:text-on-surface transition-all rounded-full relative">
-                <Bell size={18} />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-surface"></span>
+            <div className="flex items-center gap-4 border-l border-outline pl-6">
+              <button className="p-2.5 text-on-surface-variant/40 hover:bg-surface-container hover:text-[#4169E1] transition-all rounded-full relative">
+                <Bell size={20} />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#4169E1] rounded-full border-2 border-surface"></span>
               </button>
-              <div className="w-8 h-8 rounded-full bg-surface-container border border-outline overflow-hidden cursor-pointer hover:border-primary transition-all">
+              <div className="w-9 h-9 rounded-full bg-surface-container border border-outline overflow-hidden cursor-pointer hover:border-[#4169E1] transition-all shadow-sm">
                 <img 
                   src={session?.user?.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Operator"} 
                   alt="User avatar" 

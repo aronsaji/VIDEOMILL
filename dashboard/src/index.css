@@ -5,27 +5,30 @@
 @tailwind utilities;
 
 :root {
-  /* Core Palette (Light Mode) */
-  --background: #f8fafc;
+  /* Core Palette (Premium Light Mode) */
+  --background: #fdfdfd;
   --surface: #ffffff;
-  --surface-container: #f1f5f9;
-  --surface-container-low: #f8fafc;
+  --surface-container: #f8fafc;
+  --surface-container-low: #ffffff;
   
-  --primary: #0891b2;
-  --primary-container: #0891b2;
+  /* Royal Blue Identity */
+  --primary: #4169E1;
+  --primary-container: #4169E1;
   --on-primary-container: #ffffff;
   
-  --secondary: #be185d;
-  --secondary-container: #be185d;
+  /* Deep Navy Accents */
+  --secondary: #1E3A8A;
+  --secondary-container: #1E3A8A;
   
   --on-surface: #0f172a;
-  --on-surface-variant: #64748b;
+  /* Improved contrast for gray text */
+  --on-surface-variant: #475569; 
   
   --outline: #e2e8f0;
   --error: #ef4444;
   --success: #10b981;
   
-  --grid-color: rgba(8, 145, 178, 0.05);
+  --grid-color: rgba(65, 105, 225, 0.03);
 }
 
 /* Custom Font Utilities */
@@ -38,7 +41,7 @@ body {
   background-image: 
     linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background-size: 80px 80px;
   color: var(--on-surface);
   font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -46,37 +49,21 @@ body {
   overflow-x: hidden;
 }
 
-/* Global scale up for small technical text */
-span[class*="text-[9px]"], div[class*="text-[9px]"], 
-span[class*="text-[10px]"], div[class*="text-[10px]"],
-span[class*="text-[11px]"], div[class*="text-[11px]"] {
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.05em !important;
-  color: var(--on-surface-variant) !important;
+/* High-Contrast Technical Text Utility */
+.tech-text-sm {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--on-surface-variant);
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--background); }
-::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--primary-container); }
-
-/* Scanline Overlay */
-.scanline-overlay {
-  background: linear-gradient(rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.02) 50%);
-  background-size: 100% 4px;
-  pointer-events: none;
-}
-
-/* Kinetic Panels (using theme variables) */
-.panel-kinetic {
-  background-color: var(--surface);
-  border: 1px solid var(--outline);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; border: 2px solid var(--background); }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 /* Animations */
 @keyframes radar-sweep {
@@ -94,17 +81,27 @@ span[class*="text-[11px]"], div[class*="text-[11px]"] {
 }
 
 .animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+  animation: spin-slow 30s linear infinite;
 }
 
-/* High Visibility Scrollbar for Horizontal Timelines */
+/* Glow Utilities */
+.shadow-royal {
+  box-shadow: 0 10px 40px -10px rgba(65, 105, 225, 0.3);
+}
+
+.shadow-navy {
+  box-shadow: 0 10px 40px -10px rgba(30, 58, 138, 0.3);
+}
+
+/* Custom Scrollbar for Inner Containers */
 .custom-scrollbar::-webkit-scrollbar {
-  height: 4px;
+  height: 6px;
+  width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--outline);
-  border-radius: 4px;
+  border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-container);
+  background: var(--primary);
 }

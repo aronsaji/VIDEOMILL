@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
 import { 
   Play, Search, Download, Share2, X, Globe, Film, 
-  Activity, Zap, Info, Maximize2, Trash2, RefreshCcw,
-  Box, Radio, Shield, Terminal
+  Activity, Zap, Info, Maximize2, Trash2, RefreshCw,
+  Box, Radio, Shield, Terminal, ArrowUpRight
 } from 'lucide-react';
 import { retryProduction } from '../lib/api';
 
@@ -32,39 +32,39 @@ export default function Library() {
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-10 border-b border-white/5 pb-10">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-10 border-b border-outline pb-10">
         <div>
-          <div className="flex items-center gap-3 text-primary-container font-mono text-[10px] font-black uppercase tracking-[0.4em] mb-4 italic">
+          <div className="flex items-center gap-3 text-primary font-mono text-[11px] font-black uppercase tracking-[0.4em] mb-4 italic">
             <Radio size={14} className="animate-pulse" />
             PERMANENT_MEDIA_STORAGE_v4.2
           </div>
-          <h1 className="text-6xl font-black text-white font-headline-md tracking-tighter italic uppercase leading-none">
-            Media_<span className="text-primary-container">Vault</span>
+          <h1 className="text-6xl font-black text-on-surface font-headline-md tracking-tighter italic uppercase leading-none">
+            Media_<span className="text-primary">Vault</span>
           </h1>
         </div>
 
         <div className="relative group min-w-[320px]">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-800 group-hover:text-primary-container transition-colors" size={18} />
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-on-surface-variant/40 group-hover:text-primary transition-colors" size={20} />
           <input 
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search Assets..."
-            className="w-full bg-surface-container-low border border-white/5 pl-14 pr-8 py-5 text-[12px] rounded-2xl focus:border-primary-container/50 outline-none transition-all font-mono uppercase text-white placeholder:text-zinc-900 shadow-2xl"
+            className="w-full bg-surface border border-outline pl-16 pr-8 py-6 text-[12px] rounded-2xl focus:border-primary/50 outline-none transition-all font-mono uppercase text-on-surface placeholder:text-on-surface-variant/20 shadow-sm font-black tracking-widest"
           />
         </div>
       </header>
 
       {/* Grid */}
       {filteredVideos.length === 0 ? (
-        <div className="bg-surface-container-low border border-white/5 p-32 text-center relative overflow-hidden group rounded-[3rem] shadow-2xl">
-          <div className="p-10 bg-white/5 rounded-full w-fit mx-auto mb-10 text-zinc-900 group-hover:scale-110 transition-transform duration-700">
+        <div className="bg-surface border border-outline p-32 text-center relative overflow-hidden group rounded-[3rem] shadow-sm">
+          <div className="p-12 bg-surface-container rounded-full w-fit mx-auto mb-10 text-on-surface-variant/20 group-hover:scale-110 transition-transform duration-700 border border-outline">
             <Film size={64} />
           </div>
-          <h3 className="text-3xl font-black text-white font-headline-md uppercase italic tracking-tighter mb-4">Vault Empty</h3>
-          <p className="font-mono text-[11px] text-zinc-700 uppercase tracking-widest max-w-sm mx-auto">Awaiting first production cycle recording.</p>
+          <h3 className="text-3xl font-black text-on-surface font-headline-md uppercase italic tracking-tighter mb-4">Vault Empty</h3>
+          <p className="font-mono text-[11px] text-on-surface-variant uppercase tracking-widest max-w-sm mx-auto font-black italic">Awaiting first production cycle recording.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
           {filteredVideos.map((video, i) => (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -73,14 +73,14 @@ export default function Library() {
               key={video.id}
               className="group"
             >
-              <div className="bg-surface-container-low border border-white/5 overflow-hidden flex flex-col h-full rounded-[2.5rem] hover:border-primary-container/30 transition-all duration-500 cursor-pointer shadow-2xl"
+              <div className="bg-surface border border-outline overflow-hidden flex flex-col h-full rounded-[2.5rem] hover:border-primary/40 hover:shadow-xl transition-all duration-500 cursor-pointer shadow-sm relative"
                    onClick={() => setSelectedVideo(video)}>
                 {/* Thumbnail Preview */}
-                <div className="aspect-[9/16] bg-black relative overflow-hidden">
+                <div className="aspect-[9/16] bg-on-surface relative overflow-hidden">
                   {video.video_url ? (
                     <video 
                       src={video.video_url} 
-                      className="w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" 
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" 
                       muted
                       onMouseOver={e => e.currentTarget.play()}
                       onMouseOut={e => {
@@ -89,24 +89,24 @@ export default function Library() {
                       }}
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-[#050505]">
+                    <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-on-surface">
                       {video.status === 'failed' ? (
                         <div className="space-y-4">
-                          <X className="text-red-500 mx-auto" size={48} />
-                          <p className="font-mono text-[10px] text-red-500/50 uppercase tracking-widest italic font-black">Node_Failure</p>
+                          <X className="text-error mx-auto" size={48} />
+                          <p className="font-mono text-[10px] text-error uppercase tracking-widest italic font-black">Node_Failure</p>
                         </div>
                       ) : (
                         <div className="space-y-8 w-full">
-                          <Box size={48} className="text-primary-container mx-auto animate-pulse" />
-                          <div className="space-y-3">
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                          <Box size={48} className="text-primary mx-auto animate-pulse" />
+                          <div className="space-y-4">
+                            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
                               <motion.div 
                                 initial={{ width: 0 }}
                                 animate={{ width: `${video.progress || 0}%` }}
-                                className="h-full bg-primary-container shadow-[0_0_15px_#22d3ee]"
+                                className="h-full bg-primary shadow-[0_0_15px_rgba(8,145,178,0.5)]"
                               />
                             </div>
-                            <p className="font-mono text-[9px] text-primary-container animate-pulse uppercase tracking-[0.2em] italic font-black">
+                            <p className="font-mono text-[10px] text-primary animate-pulse uppercase tracking-[0.2em] italic font-black">
                               {video.sub_status || 'Synthesizing...'}
                             </p>
                           </div>
@@ -117,30 +117,30 @@ export default function Library() {
                   
                   {/* Top Badge */}
                   <div className="absolute top-6 left-6 z-20">
-                    <span className={`px-4 py-1 bg-primary-container text-black font-black uppercase text-[9px] italic rounded-lg shadow-2xl`}>
+                    <span className={`px-4 py-1.5 bg-primary text-white font-black uppercase text-[10px] italic rounded-lg shadow-xl tracking-widest`}>
                       {video.platform || 'ASSET'}
                     </span>
                   </div>
                 </div>
 
                 {/* Content Info */}
-                <div className="p-8 space-y-4 flex-1 flex flex-col justify-between">
+                <div className="p-8 space-y-6 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="text-xl font-black text-white font-headline-md uppercase italic leading-tight group-hover:text-primary-container transition-colors truncate">
+                    <h4 className="text-2xl font-black text-on-surface font-headline-md uppercase italic leading-tight group-hover:text-primary transition-colors truncate tracking-tighter">
                       {video.title || video.topic || 'NEURAL_RENDER'}
                     </h4>
-                    <div className="flex items-center gap-2 mt-4">
-                      <div className={`w-1.5 h-1.5 rounded-full ${video.status === 'completed' ? 'bg-[#6bff83]' : 'bg-primary-container'}`} />
-                      <span className="font-mono text-[9px] text-zinc-600 uppercase font-black">{video.status || 'PENDING'}</span>
+                    <div className="flex items-center gap-3 mt-4">
+                      <div className={`w-2 h-2 rounded-full ${video.status === 'completed' ? 'bg-success shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-primary animate-pulse shadow-[0_0_8px_rgba(8,145,178,0.4)]'}`} />
+                      <span className="font-mono text-[10px] text-on-surface-variant uppercase font-black tracking-widest italic opacity-60">{video.status || 'PENDING'}</span>
                     </div>
                   </div>
                   
-                  <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Globe size={14} className="text-primary-container" />
-                      <span className="font-mono text-[9px] text-zinc-500 uppercase font-black">{video.language || 'EN'}</span>
+                  <div className="pt-6 border-t border-outline flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Globe size={16} className="text-primary" />
+                      <span className="font-mono text-[10px] text-on-surface-variant uppercase font-black italic">{video.language || 'EN'}</span>
                     </div>
-                    <span className="font-mono text-[9px] text-zinc-800 uppercase font-black">{new Date(video.created_at).toLocaleDateString()}</span>
+                    <span className="font-mono text-[10px] text-on-surface-variant uppercase font-black italic opacity-40">{new Date(video.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -158,16 +158,16 @@ export default function Library() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-12"
           >
-            <div className="absolute inset-0 bg-black/95 backdrop-blur-md" onClick={() => setSelectedVideo(null)} />
+            <div className="absolute inset-0 bg-on-surface/95 backdrop-blur-md" onClick={() => setSelectedVideo(null)} />
             
             <motion.div 
               initial={{ scale: 0.95, y: 30, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 30, opacity: 0 }}
-              className="bg-surface-container-low border border-white/10 w-full max-w-6xl h-full max-h-[85vh] overflow-hidden relative z-10 flex flex-col lg:flex-row shadow-2xl rounded-[3rem]"
+              className="bg-surface border border-outline w-full max-w-7xl h-full max-h-[90vh] overflow-hidden relative z-10 flex flex-col lg:flex-row shadow-2xl rounded-[3rem]"
             >
               {/* Player Section */}
-              <div className="flex-1 bg-black relative flex items-center justify-center lg:border-r border-white/5">
+              <div className="flex-1 bg-on-surface relative flex items-center justify-center lg:border-r border-outline">
                 {selectedVideo.video_url ? (
                   <video 
                     src={selectedVideo.video_url} 
@@ -176,72 +176,72 @@ export default function Library() {
                     className="w-full h-full object-contain"
                   />
                 ) : (
-                  <div className="text-center space-y-6">
-                    <Box size={64} className="text-zinc-900 mx-auto" />
-                    <p className="font-mono text-[11px] text-zinc-700 uppercase tracking-widest font-black">Media_Signal_Offline</p>
+                  <div className="text-center space-y-8">
+                    <Box size={80} className="text-white/5 mx-auto" />
+                    <p className="font-mono text-[12px] text-white/20 uppercase tracking-[0.4em] font-black italic">Media_Signal_Offline</p>
                   </div>
                 )}
 
                 <button 
                   onClick={() => setSelectedVideo(null)}
-                  className="absolute top-8 right-8 p-4 bg-black/60 hover:bg-primary-container text-white hover:text-black rounded-full transition-all border border-white/10 lg:hidden shadow-xl"
+                  className="absolute top-8 right-8 p-4 bg-white/10 hover:bg-primary text-white hover:text-white rounded-full transition-all border border-white/10 lg:hidden shadow-xl"
                 >
                   <X size={20} />
                 </button>
               </div>
 
               {/* Sidebar Info Section */}
-              <div className="w-full lg:w-[450px] p-10 flex flex-col bg-surface-container-low">
-                <div className="flex justify-between items-start mb-10">
-                   <div className="space-y-4">
-                      <div className="flex items-center gap-3 text-primary-container font-mono text-[10px] font-black uppercase tracking-[0.4em] italic">
-                         <Activity size={14} className="animate-pulse" />
+              <div className="w-full lg:w-[500px] p-12 flex flex-col bg-surface">
+                <div className="flex justify-between items-start mb-12">
+                   <div className="space-y-5">
+                      <div className="flex items-center gap-4 text-primary font-mono text-[11px] font-black uppercase tracking-[0.4em] italic">
+                         <Activity size={16} className="animate-pulse" />
                          MASTER_SYNTH_COMPLETE
                       </div>
-                      <h2 className="text-3xl font-black text-white font-headline-md italic uppercase tracking-tighter leading-none">
+                      <h2 className="text-4xl font-black text-on-surface font-headline-md italic uppercase tracking-tighter leading-tight">
                         {selectedVideo.title || selectedVideo.topic}
                       </h2>
                    </div>
                    <button 
                     onClick={() => setSelectedVideo(null)}
-                    className="p-4 bg-white/5 hover:bg-primary-container hover:text-black text-zinc-700 rounded-2xl transition-all border border-white/5 hidden lg:block group"
+                    className="p-5 bg-surface-container hover:bg-primary/10 hover:text-primary text-on-surface-variant rounded-2xl transition-all border border-outline hidden lg:block group shadow-sm"
                   >
-                    <X size={24} className="group-hover:rotate-90 transition-transform duration-300" />
+                    <X size={28} className="group-hover:rotate-90 transition-transform duration-300" />
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto pr-2 space-y-10 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto pr-4 space-y-12 custom-scrollbar">
                   {/* Status Badges */}
-                  <div className="flex flex-wrap gap-3">
-                    <div className="flex items-center gap-3 px-5 py-2 bg-primary-container/10 rounded-full border border-primary-container/20">
-                      <div className="w-1.5 h-1.5 bg-primary-container rounded-full animate-pulse shadow-[0_0_10px_#22d3ee]" />
-                      <span className="text-[9px] font-black text-primary-container uppercase tracking-widest italic">Neural_Cluster_Alpha</span>
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-3 px-6 py-2.5 bg-primary/5 rounded-full border border-primary/20 shadow-sm">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(8,145,178,0.5)]" />
+                      <span className="text-[10px] font-black text-primary uppercase tracking-widest italic">Neural_Cluster_Alpha</span>
                     </div>
-                    <div className="px-5 py-2 bg-white/5 rounded-full border border-white/10">
-                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic">{selectedVideo.platform || 'Grid_Node'}</span>
+                    <div className="px-6 py-2.5 bg-surface-container rounded-full border border-outline shadow-sm">
+                      <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-widest italic">{selectedVideo.platform || 'Grid_Node'}</span>
                     </div>
                   </div>
 
                   {/* Metadata */}
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="bg-black/40 border border-white/5 p-6 rounded-2xl">
-                        <p className="font-mono text-[9px] text-zinc-700 uppercase mb-2 font-black tracking-widest">Language</p>
-                        <p className="font-headline-md text-lg text-white italic uppercase font-black">{selectedVideo.language || 'EN'}</p>
+                  <div className="space-y-10">
+                    <div className="grid grid-cols-2 gap-8">
+                      <div className="bg-surface-container border border-outline p-8 rounded-3xl shadow-inner">
+                        <p className="font-mono text-[10px] text-on-surface-variant uppercase mb-3 font-black tracking-widest italic opacity-40">Language</p>
+                        <p className="font-headline-md text-2xl text-on-surface italic uppercase font-black">{selectedVideo.language || 'EN'}</p>
                       </div>
-                      <div className="bg-black/40 border border-white/5 p-6 rounded-2xl">
-                        <p className="font-mono text-[9px] text-zinc-700 uppercase mb-2 font-black tracking-widest">Recorded</p>
-                        <p className="font-headline-md text-lg text-white italic uppercase font-black">{new Date(selectedVideo.created_at).toLocaleDateString()}</p>
+                      <div className="bg-surface-container border border-outline p-8 rounded-3xl shadow-inner">
+                        <p className="font-mono text-[10px] text-on-surface-variant uppercase mb-3 font-black tracking-widest italic opacity-40">Recorded</p>
+                        <p className="font-headline-md text-2xl text-on-surface italic uppercase font-black">{new Date(selectedVideo.created_at).toLocaleDateString()}</p>
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       <div className="flex items-center gap-4">
-                         <div className="h-[1px] w-8 bg-white/5" />
-                         <p className="font-mono text-[10px] text-zinc-800 uppercase tracking-[0.4em] font-black italic">Neural_Log</p>
-                         <div className="h-[1px] flex-1 bg-white/5" />
+                         <div className="h-[1px] w-10 bg-outline" />
+                         <p className="font-mono text-[11px] text-on-surface-variant uppercase tracking-[0.4em] font-black italic opacity-40">Neural_Log</p>
+                         <div className="h-[1px] flex-1 bg-outline" />
                       </div>
-                      <div className="p-8 bg-black/40 border border-white/5 rounded-3xl font-mono text-[12px] text-zinc-500 leading-relaxed italic uppercase font-black">
+                      <div className="p-10 bg-surface-container border border-outline rounded-[2.5rem] font-mono text-[13px] text-on-surface-variant leading-relaxed italic uppercase font-black shadow-inner">
                          "{selectedVideo.script_summary || 'Protocol synthesis successful. Asset is ready for multi-channel distribution across all authorized network nodes.'}"
                       </div>
                     </div>
@@ -249,13 +249,13 @@ export default function Library() {
                 </div>
 
                 {/* Actions */}
-                <div className="pt-10 mt-auto grid grid-cols-2 gap-4">
+                <div className="pt-12 mt-auto grid grid-cols-2 gap-6">
                   <a 
                     href={selectedVideo.video_url} 
                     download
-                    className="flex items-center justify-center gap-3 py-5 bg-white text-black font-black uppercase italic text-xs tracking-widest transition-all hover:bg-zinc-200 rounded-2xl"
+                    className="flex items-center justify-center gap-4 py-6 bg-on-surface text-white font-black uppercase italic text-xs tracking-[0.2em] transition-all hover:brightness-110 rounded-2xl shadow-xl shadow-on-surface/10"
                   >
-                    <Download size={18} /> Download
+                    <Download size={20} /> Download
                   </a>
                   <button 
                     onClick={async () => {
@@ -265,12 +265,12 @@ export default function Library() {
                         setSelectedVideo(null);
                       }
                     }}
-                    className="flex items-center justify-center gap-3 py-5 bg-black/40 text-white border border-white/10 font-black uppercase italic text-xs tracking-widest transition-all hover:border-primary-container/50 rounded-2xl"
+                    className="flex items-center justify-center gap-4 py-6 bg-surface-container text-on-surface border border-outline font-black uppercase italic text-xs tracking-[0.2em] transition-all hover:bg-surface rounded-2xl shadow-sm"
                   >
-                    <RefreshCw size={18} /> Retry
+                    <RefreshCw size={20} /> Retry
                   </button>
-                  <button className="col-span-2 flex items-center justify-center gap-3 py-6 bg-primary-container text-black font-black uppercase italic text-xs tracking-[0.2em] transition-all hover:shadow-[0_0_30px_#22d3ee44] rounded-2xl shadow-xl mt-2">
-                    <Share2 size={20} /> Distribute Asset
+                  <button className="col-span-2 flex items-center justify-center gap-4 py-8 bg-primary text-white font-black uppercase italic text-sm tracking-[0.3em] transition-all hover:brightness-110 rounded-3xl shadow-2xl shadow-primary/30 mt-4">
+                    <Share2 size={24} /> Distribute Asset
                   </button>
                 </div>
               </div>

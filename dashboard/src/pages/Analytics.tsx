@@ -28,7 +28,7 @@ export default function Analytics() {
     { 
       label: 'NETWORK_REACH', 
       value: formatNumber(analyticsData.totalViews || 0), 
-      change: '+14%', 
+      change: '+14% OVER_SEASON', 
       isPositive: true, 
       icon: Eye, 
       color: 'text-primary' 
@@ -36,7 +36,7 @@ export default function Analytics() {
     { 
       label: 'WATCH_TIME', 
       value: formatNumber(analyticsData.totalWatchTime || 0), 
-      change: '+8%', 
+      change: '+8% TRENDING', 
       isPositive: true, 
       icon: Clock, 
       color: 'text-success' 
@@ -44,7 +44,7 @@ export default function Analytics() {
     { 
       label: 'RETENTION', 
       value: `${analyticsData.avgRetention || 0}%`, 
-      change: 'STABLE', 
+      change: 'STABLE_NODE', 
       isPositive: true, 
       icon: Users, 
       color: 'text-primary' 
@@ -52,7 +52,7 @@ export default function Analytics() {
     { 
       label: 'ENGAGEMENT', 
       value: formatNumber(analyticsData.engagement || 0), 
-      change: '+24%', 
+      change: '+24% SPIKE', 
       isPositive: true, 
       icon: Activity, 
       color: 'text-primary' 
@@ -63,7 +63,7 @@ export default function Analytics() {
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       <header className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 border-b border-outline pb-10">
         <div>
-          <div className="flex items-center gap-3 text-primary font-mono text-[10px] font-black uppercase tracking-[0.4em] mb-4 italic">
+          <div className="flex items-center gap-3 text-primary font-mono text-[11px] font-black uppercase tracking-[0.4em] mb-4 italic">
             <Activity size={14} className="animate-pulse" />
             LIVE_DATA_SYNTHESIS_v14.4
           </div>
@@ -75,7 +75,7 @@ export default function Analytics() {
         <div className="flex gap-6">
            <div className="flex items-center gap-4 px-6 py-3 bg-surface border border-outline rounded-xl shadow-sm">
               <Shield size={16} className="text-success" />
-              <span className="font-mono text-[9px] text-on-surface-variant/40 font-black tracking-[0.2em] uppercase">AES_256_ACTIVE</span>
+              <span className="font-mono text-[10px] text-on-surface-variant font-black tracking-[0.2em] uppercase">AES_256_ACTIVE</span>
            </div>
         </div>
       </header>
@@ -85,7 +85,7 @@ export default function Analytics() {
             <div className="flex items-center gap-8 relative z-10">
                 <div className={`w-4 h-4 rounded-full ${engineOnline ? 'bg-success animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'bg-error'}`} />
                 <div>
-                    <p className="font-mono text-[10px] text-on-surface-variant/40 uppercase font-black tracking-widest mb-1">Epic_Engine_v14.4_PRO</p>
+                    <p className="font-mono text-[11px] text-on-surface-variant uppercase font-black tracking-widest mb-1">Epic_Engine_v14.4_PRO</p>
                     <h3 className="text-3xl font-black text-on-surface font-headline-md italic uppercase tracking-tighter">
                         {engineOnline ? 'Status: Nominal' : 'Status: Offline'}
                     </h3>
@@ -94,7 +94,7 @@ export default function Analytics() {
 
             <div className="flex items-center gap-12 relative z-10">
                 <div className="flex flex-col items-end">
-                    <span className="font-mono text-[9px] text-on-surface-variant/40 uppercase font-black tracking-widest mb-2">GPU_LOAD</span>
+                    <span className="font-mono text-[11px] text-on-surface-variant uppercase font-black tracking-widest mb-2">GPU_LOAD</span>
                     <div className="flex gap-1.5">
                         {Array.from({ length: 12 }).map((_, i) => (
                             <div key={i} className={`w-2 h-4 rounded-full transition-all duration-500 ${i < (activeRenders.length > 0 ? 9 : 3) ? 'bg-primary shadow-[0_0_10px_rgba(8,145,178,0.2)]' : 'bg-surface-container'}`} />
@@ -102,16 +102,16 @@ export default function Analytics() {
                     </div>
                 </div>
                 <div className="flex flex-col items-end border-l border-outline pl-12">
-                    <span className="font-mono text-[9px] text-on-surface-variant/40 uppercase font-black tracking-widest mb-1">NODES</span>
+                    <span className="font-mono text-[11px] text-on-surface-variant uppercase font-black tracking-widest mb-1">NODES</span>
                     <span className="text-4xl font-black text-primary font-headline-md italic tracking-tighter leading-none">{activeRenders.length}</span>
                 </div>
             </div>
         </div>
 
         <div className="bg-surface border border-outline p-8 rounded-[3rem] flex flex-col justify-center items-center text-center relative overflow-hidden shadow-sm group">
-          <p className="font-mono text-[10px] text-on-surface-variant/40 uppercase font-black tracking-widest mb-4">Avg_Render_Time</p>
+          <p className="font-mono text-[11px] text-on-surface-variant uppercase font-black tracking-widest mb-4">Avg_Render_Time</p>
           <h4 className="text-5xl font-black text-on-surface font-headline-md italic tracking-tighter leading-none">142<span className="text-primary text-2xl">.4s</span></h4>
-          <p className="text-[10px] text-success font-black uppercase tracking-widest mt-4 flex items-center gap-2 italic">
+          <p className="text-[11px] text-success font-black uppercase tracking-widest mt-4 flex items-center gap-2 italic">
             <ArrowUpRight size={12} /> 12% Improved
           </p>
         </div>
@@ -130,14 +130,14 @@ export default function Analytics() {
                <div className={`p-4 bg-surface-container rounded-2xl border border-outline ${stat.color} group-hover:scale-110 transition-all duration-500`}>
                   <stat.icon size={24} />
                </div>
-               <div className={`px-3 py-1 rounded-full font-mono text-[9px] font-black border ${
+               <div className={`px-3 py-1 rounded-full font-mono text-[10px] font-black border ${
                  stat.isPositive ? 'bg-emerald-50 text-success border-emerald-100' : 'bg-red-50 text-error border-red-100'
                }`}>
                   {stat.change}
                </div>
             </div>
             <div className="text-6xl font-black text-on-surface font-headline-md italic tracking-tighter mb-2 leading-none relative z-10">{stat.value}</div>
-            <span className="text-[10px] text-on-surface-variant/40 uppercase font-black tracking-[0.2em] italic relative z-10">{stat.label}</span>
+            <span className="text-[11px] text-on-surface-variant uppercase font-black tracking-[0.2em] italic relative z-10">{stat.label}</span>
           </motion.div>
         ))}
       </div>
@@ -152,9 +152,9 @@ export default function Analytics() {
 
          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
             {[
-               { label: 'TOP_VOICE_PERFORMANCE', value: 'Emma (EN)', sub: '92.4% Retention', icon: Radio },
-               { label: 'OPTIMAL_HOOK_TIME', value: '02.4s - 04.1s', sub: 'Critical Threshold', icon: Clock },
-               { label: 'CONTENT_VECTOR', value: 'Tech_Infographic', sub: 'High Engagement', icon: Target },
+               { label: 'TOP_VOICE_PERFORMANCE', value: 'Emma (EN)', sub: '92.4% Retention (Season High)', icon: Radio },
+               { label: 'OPTIMAL_HOOK_TIME', value: '02.4s - 04.1s', sub: 'Critical Conversion Threshold', icon: Clock },
+               { label: 'CONTENT_VECTOR', value: 'French_Cuisine', sub: '#la_cuisine_française #france', icon: Target },
             ].map((insight, i) => (
               <motion.div 
                 key={i}
@@ -164,11 +164,11 @@ export default function Analytics() {
                 className="p-8 bg-surface-container border border-outline rounded-[2rem] hover:border-primary/40 transition-all duration-500"
               >
                  <div className="flex items-center gap-4 mb-6">
-                    <insight.icon size={16} className="text-on-surface-variant/30" />
-                    <span className="font-mono text-[9px] text-on-surface-variant/40 font-black uppercase tracking-widest">{insight.label}</span>
+                    <insight.icon size={16} className="text-primary" />
+                    <span className="font-mono text-[11px] text-on-surface-variant font-black uppercase tracking-widest">{insight.label}</span>
                  </div>
                  <div className="text-2xl font-black text-on-surface font-headline-md uppercase italic mb-2 leading-none">{insight.value}</div>
-                 <p className="font-mono text-[10px] text-primary font-black uppercase tracking-widest italic">{insight.sub}</p>
+                 <p className="font-mono text-[11px] text-primary font-black uppercase tracking-widest italic">{insight.sub}</p>
               </motion.div>
             ))}
          </div>
@@ -179,11 +179,11 @@ export default function Analytics() {
                   <Zap size={20} className="text-white" />
                </div>
                <div>
-                  <p className="text-xs font-black text-on-surface uppercase italic">Optimization Strategy Ready</p>
-                  <p className="font-mono text-[9px] text-on-surface-variant/40 uppercase font-black tracking-widest mt-1">AI Recommendation: Increase post frequency in 'Tech' category for India sector.</p>
+                  <p className="text-sm font-black text-on-surface uppercase italic">Optimization Strategy Ready</p>
+                  <p className="font-mono text-[11px] text-on-surface-variant uppercase font-black tracking-widest mt-1">AI Recommendation: Focus on "French Cuisine" segment for Paris/Lyon Geo-Targets.</p>
                </div>
             </div>
-            <button className="px-8 py-4 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all italic shadow-lg shadow-primary/20">
+            <button className="px-8 py-4 bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:brightness-110 transition-all italic shadow-lg shadow-primary/20">
                Apply_Optimization
             </button>
          </div>
@@ -218,7 +218,7 @@ export default function Analytics() {
                                  className="w-full bg-gradient-to-t from-primary/10 to-primary rounded-t-xl relative group-hover:shadow-lg transition-all duration-500"
                                />
                             </div>
-                            <span className="font-mono text-[8px] text-on-surface-variant/40 font-black rotate-45 origin-left whitespace-nowrap uppercase tracking-widest">
+                            <span className="font-mono text-[10px] text-on-surface-variant font-black rotate-45 origin-left whitespace-nowrap uppercase tracking-widest">
                                {new Date(snap.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                             </span>
                          </div>
@@ -227,7 +227,7 @@ export default function Analytics() {
                    ) : (
                      <div className="w-full h-full flex flex-col items-center justify-center text-center">
                         <Terminal size={40} className="text-on-surface-variant/10 mb-8" />
-                        <p className="font-mono text-[10px] text-on-surface-variant/20 uppercase font-black tracking-[0.3em]">Awaiting data stream...</p>
+                        <p className="font-mono text-[11px] text-on-surface-variant uppercase font-black tracking-[0.3em]">Awaiting data stream...</p>
                      </div>
                    )}
                 </div>
@@ -256,19 +256,19 @@ export default function Analytics() {
                       className="p-6 bg-surface-container border border-outline rounded-[1.5rem] hover:border-primary/40 hover:bg-surface transition-all duration-500 group/item cursor-crosshair shadow-sm"
                     >
                        <div className="flex justify-between items-start mb-6">
-                          <span className="font-mono text-[9px] text-primary font-black uppercase tracking-[0.2em] italic">{video.id.slice(0, 8)}</span>
-                          <ArrowUpRight size={14} className="text-on-surface-variant/30 group-hover/item:text-primary transition-colors" />
+                          <span className="font-mono text-[10px] text-primary font-black uppercase tracking-[0.2em] italic">{video.id.slice(0, 8)}</span>
+                          <ArrowUpRight size={14} className="text-on-surface-variant group-hover/item:text-primary transition-colors" />
                        </div>
                        <h4 className="text-xl font-black text-on-surface font-headline-md uppercase italic tracking-tight mb-8 group-hover/item:text-primary transition-colors duration-500 line-clamp-2 leading-none">
                           {video.title || 'Untitled_Production'}
                        </h4>
                        <div className="grid grid-cols-2 gap-6 border-t border-outline pt-6">
                           <div>
-                             <span className="font-mono text-[8px] text-on-surface-variant/40 uppercase font-black tracking-widest block mb-2">STATUS</span>
+                             <span className="font-mono text-[10px] text-on-surface-variant uppercase font-black tracking-widest block mb-2">STATUS</span>
                              <span className="text-xl text-on-surface font-black italic font-headline-md uppercase leading-none">{video.status}</span>
                           </div>
                           <div>
-                             <span className="font-mono text-[8px] text-on-surface-variant/40 uppercase font-black tracking-widest block mb-2">PLATFORM</span>
+                             <span className="font-mono text-[10px] text-on-surface-variant uppercase font-black tracking-widest block mb-2">PLATFORM</span>
                              <span className="text-xl text-success font-black italic font-headline-md uppercase leading-none">{video.platform || 'TIKTOK'}</span>
                           </div>
                        </div>

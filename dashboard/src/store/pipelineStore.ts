@@ -20,8 +20,6 @@ interface PipelineState {
     engagement: number;
     topPerformers: any[];
   };
-  series: any[];
-  episodes: any[];
   isLoading: boolean;
   error: string | null;
 
@@ -29,10 +27,13 @@ interface PipelineState {
   fetchOrders: () => Promise<void>;
   fetchProductions: () => Promise<void>;
   fetchVideos: () => Promise<void>;
-  fetchTrends: (country?: string, language?: string) => Promise<void>;
+  fetchTrends: (countries?: string[], languages?: string[]) => Promise<void>;
   fetchFilterOptions: () => Promise<void>;
   fetchAgentLogs: () => Promise<void>;
   fetchSocialAccounts: () => Promise<void>;
+  fetchSeries: () => Promise<void>;
+  fetchEpisodes: () => Promise<void>;
+  fetchAnalytics: () => Promise<void>;
   subscribeToChanges: () => () => void;
 }
 
@@ -143,7 +144,6 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
   fetchFilterOptions: async () => {
     try {
-      // Vi henter unike land og språk direkte fra databasen
       const { data, error } = await supabase
         .from('trending_topics')
         .select('country, language');
@@ -192,48 +192,30 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     return get().fetchProductions();
   },
 
-  fetchTrends: async (country?: string, language?: string) => {
-    set({ trends: [], isLoading: true }); // Clear trends and show loading immediately
+  fetchTrends: async (countries?: string[], languages?: string[]) => {
+    set({ isLoading: true });
     try {
       let query = supabase
         .from('trending_topics')
         .select('*')
         .order('viral_score', { ascending: false });
       
-      if (country && country !== 'GLOBAL' && country !== 'ALL') {
-        query = query.eq('country', country);
+      if (countries && countries.length > 0 && !countries.includes('ALL') && !countries.includes('GLOBAL')) {
+        query = query.in('country', countries);
       }
 
-      if (language && language !== 'ALL') {
-        query = query.eq('language', language.toLowerCase());
+      if (languages && languages.length > 0 && !languages.includes('ALL')) {
+        query = query.in('language', languages.map(l => l.toLowerCase()));
       }
 
       const { data, error } = await query;
-      if (error) {
-        console.error('❌ Supabase Trend Fetch Error:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log('📊 Raw Trends from DB:', data);
-      
-      // Sikre at vi alltid sorterer etter viral_score (høyest først)
-      const sortedTrends = (data || []).sort((a, b) => (b.viral_score || 0) - (a.viral_score || 0));
-      
-      set({ trends: sortedTrends });
+      set({ trends: data || [] });
     } catch (err) {
       console.error('Error fetching trends:', err);
     } finally {
       set({ isLoading: false });
-    }
-  },
-
-  fetchEpisodes: async () => {
-    try {
-      const { data, error } = await supabase.from('episodes').select('*, series:series_id(title)');
-      if (error) throw error;
-      set({ episodes: data || [] });
-    } catch (err) {
-      console.error('Error fetching episodes:', err);
     }
   },
 

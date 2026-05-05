@@ -7,17 +7,17 @@ export default function LiveStatusTracker() {
   const { orders, isLoading } = usePipelineStore();
   
   // Filter for active (non-completed/non-failed) orders
-  const activeOrders = orders.filter(o => o.status === 'rendering' || o.status === 'pending').slice(0, 3);
-  const completedToday = orders.filter(o => o.status === 'completed' && new Date(o.updated_at).toDateString() === new Date().toDateString()).length;
+  const activeOrders = (orders || []).filter(o => o.status === 'rendering' || o.status === 'pending').slice(0, 3);
+  const completedToday = (orders || []).filter(o => o.status === 'completed' && new Date(o.updated_at).toDateString() === new Date().toDateString()).length;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-2">
-           <Activity size={14} className="text-primary-container animate-pulse" />
-           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 font-mono">Live_Engine_Status</span>
+           <Activity size={14} className="text-primary animate-pulse" />
+           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant font-mono">Live_Engine_Status</span>
         </div>
-        <span className="text-[9px] font-mono text-zinc-800 font-black">
+        <span className="text-[10px] font-mono text-on-surface font-black uppercase italic">
           {activeOrders.length} ACTIVE / {completedToday} DONE
         </span>
       </div>
@@ -30,12 +30,12 @@ export default function LiveStatusTracker() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="group bg-surface-container-low/50 border border-white/5 rounded-2xl p-4 hover:border-primary-container/30 transition-all relative overflow-hidden"
+              className="group bg-surface-container/50 border border-outline rounded-2xl p-4 hover:border-primary/30 transition-all relative overflow-hidden shadow-sm"
             >
               {/* Progress Bar Background */}
               {order.status === 'rendering' && (
                 <motion.div 
-                  className="absolute bottom-0 left-0 h-1 bg-primary-container/20 w-full"
+                  className="absolute bottom-0 left-0 h-1 bg-primary/20 w-full"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: 30, repeat: Infinity }}
@@ -43,31 +43,31 @@ export default function LiveStatusTracker() {
               )}
 
               <div className="flex justify-between items-start relative z-10">
-                <div className="flex gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                    order.status === 'rendering' ? 'bg-primary-container/10' : 'bg-white/5'
+                <div className="flex gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                    order.status === 'rendering' ? 'bg-primary/10 border-primary/20' : 'bg-surface-container border-outline'
                   }`}>
                     {order.status === 'rendering' ? (
-                      <Loader2 size={16} className="text-primary-container animate-spin" />
+                      <Loader2 size={18} className="text-primary animate-spin" />
                     ) : (
-                      <Clock size={16} className="text-zinc-600" />
+                      <Clock size={18} className="text-on-surface-variant/40" />
                     )}
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-black text-white uppercase italic tracking-tight line-clamp-1 w-32">
-                      {order.title || 'Untitled_Production'}
+                    <h4 className="text-[11px] font-black text-on-surface uppercase italic tracking-tight line-clamp-1 w-32">
+                      {order.title || order.topic || 'Untitled_Production'}
                     </h4>
-                    <p className="text-[8px] font-mono font-black text-zinc-700 uppercase tracking-widest mt-0.5">
-                      {order.status === 'rendering' ? 'NEURAL_ENCODING_IN_PROGRESS' : 'QUEUED_FOR_DISPATCH'}
+                    <p className="text-[9px] font-mono font-black text-on-surface-variant uppercase tracking-widest mt-1">
+                      {order.status === 'rendering' ? 'NEURAL_ENCODING' : 'DISPATCH_QUEUED'}
                     </p>
                   </div>
                 </div>
                 
                 <div className="text-right">
-                   <div className={`text-[9px] font-mono font-black px-2 py-0.5 rounded-full ${
-                     order.status === 'rendering' ? 'text-primary-container' : 'text-zinc-600'
+                   <div className={`text-[10px] font-mono font-black px-3 py-1 rounded-full border ${
+                     order.status === 'rendering' ? 'text-primary bg-primary/5 border-primary/20 animate-pulse' : 'text-on-surface-variant bg-surface-container border-outline'
                    }`}>
-                     {order.status === 'rendering' ? 'SYNCING' : 'IDLE'}
+                     {order.status === 'rendering' ? 'SYNC' : 'READY'}
                    </div>
                 </div>
               </div>
@@ -79,30 +79,30 @@ export default function LiveStatusTracker() {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="py-10 flex flex-col items-center justify-center border border-dashed border-white/5 rounded-[2rem] bg-white/[0.01]"
+            className="py-12 flex flex-col items-center justify-center border-2 border-dashed border-outline rounded-[2rem] bg-surface-container/20"
           >
-             <CheckCircle2 size={24} className="text-zinc-800 mb-3" />
-             <p className="text-[9px] font-mono font-black text-zinc-800 uppercase tracking-widest">Pipeline_Nominal_Wait_Active</p>
+             <CheckCircle2 size={28} className="text-on-surface-variant/20 mb-4" />
+             <p className="text-[10px] font-mono font-black text-on-surface-variant uppercase tracking-widest italic">Pipeline_Wait_Protocol_Active</p>
           </motion.div>
         )}
       </div>
 
       {/* Global Progress Pulse */}
       {activeOrders.length > 0 && (
-        <div className="pt-4 border-t border-white/5">
-           <div className="flex justify-between text-[8px] font-mono font-black text-zinc-700 uppercase mb-2">
+        <div className="pt-6 border-t border-outline">
+           <div className="flex justify-between text-[10px] font-mono font-black text-on-surface-variant uppercase mb-3 tracking-widest italic">
               <span>Overall_Efficiency</span>
-              <span>98.4%</span>
+              <span className="text-primary">98.4%</span>
            </div>
-           <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+           <div className="h-1.5 bg-surface-container border border-outline rounded-full overflow-hidden">
               <motion.div 
-                className="h-full bg-gradient-to-r from-primary-container via-[#00f5ff] to-primary-container"
+                className="h-full bg-primary"
                 animate={{ 
                   x: ['-100%', '100%'],
-                  opacity: [0.5, 1, 0.5]
+                  opacity: [0.7, 1, 0.7]
                 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                style={{ width: '50%' }}
+                style={{ width: '60%' }}
               />
            </div>
         </div>

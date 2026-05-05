@@ -10,14 +10,19 @@ interface Translations {
 
 const translations: Translations = {
   COMMAND_CENTER: { NO: 'KOMMANDO_SENTER', EN: 'COMMAND_CENTER' },
+  FACTORY: { NO: 'FABRIKKEN', EN: 'THE_FACTORY' },
   THE_FACTORY: { NO: 'FABRIKKEN', EN: 'THE_FACTORY' },
   AUTO_SERIES: { NO: 'AUTO_SERIER', EN: 'AUTO_SERIES' },
   TREND_RADAR: { NO: 'TREND_RADAR', EN: 'TREND_RADAR' },
+  TRENDS: { NO: 'TREND_RADAR', EN: 'TREND_RADAR' },
   AI_AGENTS: { NO: 'AI_AGENTER', EN: 'AI_AGENTS' },
+  AGENTS: { NO: 'AI_AGENTER', EN: 'AI_AGENTS' },
   VIDEO_ARCHIVE: { NO: 'VIDEO_ARKIV', EN: 'VIDEO_ARCHIVE' },
+  ARCHIVE: { NO: 'VIDEO_ARKIV', EN: 'VIDEO_ARCHIVE' },
   SETTINGS: { NO: 'INNSTILLINGER', EN: 'SETTINGS' },
   LOGS: { NO: 'LOGG_TERMINAL', EN: 'SYSTEM_LOGS' },
   INITIATE_PRODUCTION: { NO: 'START_PRODUKSJON', EN: 'INITIATE_PRODUCTION' },
+  CREATE_ORDER: { NO: 'START_PRODUKSJON', EN: 'INITIATE_PRODUCTION' },
   TERMINATE_CONNECTION: { NO: 'AVSLUTT_KOBLING', EN: 'TERMINATE_CONNECTION' },
   TOGGLE_NODE_INTERFACE: { NO: 'VEKSLE_GRENSESNITT', EN: 'TOGGLE_NODE_INTERFACE' },
   ACTIVE_CYCLES: { NO: 'AKTIVE_SYKLUSER', EN: 'ACTIVE_CYCLES' },
@@ -27,7 +32,7 @@ const translations: Translations = {
   LANGUAGE: { NO: 'SPRÅK', EN: 'LANGUAGE' },
   COUNTRY: { NO: 'LAND', EN: 'COUNTRY' },
   PLATFORM: { NO: 'PLATTFORM', EN: 'PLATFORM' },
-  VOICE_GENDER: { NO: 'STEMME_KJØNN', EN: 'VOICE_PROFILE' },
+  VOICE_PROFILE: { NO: 'STEMME_PROFIL', EN: 'VOICE_PROFILE' },
   MALE: { NO: 'MANN', EN: 'MALE' },
   FEMALE: { NO: 'KVINNE', EN: 'FEMALE' },
   AUTO: { NO: 'AUTO', EN: 'AUTO' },
@@ -51,6 +56,7 @@ export const useI18nStore = create<I18nState>((set, get) => ({
   setLanguage: (lang) => set({ language: lang }),
   t: (key) => {
     const lang = get().language;
-    return translations[key]?.[lang] || key;
+    const upperKey = key.toUpperCase().replace(/-/g, '_');
+    return translations[upperKey]?.[lang] || key;
   },
 }));
