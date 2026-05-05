@@ -12,7 +12,7 @@ import {
   Terminal,
   Zap,
   Globe,
-  Database,
+  Monitor,
   Mic2,
   Share2
 } from 'lucide-react';
@@ -45,9 +45,9 @@ export default function Dashboard() {
 
   const stats = [
     { label: 'RENDER_FLOW', value: safeOrders.filter(o => o.status === 'processing' || o.status === 'rendering').length || 0, sub: 'ACTIVE_NODES', color: 'text-[#6bff83]', icon: Cpu },
-    { label: 'VIRAL_VELOCITY', value: '42.8M', sub: 'LAST_24H', color: 'text-[#BD00FF]', icon: TrendingUp },
+    { label: 'ARCHIVE_SIZE', value: (usePipelineStore.getState().videos || []).length, sub: 'FINISHED_ASSETS', color: 'text-[#BD00FF]', icon: TrendingUp },
     { label: 'QUEUE_DEPTH', value: safeOrders.filter(o => o.status === 'queued' || o.status === 'pending').length || 0, sub: 'TASKS_PENDING', color: 'text-[#00f5ff]', icon: Layers },
-    { label: 'SYSTEM_HEALTH', value: '99.9%', sub: 'STABLE', color: 'text-[#ffaa00]', icon: Activity },
+    { label: 'LIVE_TRENDS', value: safeTrends.length, sub: 'RADAR_ACTIVE', color: 'text-[#ffaa00]', icon: Activity },
   ];
 
   return (

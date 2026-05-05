@@ -1,160 +1,100 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
-import type { Order, OrderStatus } from '../types';
 
 interface PipelineState {
   orders: any[];
+  productions: any[];
   trends: any[];
-  videos: any[];
-  isInitialLoaded: boolean;
+  analytics: any[];
+  series: any[];
+  episodes: any[];
+  agentLogs: any[];
+  socialAccounts: any[];
   isLoading: boolean;
   error: string | null;
+
   fetchOrders: () => Promise<void>;
+  fetchProductions: () => Promise<void>;
   fetchTrends: () => Promise<void>;
-  fetchVideos: () => Promise<void>;
-  fetchInitialData: () => Promise<void>;
-  addOrder: (order: Partial<Order>) => void;
-  updateOrder: (videoId: string, updates: Partial<Order>) => void;
-  retryOrder: (order: Order) => Promise<void>;
+  fetchAnalytics: () => Promise<void>;
+  fetchSeries: () => Promise<void>;
+  fetchEpisodes: () => Promise<void>;
+  fetchAgentLogs: () => Promise<void>;
+  fetchSocialAccounts: () => Promise<void>;
   subscribeToChanges: () => () => void;
 }
 
 export const usePipelineStore = create<PipelineState>((set, get) => ({
   orders: [],
+  productions: [],
   trends: [],
-  videos: [],
-  isInitialLoaded: false,
+  analytics: [],
+  series: [],
+  episodes: [],
+  agentLogs: [],
+  socialAccounts: [],
   isLoading: false,
   error: null,
 
-  fetchInitialData: async () => {
-    set({ isLoading: true });
-    try {
-      await Promise.all([
-        get().fetchOrders(),
-        get().fetchTrends(),
-        get().fetchVideos()
-      ]);
-      set({ isInitialLoaded: true });
-    } catch (err) {
-      set({ error: 'Kunne ikke hente initial data' });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
   fetchOrders: async () => {
-    try {
-      // Hent fra både orders og productions
-      const [ordersRes, productionsRes] = await Promise.all([
-        supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50),
-        supabase.from('productions').select('*').order('created_at', { ascending: false }).limit(50)
-      ]);
-
-      const allData = [...(ordersRes.data || []), ...(productionsRes.data || [])];
-      // Fjern duplikater og filtrer bort de som er ferdige (de går til videos)
-      const uniqueOrders = Array.from(new Map(allData.map(item => [item.id || item.video_id, item])).values())
-        .filter((o: any) => o.status !== 'completed' && o.status !== 'published');
-
-      set({ orders: uniqueOrders });
-    } catch (err) {
-      console.error('Feil ved henting av ordrer:', err);
-    }
+    const { data } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    set({ orders: data || [] });
   },
 
-  fetchVideos: async () => {
-    try {
-      // Prøv å hente fra 'videos' tabellen først (brukt i n8n), deretter 'productions' som fallback
-      const { data, error } = await supabase
-        .from('videos')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (error) {
-        // Fallback til productions hvis videos ikke eksisterer
-        const { data: prodData } = await supabase
-          .from('productions')
-          .select('*')
-          .eq('status', 'completed')
-          .order('created_at', { ascending: false });
-        
-        set({ videos: prodData || [] });
-      } else {
-        set({ videos: data || [] });
-      }
-    } catch (err) {
-      console.error('Feil ved henting av videoer:', err);
-    }
+  fetchProductions: async () => {
+    const { data } = await supabase
+      .from('productions')
+      .select('*')
+      .order('created_at', { ascending: false });
+    set({ productions: data || [] });
   },
 
   fetchTrends: async () => {
-    try {
-      const { data, error } = await supabase
-        .from('trending_topics')
-        .select('*')
-        .limit(50);
-
-      if (error) throw error;
-      
-      const uniqueData = Array.from(new Map(data?.map(item => [item.title, item])).values());
-      const sortedData = (uniqueData || []).sort((a: any, b: any) => {
-        const dateA = new Date(a.updated_at || 0).getTime();
-        const dateB = new Date(b.updated_at || 0).getTime();
-        return dateB - dateA;
-      });
-
-      set({ trends: sortedData });
-    } catch (err) {
-      console.error('Feil ved henting av trender:', err);
-      set({ trends: get().trends || [] });
-    }
+    const { data } = await supabase
+      .from('trending_topics')
+      .select('*')
+      .order('viral_score', { ascending: false });
+    set({ trends: data || [] });
   },
 
-  addOrder: (order) => {
-    get().fetchOrders();
+  fetchAnalytics: async () => {
+    const { data } = await supabase
+      .from('performance_snapshots')
+      .select('*')
+      .order('timestamp', { ascending: false });
+    set({ analytics: data || [] });
   },
 
-  updateOrder: (videoId, updates) => {
-    set((state) => ({
-      orders: (state.orders || []).map((o) => 
-        (o.video_id === videoId || o.id === videoId) ? { ...o, ...updates } : o
-      ),
-    }));
+  fetchSeries: async () => {
+    const { data } = await supabase.from('series').select('*');
+    set({ series: data || [] });
   },
 
-  retryOrder: async (order) => {
-    try {
-      const { triggerProduction } = await import('../lib/api');
-      await triggerProduction({
-        action: 'RETRY',
-        video_id: order.video_id || order.id,
-        title: order.title,
-        topic: order.topic,
-        language: order.language || 'Norsk'
-      });
-      get().updateOrder(order.video_id || order.id, { status: 'queued' });
-    } catch (err) {
-      console.error('Retry feilet:', err);
-    }
+  fetchEpisodes: async () => {
+    const { data } = await supabase.from('episodes').select('*, series:series_id(title)');
+    set({ episodes: data || [] });
+  },
+
+  fetchAgentLogs: async () => {
+    const { data } = await supabase.from('agent_logs').select('*').order('created_at', { ascending: false }).limit(50);
+    set({ agentLogs: data || [] });
+  },
+
+  fetchSocialAccounts: async () => {
+    const { data } = await supabase.from('user_social_accounts').select('*');
+    set({ socialAccounts: data || [] });
   },
 
   subscribeToChanges: () => {
-    const channelId = `db-changes-${Date.now()}`;
     const channel = supabase
-      .channel(channelId)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        get().fetchOrders();
-        get().fetchVideos();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'productions' }, () => {
-        get().fetchOrders();
-        get().fetchVideos();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'videos' }, () => {
-        get().fetchVideos();
-      })
+      .channel('pipeline-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => get().fetchOrders())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'productions' }, () => get().fetchProductions())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, () => get().fetchTrends())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agent_logs' }, () => get().fetchAgentLogs())
       .subscribe();
 
     return () => {
