@@ -18,6 +18,7 @@ if (fs.existsSync(envPath)) {
 
 const PORT = process.env.PORT || 3001;
 const FFMPEG_PATH = process.env.FFMPEG_PATH || `C:/VideoMill/NY_VIDEOMILL_V2/ffmpeg-2026-04-30-git-cc3ca17127-full_build/bin/ffmpeg.exe`;
+const FFPROBE_PATH = FFMPEG_PATH.replace('ffmpeg.exe', 'ffprobe.exe');
 const BASE_ASSETS_DIR = process.env.BASE_ASSETS_DIR || `C:/VideoMill/VideoMill_Assets`;
 const EDGE_TTS_PATH = process.env.EDGE_TTS_PATH || `C:/Users/saji_/AppData/Local/Python/pythoncore-3.14-64/Scripts/edge-tts.exe`;
 
@@ -128,11 +129,11 @@ async function updateStatus(id, status, extra = {}) {
   });
 }
 
-async function callFooocus(prompt, dest, fnIndex = 33) {
+async function callFooocus(prompt, dest, fnIndex = 32) {
   const cinematicPrompt = `${prompt}, cinematic shot, 8k resolution, highly detailed, masterpiece, stunning lighting, unreal engine 5 render, professional photography, viral aesthetic`;
   const apiBody = {
     fn_index: fnIndex, 
-    data: [cinematicPrompt, "text, watermark, blurry, low quality, distorted", ["Fooocus V2", "Fooocus Cinematic", "Fooocus Masterpiece"], "Quality", "1024*1792", "1", "png", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null]
+    data: [cinematicPrompt, "text, watermark, blurry, low quality", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null]
   };
   
   return new Promise((resolve, reject) => {
@@ -225,8 +226,8 @@ async function handleCinematicRender(data) {
     // Finn varighet på lyd (default 4s hvis feil)
     let dur = 4;
     try {
-      const ffprobe = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${sceneAudio}"`).toString().trim();
-      dur = parseFloat(ffprobe) + 0.3; // Legg til litt buffer
+      const ffprobeResult = execSync(`"${FFPROBE_PATH}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${sceneAudio}"`).toString().trim();
+      dur = parseFloat(ffprobeResult) + 0.3; // Legg til litt buffer
     } catch (e) { dur = scene.duration_seconds || 4; }
 
     // 2. GENERER BILDE OG VIDEO
