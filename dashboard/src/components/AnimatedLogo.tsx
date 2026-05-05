@@ -1,120 +1,67 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Video, Zap, Cpu, Radio } from 'lucide-react';
 
-export default function AnimatedLogo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' | 'xl' }) {
+interface AnimatedLogoProps {
+  size?: 'sm' | 'md' | 'lg';
+}
+
+const AnimatedLogo: React.FC<AnimatedLogoProps> = ({ size = 'md' }) => {
   const sizes = {
-    sm: { icon: 16, text: 'text-sm', sub: 'text-[9px]', gap: 'gap-2', padding: 'p-2' },
-    md: { icon: 24, text: 'text-2xl', sub: 'text-[11px]', gap: 'gap-3', padding: 'p-4' },
-    lg: { icon: 32, text: 'text-4xl', sub: 'text-sm', gap: 'gap-4', padding: 'p-6' },
-    xl: { icon: 48, text: 'text-7xl', sub: 'text-base', gap: 'gap-6', padding: 'p-10' },
+    sm: { container: 'h-10', box: 'w-8 h-8', text: 'text-lg', dot: 'w-1.5 h-1.5' },
+    md: { container: 'h-14', box: 'w-12 h-12', text: 'text-2xl', dot: 'w-2 h-2' },
+    lg: { container: 'h-24', box: 'w-20 h-20', text: 'text-5xl', dot: 'w-4 h-4' },
   };
 
-  const s = sizes[size];
+  const currentSize = sizes[size];
 
   return (
-    <div className={`flex flex-col items-center ${s.gap} select-none`}>
-      <div className="relative">
-        {/* Outer Glow Ring - Royal Blue Theme */}
-        <motion.div 
+    <div className={`flex items-center gap-4 ${currentSize.container}`}>
+      <div className={`relative ${currentSize.box} flex items-center justify-center`}>
+        {/* Organic Base Layer */}
+        <motion.div
           animate={{ 
-            scale: [1, 1.1, 1],
-            rotate: [0, 90, 180, 270, 360],
-            opacity: [0.2, 0.4, 0.2]
+            borderRadius: ["25% 75% 70% 30% / 30% 30% 70% 70%", "75% 25% 30% 70% / 70% 70% 30% 30%", "25% 75% 70% 30% / 30% 30% 70% 70%"],
           }}
-          transition={{ 
-            duration: 8, 
-            repeat: Infinity, 
-            ease: "linear" 
-          }}
-          className="absolute -inset-4 border border-[#4169E1]/30 rounded-2xl blur-sm"
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0 bg-[#b1cdb7] opacity-20 blur-sm"
         />
         
-        {/* Kinetic Frame - Royal Blue Background for visibility */}
+        {/* Core Technical Box */}
         <motion.div 
-          className="relative bg-[#4169E1] border-2 border-[#1E3A8A] p-4 rounded-2xl shadow-xl flex items-center justify-center overflow-hidden group"
-          whileHover={{ scale: 1.05, borderColor: '#ffffff' }}
+          className="w-full h-full border border-[#b1cdb7]/40 rounded-soft-sm relative flex items-center justify-center bg-[#131412]"
+          whileHover={{ borderColor: '#b1cdb7', scale: 1.05 }}
         >
-          {/* Scanning Line Effect */}
-          <motion.div 
-            animate={{ translateY: ['-100%', '200%'] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-transparent w-full h-1/2 pointer-events-none"
-          />
-
-          <div className="relative z-10 flex items-center justify-center">
-            <motion.div
-              animate={{ 
-                rotateY: [0, 360],
-                filter: ["drop-shadow(0 0 0px #ffffff)", "drop-shadow(0 0 8px #ffffff)", "drop-shadow(0 0 0px #ffffff)"]
-              }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Video size={s.icon} className="text-white" />
-            </motion.div>
-            
-            <motion.div 
-              className="absolute"
-              animate={{ 
-                scale: [0.8, 1.2, 0.8],
-                opacity: [0, 0.4, 0]
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Zap size={s.icon * 1.5} className="text-white opacity-40" />
-            </motion.div>
+          <div className={`relative flex flex-col items-center gap-1`}>
+             <motion.div 
+               animate={{ scale: [1, 1.2, 1] }}
+               transition={{ duration: 4, repeat: Infinity }}
+               className={`${currentSize.dot} bg-[#b1cdb7] rounded-full shadow-[0_0_10px_#b1cdb7]`} 
+             />
+             <div className="w-[1px] h-3 bg-gradient-to-b from-[#b1cdb7] to-transparent opacity-40" />
           </div>
         </motion.div>
-
-        {/* Tactical Corner Marks */}
-        <div className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-[#4169E1]" />
-        <div className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-[#4169E1]" />
       </div>
 
-      <div className="text-center">
-        <motion.h1 
-          className={`${s.text} font-black text-[#1E3A8A] font-headline-md tracking-tighter italic uppercase leading-none mb-1 flex items-center justify-center gap-1`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+      <div className="flex flex-col">
+        <motion.span 
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          className={`${currentSize.text} font-headline-md text-[#e4e2e0] uppercase italic tracking-tighter leading-none flex items-baseline gap-1`}
         >
-          Video<span className="text-[#4169E1]">Mill</span>
-          <motion.span
-            animate={{ opacity: [1, 0, 1] }}
-            transition={{ duration: 1, repeat: Infinity }}
-            className="w-1.5 h-[0.8em] bg-[#4169E1] inline-block align-middle ml-1"
-          />
-        </motion.h1>
-        
-        <div className="flex items-center justify-center gap-3 overflow-hidden">
-          <motion.div 
-            className="h-[1px] bg-[#4169E1]/20 w-8"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-          />
-          <motion.p 
-            className={`${s.sub} font-mono font-black uppercase tracking-[0.3em] text-[#4169E1] whitespace-nowrap italic opacity-80`}
-            animate={{ opacity: [0.6, 1, 0.6] }}
-            transition={{ duration: 4, repeat: Infinity }}
+          Video<span className="text-[#b1cdb7]">mill</span>
+        </motion.span>
+        {size !== 'sm' && (
+          <motion.span 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.4 }}
+            className="font-label-sm text-[#b1cdb7] text-[9px] uppercase tracking-[0.4em] mt-1"
           >
-            Autonomous_Cinema
-          </motion.p>
-          <motion.div 
-            className="h-[1px] bg-[#4169E1]/20 w-8"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-          />
-        </div>
+            Naturalist_Studio_v2
+          </motion.span>
+        )}
       </div>
-      
-      {/* Neural Link Status Indicator */}
-      <motion.div 
-        className="flex items-center gap-2 px-3 py-1 bg-surface-container border border-outline rounded-full mt-3"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-        <span className="text-[9px] font-mono font-black text-[#4169E1] uppercase tracking-[0.2em] italic">Core_Stable</span>
-      </motion.div>
     </div>
   );
-}
+};
+
+export default AnimatedLogo;

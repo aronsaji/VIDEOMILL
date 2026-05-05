@@ -49,59 +49,59 @@ export default function Archive() {
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 border-b border-outline pb-10">
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 border-b border-[#424843] pb-10">
         <div>
-          <div className="flex items-center gap-3 text-[#4169E1] font-mono text-[10px] font-black uppercase tracking-[0.4em] mb-4 italic">
-            <Radio size={14} className="animate-pulse" />
+          <div className="flex items-center gap-4 text-[#b1cdb7] font-label-sm text-[11px] font-bold uppercase tracking-[0.4em] mb-4 italic">
+            <Radio size={18} className="animate-pulse" />
             PERMANENT_MEDIA_STORAGE_v4.2
           </div>
-          <h1 className="text-6xl font-black text-[#1E3A8A] font-headline-md tracking-tighter italic uppercase leading-none">
-            Video_<span className="text-[#4169E1]">Archive</span>
+          <h1 className="font-headline-lg text-[#e4e2e0] uppercase italic tracking-tighter leading-none">
+            Video_<span className="text-[#b1cdb7]">Archive</span>
           </h1>
         </div>
         
         <div className="flex gap-8">
-           <div className="bg-surface border border-outline p-8 rounded-[2.5rem] flex flex-col min-w-[220px] shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-[#4169E1]/20" />
-              <span className="font-mono text-[10px] text-on-surface-variant uppercase font-black tracking-[0.2em] mb-3 italic opacity-40">TOTAL_ASSETS</span>
-              <span className="text-5xl font-black text-[#1E3A8A] font-headline-md italic tracking-tighter leading-none">{videos.length.toString().padStart(2, '0')}</span>
+           <div className="bg-[#1b1c1a] border border-[#424843] p-8 rounded-soft-xl flex flex-col min-w-[220px] shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-[#b1cdb7]/10" />
+              <span className="font-label-sm text-[10px] text-[#8c928c] uppercase font-bold tracking-[0.2em] mb-3 italic opacity-40">TOTAL_ASSETS</span>
+              <span className="text-5xl font-bold text-[#e4e2e0] font-headline-md italic tracking-tighter leading-none">{videos.length.toString().padStart(2, '0')}</span>
            </div>
-           <div className="bg-surface border border-outline p-8 rounded-[2.5rem] flex flex-col min-w-[220px] shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-full h-1 bg-[#4169E1]/20" />
-              <span className="font-mono text-[10px] text-on-surface-variant uppercase font-black tracking-[0.2em] mb-3 italic opacity-40">STORAGE_NODES</span>
-              <span className="text-5xl font-black text-[#4169E1] font-headline-md italic tracking-tighter leading-none">1.2<span className="text-[#1E3A8A]/20 text-3xl">TB</span></span>
+           <div className="bg-[#1b1c1a] border border-[#424843] p-8 rounded-soft-xl flex flex-col min-w-[220px] shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-[#b1cdb7]/10" />
+              <span className="font-label-sm text-[10px] text-[#8c928c] uppercase font-bold tracking-[0.2em] mb-3 italic opacity-40">STORAGE_NODES</span>
+              <span className="text-5xl font-bold text-[#b1cdb7] font-headline-md italic tracking-tighter leading-none">1.2<span className="text-[#8c928c]/20 text-3xl ml-1">TB</span></span>
            </div>
         </div>
       </header>
 
-      <section className="bg-surface border border-outline p-12 rounded-[3.5rem] shadow-sm relative overflow-hidden group">
-         <div className="flex items-center justify-between mb-10 border-b border-outline pb-8">
+      <section className="bg-[#1b1c1a] border border-[#424843] p-12 rounded-soft-xl shadow-sm relative overflow-hidden group">
+         <div className="flex items-center justify-between mb-10 border-b border-[#424843] pb-8">
             <div className="flex items-center gap-4">
-              <div className="p-4 bg-[#4169E1]/5 rounded-2xl border border-[#4169E1]/10 text-[#4169E1]">
+              <div className="p-4 bg-[#b1cdb7]/5 rounded-soft border border-[#b1cdb7]/10 text-[#b1cdb7]">
                 <LinkIcon size={24} />
               </div>
-              <h2 className="text-sm font-black text-[#1E3A8A] uppercase italic tracking-[0.3em]">Bridge_Matrix</h2>
+              <h2 className="font-label-sm text-[13px] font-bold text-[#e4e2e0] uppercase italic tracking-[0.3em]">Bridge_Matrix</h2>
             </div>
-            <span className="font-mono text-[10px] text-on-surface-variant uppercase tracking-widest font-black italic opacity-40">AUTONOMOUS_LINK_NODES</span>
+            <span className="font-label-sm text-[10px] text-[#8c928c] uppercase tracking-widest font-bold italic opacity-40">AUTONOMOUS_LINK_NODES</span>
          </div>
 
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {platforms.map(platform => {
               const account = socialAccounts.find(a => a.platform?.toLowerCase() === platform.id);
               return (
-                <div key={platform.id} className={`p-10 rounded-[3rem] border transition-all flex flex-col gap-8 group/node ${account ? 'border-success/30 bg-success/5 shadow-xl shadow-success/5' : 'border-outline bg-surface-container/50'}`}>
+                <div key={platform.id} className={`p-10 rounded-soft-xl border transition-all flex flex-col gap-8 group/node ${account ? 'border-[#b1cdb7]/30 bg-[#2d4535]/10 shadow-xl' : 'border-[#424843] bg-[#131412]/50'}`}>
                    <div className="flex justify-between items-center">
-                      <span className="text-3xl font-black text-[#1E3A8A] font-headline-md uppercase italic tracking-tighter leading-none group-hover/node:text-[#4169E1] transition-colors">{platform.name}</span>
-                      {account ? <CheckCircle2 size={24} className="text-success" /> : <AlertCircle size={24} className="text-on-surface-variant/20" />}
+                      <span className="text-3xl font-bold text-[#e4e2e0] font-headline-md uppercase italic tracking-tighter leading-none group-hover/node:text-[#b1cdb7] transition-colors">{platform.name}</span>
+                      {account ? <CheckCircle2 size={24} className="text-[#b1cdb7]" /> : <AlertCircle size={24} className="text-[#8c928c]/20" />}
                    </div>
                    <div className="space-y-3">
-                      <span className="font-mono text-[10px] text-on-surface-variant uppercase font-black tracking-widest italic opacity-40">SECTOR_STATUS</span>
-                      <p className={`font-mono text-[11px] font-black uppercase italic tracking-widest ${account ? 'text-success' : 'text-on-surface-variant/40'}`}>
+                      <span className="font-label-sm text-[10px] text-[#8c928c] uppercase font-bold tracking-widest italic opacity-40">SECTOR_STATUS</span>
+                      <p className={`font-label-sm text-[11px] font-bold uppercase italic tracking-widest ${account ? 'text-[#b1cdb7]' : 'text-[#8c928c]/40'}`}>
                          {account ? 'ONLINE_ACTIVE' : 'SECTOR_IDLE'}
                       </p>
                    </div>
-                   <button className={`w-full py-5 text-[11px] font-black uppercase italic border rounded-2xl transition-all tracking-[0.3em] ${
-                     account ? 'border-success/30 text-success hover:bg-success hover:text-white' : 'border-outline text-on-surface-variant/40 hover:border-[#4169E1] hover:text-[#4169E1]'
+                   <button className={`w-full py-5 text-[11px] font-bold uppercase italic border rounded-soft-lg transition-all tracking-[0.3em] font-label-sm ${
+                     account ? 'border-[#b1cdb7]/30 text-[#b1cdb7] hover:bg-[#b1cdb7] hover:text-[#1d3526]' : 'border-[#424843] text-[#8c928c]/40 hover:border-[#b1cdb7] hover:text-[#b1cdb7]'
                    }`}>
                       {account ? 'Manage' : 'Link Node'}
                    </button>
@@ -113,24 +113,24 @@ export default function Archive() {
 
       <section className="flex flex-col md:flex-row gap-8">
          <div className="relative flex-1 group">
-            <div className="absolute left-8 top-1/2 -translate-y-1/2 text-on-surface-variant/30 group-focus-within:text-[#4169E1] transition-colors">
+            <div className="absolute left-8 top-1/2 -translate-y-1/2 text-[#8c928c]/30 group-focus-within:text-[#b1cdb7] transition-colors">
               <Search size={28} />
             </div>
             <input 
               type="text" 
               placeholder="Search_Historical_Clusters..."
-              className="w-full bg-surface border border-outline py-8 pl-20 pr-10 rounded-[2rem] text-sm text-[#1E3A8A] focus:outline-none focus:border-[#4169E1]/50 transition-all font-mono uppercase font-black tracking-widest placeholder:text-[#1E3A8A]/10 shadow-sm"
+              className="w-full bg-[#1b1c1a] border border-[#424843] py-8 pl-20 pr-10 rounded-soft-xl text-[14px] text-[#e4e2e0] focus:outline-none focus:border-[#b1cdb7]/50 transition-all font-label-sm uppercase font-bold tracking-widest placeholder:text-[#e4e2e0]/5 shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
          </div>
-         <div className="flex bg-surface border border-outline p-3 rounded-[2rem] gap-3 shadow-sm">
+         <div className="flex bg-[#1b1c1a] border border-[#424843] p-3 rounded-soft-xl gap-3 shadow-sm">
             {['ALL', 'TIKTOK', 'REELS', 'SHORTS'].map(p => (
               <button
                 key={p}
                 onClick={() => setSelectedPlatform(p)}
-                className={`px-12 py-5 font-black uppercase italic text-[11px] rounded-2xl transition-all tracking-[0.3em] ${
-                  selectedPlatform === p ? 'bg-[#4169E1] text-white shadow-xl shadow-[#4169E1]/30' : 'text-on-surface-variant hover:text-[#4169E1] hover:bg-surface-container'
+                className={`px-12 py-5 font-bold uppercase italic text-[11px] rounded-soft-lg transition-all tracking-[0.3em] font-label-sm ${
+                  selectedPlatform === p ? 'bg-[#b1cdb7] text-[#1d3526] shadow-xl shadow-[#b1cdb7]/10' : 'text-[#8c928c] hover:text-[#b1cdb7] hover:bg-[#1f201e]'
                 }`}
               >
                 {p}
@@ -148,13 +148,13 @@ export default function Archive() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-surface border border-outline rounded-[3.5rem] group overflow-hidden relative shadow-sm hover:border-[#4169E1]/30 transition-all duration-500 hover:shadow-2xl hover:shadow-[#4169E1]/5"
+              className="bg-[#1b1c1a] border border-[#424843] rounded-soft-xl group overflow-hidden relative shadow-sm hover:border-[#b1cdb7]/30 transition-all duration-500 hover:shadow-2xl"
             >
-               <div className="aspect-[9/16] bg-[#0F172A] relative overflow-hidden group/media">
+               <div className="aspect-[9/16] bg-[#0d0e0d] relative overflow-hidden group/media">
                   {video.video_url ? (
                     <video 
                       src={video.video_url} 
-                      className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 ease-[0.22, 1, 0.36, 1]"
+                      className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 ease-[0.22, 1, 0.36, 1]"
                       onMouseOver={e => e.currentTarget.play()}
                       onMouseOut={e => {
                         e.currentTarget.pause();
@@ -164,27 +164,27 @@ export default function Archive() {
                       loop
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-14 text-center bg-[#0F172A]">
+                    <div className="w-full h-full flex flex-col items-center justify-center p-14 text-center bg-[#0d0e0d]">
                       {video.status === 'failed' ? (
                         <div className="space-y-6">
-                          <AlertCircle className="text-error mx-auto shadow-[0_0_20px_rgba(239,68,68,0.3)]" size={64} />
-                          <p className="font-mono text-[11px] text-error/60 uppercase tracking-[0.5em] italic font-black">Node_Failure</p>
+                          <AlertCircle className="text-[#ffb4ab] mx-auto shadow-[0_0_20px_rgba(255,180,171,0.2)]" size={64} />
+                          <p className="font-label-sm text-[11px] text-[#ffb4ab]/60 uppercase tracking-[0.5em] italic font-bold">Node_Failure</p>
                         </div>
                       ) : (
                         <div className="space-y-10 w-full">
                           <div className="relative">
-                             <Box size={64} className="text-[#4169E1] mx-auto animate-pulse opacity-20" />
-                             <Activity size={32} className="absolute inset-0 m-auto text-[#4169E1] animate-spin-slow" />
+                             <Box size={64} className="text-[#b1cdb7] mx-auto animate-mist opacity-20" />
+                             <Activity size={32} className="absolute inset-0 m-auto text-[#b1cdb7] animate-spin-slow" />
                           </div>
                           <div className="space-y-4">
-                            <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                            <div className="h-1.5 w-full bg-[#1b1c1a] border border-[#424843] rounded-full overflow-hidden shadow-inner">
                               <motion.div 
                                 initial={{ width: 0 }}
                                 animate={{ width: `${video.progress || 0}%` }}
-                                className="h-full bg-[#4169E1] shadow-[0_0_20px_#4169E1]"
+                                className="h-full bg-[#b1cdb7] shadow-[0_0_15px_#b1cdb7]"
                               />
                             </div>
-                            <p className="font-mono text-[10px] text-[#4169E1] animate-pulse uppercase tracking-[0.4em] italic font-black">
+                            <p className="font-label-sm text-[10px] text-[#b1cdb7] animate-pulse uppercase tracking-[0.4em] italic font-bold">
                                 {video.sub_status || 'Synthesizing...'}
                             </p>
                           </div>
@@ -194,17 +194,17 @@ export default function Archive() {
                   )}
                   
                   <div className="absolute top-8 left-8 right-8 flex justify-between items-start z-20">
-                     <span className="px-5 py-2 bg-[#4169E1] text-white font-black text-[11px] uppercase italic rounded-xl shadow-2xl shadow-[#4169E1]/30 tracking-widest">
+                     <span className="px-5 py-2 bg-[#2d4535] border border-[#b1cdb7]/20 text-[#b1cdb7] font-bold text-[11px] uppercase italic rounded-soft-lg shadow-2xl tracking-widest font-label-sm">
                         {video.platform || 'ASSET'}
                      </span>
                   </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 p-10 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/90 to-transparent z-20 transform translate-y-20 group-hover:translate-y-0 transition-transform duration-700 ease-[0.22, 1, 0.36, 1]">
+                  <div className="absolute bottom-0 left-0 right-0 p-10 bg-gradient-to-t from-[#0d0e0d] via-[#0d0e0d]/90 to-transparent z-20 transform translate-y-20 group-hover:translate-y-0 transition-transform duration-700 ease-[0.22, 1, 0.36, 1]">
                      <div className="flex justify-between items-center mb-4">
-                        <span className="font-mono text-[10px] text-success uppercase font-black italic tracking-[0.3em]">{video.status || 'PUBLISHED'}</span>
-                        <span className="font-mono text-[10px] text-white/20 uppercase font-black italic">{new Date(video.created_at).toLocaleDateString()}</span>
+                        <span className="font-label-sm text-[10px] text-[#b1cdb7] uppercase font-bold italic tracking-[0.3em]">{video.status || 'PUBLISHED'}</span>
+                        <span className="font-label-sm text-[10px] text-[#8c928c] uppercase font-bold italic opacity-40">{new Date(video.created_at).toLocaleDateString()}</span>
                      </div>
-                     <h3 className="text-3xl font-black text-white font-headline-md uppercase italic truncate mb-10 group-hover:text-[#4169E1] transition-colors duration-500 leading-none tracking-tighter">
+                     <h3 className="text-2xl font-bold text-[#e4e2e0] font-headline-md uppercase italic truncate mb-10 group-hover:text-[#b1cdb7] transition-colors duration-500 leading-none tracking-tighter">
                         {video.title || video.topic || 'NEURAL_RENDER'}
                      </h3>
                      
@@ -215,11 +215,11 @@ export default function Archive() {
                             const success = await retryProduction(video.id);
                             if (success) alert('🔄 RETRY_INITIATED');
                           }}
-                          className="py-5 bg-white/5 border border-white/10 text-white/60 font-black uppercase italic text-[11px] hover:bg-white/10 hover:text-white transition-all rounded-2xl flex items-center justify-center gap-4 tracking-[0.2em]"
+                          className="py-5 bg-[#131412]/60 border border-[#424843] text-[#8c928c] font-bold uppercase italic text-[11px] hover:bg-[#1b1c1a] hover:text-[#b1cdb7] transition-all rounded-soft-lg flex items-center justify-center gap-4 tracking-[0.2em] font-label-sm"
                         >
                            <RefreshCcw size={18} /> Retry
                         </button>
-                        <button className="py-5 bg-[#4169E1] text-white font-black uppercase italic text-[11px] hover:brightness-110 transition-all rounded-2xl flex items-center justify-center gap-4 tracking-[0.2em] shadow-xl shadow-[#4169E1]/20">
+                        <button className="py-5 bg-[#b1cdb7] text-[#1d3526] font-bold uppercase italic text-[11px] hover:brightness-110 transition-all rounded-soft-lg flex items-center justify-center gap-4 tracking-[0.2em] shadow-xl shadow-[#b1cdb7]/10 font-label-sm">
                            <Share2 size={18} /> Repost
                         </button>
                      </div>

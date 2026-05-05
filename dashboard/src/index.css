@@ -1,39 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&family=Be+Vietnam+Pro:wght@400;500;700&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Core Palette (Premium Light Mode) */
-  --background: #fdfdfd;
-  --surface: #ffffff;
-  --surface-container: #f8fafc;
-  --surface-container-low: #ffffff;
+  /* Videomill Identity - The Naturalist Studio */
+  --background: #131412;
+  --surface: #131412;
+  --surface-dim: #131412;
+  --surface-bright: #393938;
+  --surface-container-lowest: #0d0e0d;
+  --surface-container-low: #1b1c1a;
+  --surface-container: #1f201e;
+  --surface-container-high: #292a29;
+  --surface-container-highest: #343533;
   
-  /* Royal Blue Identity */
-  --primary: #4169E1;
-  --primary-container: #4169E1;
-  --on-primary-container: #ffffff;
+  --on-surface: #e4e2e0;
+  --on-surface-variant: #c2c8c1;
+  --inverse-surface: #e4e2e0;
+  --inverse-on-surface: #30312f;
   
-  /* Deep Navy Accents */
-  --secondary: #1E3A8A;
-  --secondary-container: #1E3A8A;
+  --outline: #8c928c;
+  --outline-variant: #424843;
   
-  --on-surface: #0f172a;
-  /* Improved contrast for gray text */
-  --on-surface-variant: #475569; 
+  --primary: #b1cdb7;
+  --on-primary: #1d3526;
+  --primary-container: #2d4535;
+  --on-primary-container: #97b29d;
+  --inverse-primary: #4b6452;
   
-  --outline: #e2e8f0;
-  --error: #ef4444;
-  --success: #10b981;
+  --secondary: #bec9bf;
+  --on-secondary: #29332c;
+  --secondary-container: #414c44;
+  --on-secondary-container: #b0bbb1;
   
-  --grid-color: rgba(65, 105, 225, 0.03);
+  --tertiary: #e9bbbe;
+  --on-tertiary: #46282b;
+  --tertiary-container: #57373a;
+  --on-tertiary-container: #cca1a4;
+  
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+  
+  --success: #b1cdb7; /* Mapping success to primary green for theme consistency */
+  
+  --grid-color: rgba(177, 205, 183, 0.03);
 }
 
 /* Custom Font Utilities */
+.font-headline-lg {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
 .font-headline-md {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.font-body-lg {
   font-family: 'Epilogue', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.font-body-md {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.font-label-sm {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.05em;
 }
 
 body {
@@ -41,66 +94,53 @@ body {
   background-image: 
     linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 80px 80px;
+  background-size: 40px 40px;
   color: var(--on-surface);
-  font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
+  font-family: 'Epilogue', sans-serif;
   -webkit-font-smoothing: antialiased;
   margin: 0;
   overflow-x: hidden;
 }
 
-/* High-Contrast Technical Text Utility */
-.tech-text-sm {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--on-surface-variant);
-}
+/* Rounded Utilities */
+.rounded-soft-sm { border-radius: 0.125rem; }
+.rounded-soft { border-radius: 0.25rem; }
+.rounded-soft-md { border-radius: 0.375rem; }
+.rounded-soft-lg { border-radius: 0.5rem; }
+.rounded-soft-xl { border-radius: 0.75rem; }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--background); }
-::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; border: 2px solid var(--background); }
+::-webkit-scrollbar-thumb { background: var(--surface-container-highest); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
+/* Layout Utilities */
+.panel-naturalist {
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: 0.5rem;
+}
+
 /* Animations */
-@keyframes radar-sweep {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes pulse-mist {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
 }
 
-.animate-radar {
-  animation: radar-sweep 15s linear infinite;
+.animate-mist {
+  animation: pulse-mist 4s ease-in-out infinite;
 }
 
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 30s linear infinite;
-}
-
-/* Glow Utilities */
-.shadow-royal {
-  box-shadow: 0 10px 40px -10px rgba(65, 105, 225, 0.3);
-}
-
-.shadow-navy {
-  box-shadow: 0 10px 40px -10px rgba(30, 58, 138, 0.3);
-}
-
-/* Custom Scrollbar for Inner Containers */
+/* Inner Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
+  height: 4px;
+  width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--outline);
-  border-radius: 10px;
+  background: var(--outline-variant);
+  border-radius: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--primary);

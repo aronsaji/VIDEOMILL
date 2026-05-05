@@ -1,404 +1,240 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Zap, TrendingUp, Globe, Activity, 
-  AlertCircle, Clock, ExternalLink, 
-  Plus, Radar, Target, Cpu, Search,
-  Filter, ArrowUpRight, Hash, Users,
-  Flame, Tag, Check, X
+  TrendingUp, Search, Globe, MessageSquare, 
+  ArrowUpRight, BarChart3, Clock, Zap,
+  Activity, Filter, Languages, Target, ChevronRight
 } from 'lucide-react';
-import { usePipelineStore } from '../store/pipelineStore';
-import { useI18nStore } from '../store/i18nStore';
-import { triggerProduction } from '../lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePipelineStore } from '../store/pipelineStore';
 import { supabase } from '../lib/supabase';
+import { useI18nStore } from '../store/i18nStore';
 
 export default function TrendAnalyzer() {
-  const { trends, isLoading, fetchTrends, fetchFilterOptions, uniqueCountries, uniqueLanguages } = usePipelineStore();
   const { t } = useI18nStore();
-  
-  // Multiple selection states
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['ALL']);
-  const [selectedCountries, setSelectedCountries] = useState<string[]>(['ALL']);
-  
-  const [lastDispatched, setLastDispatched] = useState<string | null>(null);
+  const { trends, fetchTrends, generateFromTrend } = usePipelineStore();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCountries, setSelectedCountries] = useState<string[]>(['US']);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['en']);
+  const [isGenerating, setIsGenerating] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchFilterOptions();
-  }, [fetchFilterOptions]);
+    fetchTrends(selectedCountries, selectedLanguages);
+  }, [selectedCountries, selectedLanguages]);
 
-  useEffect(() => {
-    fetchTrends(
-      selectedCountries,
-      selectedLanguages
+  const toggleCountry = (id: string) => {
+    setSelectedCountries(prev => 
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
-  }, [selectedCountries, selectedLanguages, fetchTrends]);
-
-  // Auto-seed if empty
-  useEffect(() => {
-    if (!isLoading && trends.length === 0 && selectedCountries.includes('ALL') && selectedLanguages.includes('ALL')) {
-      initiateRecon();
-    }
-  }, [isLoading, trends, selectedCountries, selectedLanguages]);
-
-  const toggleCountry = (country: string) => {
-    if (country === 'ALL') {
-      setSelectedCountries(['ALL']);
-      return;
-    }
-
-    setSelectedCountries(prev => {
-      const filtered = prev.filter(c => c !== 'ALL');
-      if (filtered.includes(country)) {
-        const next = filtered.filter(c => c !== country);
-        return next.length === 0 ? ['ALL'] : next;
-      } else {
-        return [...filtered, country];
-      }
-    });
   };
 
-  const toggleLanguage = (lang: string) => {
-    if (lang === 'ALL') {
-      setSelectedLanguages(['ALL']);
-      return;
-    }
-
-    setSelectedLanguages(prev => {
-      const filtered = prev.filter(l => l !== 'ALL');
-      if (filtered.includes(lang)) {
-        const next = filtered.filter(l => l !== lang);
-        return next.length === 0 ? ['ALL'] : next;
-      } else {
-        return [...filtered, lang];
-      }
-    });
+  const toggleLanguage = (id: string) => {
+    setSelectedLanguages(prev => 
+      prev.includes(id) ? prev.filter(l => l !== id) : [...prev, id]
+    );
   };
 
-  const handleDispatch = async (trend: any) => {
-    const success = await triggerProduction({
-      action: 'viranode-generate',
-      topic: trend.title,
-      language: trend.language || 'en',
-      platform: trend.platform,
-      title: trend.title,
-      category: trend.category,
-      target_audience: trend.target_audience,
-      heat_level: trend.heat_level,
-      tags: trend.tags,
-      source: 'TREND_RADAR'
-    });
+  const countries = [
+    { id: 'US', name: 'USA', flag: '🇺🇸' },
+    { id: 'NO', name: 'Norge', flag: '🇳🇴' },
+    { id: 'IN-TA', name: 'India (Tamil)', flag: '🇮🇳' },
+    { id: 'IN-HI', name: 'India (Hindi)', flag: '🇮🇳' },
+    { id: 'FR', name: 'Frankrike', flag: '🇫🇷' },
+    { id: 'UK', name: 'UK', flag: '🇬🇧' },
+  ];
 
-    if (success) {
-      setLastDispatched(trend.id);
-      setTimeout(() => setLastDispatched(null), 3000);
+  const languages = [
+    { id: 'en', name: 'English' },
+    { id: 'no', name: 'Norsk' },
+    { id: 'ta', name: 'Tamil' },
+    { id: 'hi', name: 'Hindi' },
+    { id: 'fr', name: 'Français' },
+  ];
+
+  const filteredTrends = (trends || []).filter(trend => 
+    trend.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    trend.hashtags?.some((h: string) => h.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const handleGenerate = async (trend: any) => {
+    setIsGenerating(trend.id);
+    try {
+      await generateFromTrend(trend);
+    } finally {
+      setIsGenerating(null);
     }
-  };
-
-  const initiateRecon = async () => {
-    const newTrends = [
-      { 
-        title: "La Cuisine Française: Top 5 Classics", 
-        platform: "TikTok",
-        growth_stat: "+142% SEASON_SPIKE", 
-        viral_score: 95, 
-        country: "France", 
-        language: "fr",
-        category: "Cuisine",
-        heat_level: "HIGH",
-        target_audience: "Foodies (France)",
-        tags: ["la cuisine française", "france", "cuisine"],
-        active: true
-      },
-      { 
-        title: "AI Video Revolution: Sora vs Kling", 
-        platform: "YouTube",
-        growth_stat: "+125% GLOBAL_GAIN", 
-        viral_score: 98, 
-        country: "Global", 
-        language: "en",
-        category: "Technology",
-        heat_level: "NUCLEAR",
-        target_audience: "Tech Enthusiasts",
-        tags: ["AI", "Sora", "Future"],
-        active: true
-      },
-      { 
-        title: "Norsk Friluftsliv: Vinterguide", 
-        platform: "Instagram",
-        growth_stat: "+88% LOCAL_TREND", 
-        viral_score: 89, 
-        country: "Norway", 
-        language: "no",
-        category: "Lifestyle",
-        heat_level: "NORMAL",
-        target_audience: "Nature Lovers",
-        tags: ["norge", "friluftsliv", "vinter"],
-        active: true
-      },
-      { 
-        title: "Bollywood Beats: Tamil Remix", 
-        platform: "YouTube",
-        growth_stat: "+310% HYPER_GROWTH", 
-        viral_score: 99, 
-        country: "India", 
-        language: "ta",
-        category: "Music",
-        heat_level: "EXTREME",
-        target_audience: "Gen-Z India",
-        tags: ["india", "tamil", "remix"],
-        active: true
-      },
-      { 
-        title: "Hindi Web-Series: The New Era", 
-        platform: "Facebook",
-        growth_stat: "+22% INCREASE_SEASON", 
-        viral_score: 91, 
-        country: "India", 
-        language: "hi",
-        category: "Entertainment",
-        heat_level: "HIGH",
-        target_audience: "Hindi Viewers",
-        tags: ["india", "hindi", "webseries"],
-        active: true
-      }
-    ];
-
-    const { error } = await supabase.from('trending_topics').insert(newTrends);
-    if (error) {
-      console.error('Error seeding trends:', error);
-    } else {
-      fetchTrends();
-    }
-  };
-
-  const getHeatColor = (level: string) => {
-    const l = level?.toUpperCase();
-    if (l === 'NUCLEAR' || l === 'EXTREME') return 'text-error bg-error/10 border-error/20';
-    if (l === 'HIGH') return 'text-orange-600 bg-orange-50 border-orange-200';
-    return 'text-primary bg-primary/10 border-primary/20';
   };
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-      <header className="flex justify-between items-center border-b border-outline pb-10">
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-10 border-b border-[#424843] pb-10">
         <div>
-          <h1 className="text-5xl font-black text-[#1E3A8A] font-headline-md tracking-tighter italic uppercase leading-none">{t('TREND_RADAR')}</h1>
-          <p className="text-on-surface-variant mt-3 font-mono text-[11px] uppercase font-black tracking-widest italic opacity-60">Neural Intercept // Multi-Sector Analysis Active</p>
+          <div className="flex items-center gap-4 text-[#b1cdb7] font-label-sm text-[11px] font-bold uppercase tracking-[0.4em] mb-4 italic">
+            <Activity size={18} className="animate-pulse" />
+            GLOBAL_NEURAL_MONITOR_v4
+          </div>
+          <h1 className="font-headline-lg text-[#e4e2e0] uppercase italic tracking-tighter leading-none">
+            {t('TREND_RADAR')}
+          </h1>
         </div>
-        <div className="flex gap-4">
-           <button 
-             onClick={initiateRecon}
-             className="flex items-center gap-3 px-8 py-4 bg-surface border border-outline rounded-2xl text-[11px] font-black uppercase tracking-widest text-[#1E3A8A] hover:bg-surface-container transition-all font-mono shadow-sm"
-           >
-             <Radar size={16} className="animate-spin-slow text-[#4169E1]" />
-             Initiate Recon
-           </button>
+        <div className="flex gap-6 w-full lg:w-auto">
+          <div className="relative flex-1 lg:w-96 group">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#8c928c] group-focus-within:text-[#b1cdb7] transition-colors" size={20} />
+            <input 
+              type="text" 
+              placeholder="Intercept trends..."
+              className="w-full bg-[#1b1c1a] border border-[#424843] py-5 pl-16 pr-8 rounded-soft-lg text-[13px] text-[#e4e2e0] focus:ring-1 focus:ring-[#b1cdb7]/30 focus:border-[#b1cdb7] outline-none font-label-sm placeholder:text-[#8c928c]/20 transition-all font-bold tracking-widest"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
       </header>
 
-      {/* Filter Matrix - Multi-Select Support */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="p-10 bg-surface border border-outline rounded-[2.5rem] space-y-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-[#4169E1]">
-              <Target size={18} />
-              <span className="text-xs font-black uppercase tracking-widest">Geospatial Targeting</span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* Intelligence Controls - Panel System */}
+        <aside className="lg:col-span-3 space-y-10">
+          <section className="bg-[#1b1c1a] border border-[#424843] p-10 rounded-soft-xl space-y-10 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#b1cdb7]/5 blur-[40px] rounded-full" />
+            
+            <div className="space-y-8 relative z-10">
+               <div className="flex items-center gap-4 text-[#b1cdb7]">
+                  <Globe size={22} />
+                  <h3 className="font-label-sm text-[12px] font-bold uppercase tracking-[0.2em] italic">Geospatial_Targeting</h3>
+               </div>
+               <div className="flex flex-col gap-3">
+                  {countries.map(country => (
+                    <button
+                      key={country.id}
+                      onClick={() => toggleCountry(country.id)}
+                      className={`flex items-center justify-between p-4 rounded-soft border transition-all font-label-sm group/btn ${
+                        selectedCountries.includes(country.id)
+                          ? 'bg-[#2d4535] border-[#b1cdb7]/30 text-[#b1cdb7]'
+                          : 'bg-[#131412] border-[#424843] text-[#8c928c] hover:border-[#b1cdb7]/40'
+                      }`}
+                    >
+                      <span className="flex items-center gap-4">
+                        <span className="grayscale opacity-60 group-hover/btn:grayscale-0 group-hover/btn:opacity-100 transition-all text-lg">{country.flag}</span>
+                        <span className="text-[11px] font-bold uppercase tracking-widest">{country.name}</span>
+                      </span>
+                      {selectedCountries.includes(country.id) && <div className="w-1.5 h-1.5 rounded-full bg-[#b1cdb7] shadow-[0_0_8px_#b1cdb7]" />}
+                    </button>
+                  ))}
+               </div>
             </div>
-            <span className="font-mono text-[9px] font-black uppercase text-on-surface-variant/40">Multi_Select Enabled</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => toggleCountry('ALL')}
-              className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border flex items-center gap-2 ${
-                selectedCountries.includes('ALL') ? 'bg-[#4169E1] text-white border-[#4169E1] shadow-lg shadow-[#4169E1]/20' : 'bg-surface-container text-on-surface-variant border-outline hover:border-[#4169E1] hover:text-[#4169E1]'
-              }`}
-            >
-              {selectedCountries.includes('ALL') && <Check size={12} />}
-              Global
-            </button>
-            {['USA', 'Norway', 'India', 'France', 'UK'].map(c => (
-              <button
-                key={c}
-                onClick={() => toggleCountry(c)}
-                className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border flex items-center gap-2 ${
-                  selectedCountries.includes(c) ? 'bg-[#4169E1] text-white border-[#4169E1] shadow-lg shadow-[#4169E1]/20' : 'bg-surface-container text-on-surface-variant border-outline hover:border-[#4169E1] hover:text-[#4169E1]'
-                }`}
-              >
-                {selectedCountries.includes(c) && <Check size={12} />}
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        <div className="p-10 bg-surface border border-outline rounded-[2.5rem] space-y-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-[#4169E1]">
-              <Cpu size={18} />
-              <span className="text-xs font-black uppercase tracking-widest">Linguistic Decode</span>
+            <div className="space-y-8 relative z-10 pt-10 border-t border-[#424843]">
+               <div className="flex items-center gap-4 text-[#bec9bf]">
+                  <Languages size={22} />
+                  <h3 className="font-label-sm text-[12px] font-bold uppercase tracking-[0.2em] italic">Linguistic_Decode</h3>
+               </div>
+               <div className="flex flex-col gap-3">
+                  {languages.map(lang => (
+                    <button
+                      key={lang.id}
+                      onClick={() => toggleLanguage(lang.id)}
+                      className={`flex items-center justify-between p-4 rounded-soft border transition-all font-label-sm group/btn ${
+                        selectedLanguages.includes(lang.id)
+                          ? 'bg-[#414c44] border-[#bec9bf]/30 text-[#bec9bf]'
+                          : 'bg-[#131412] border-[#424843] text-[#8c928c] hover:border-[#bec9bf]/40'
+                      }`}
+                    >
+                      <span className="text-[11px] font-bold uppercase tracking-widest">{lang.name}</span>
+                      {selectedLanguages.includes(lang.id) && <div className="w-1.5 h-1.5 rounded-full bg-[#bec9bf] shadow-[0_0_8px_#bec9bf]" />}
+                    </button>
+                  ))}
+               </div>
             </div>
-            <span className="font-mono text-[9px] font-black uppercase text-on-surface-variant/40">Multi_Select Enabled</span>
+          </section>
+
+          <div className="p-8 bg-[#b1cdb7]/5 border border-[#b1cdb7]/10 rounded-soft-xl">
+             <div className="flex items-center gap-4 mb-4">
+                <Target size={18} className="text-[#b1cdb7]" />
+                <span className="font-label-sm text-[10px] font-bold uppercase tracking-widest text-[#b1cdb7] italic">Neural_Focus</span>
+             </div>
+             <p className="font-body-md text-[13px] text-[#8c928c] leading-relaxed italic">
+               Currently monitoring <span className="text-[#b1cdb7] font-bold">{selectedCountries.length}</span> sectors with <span className="text-[#b1cdb7] font-bold">{selectedLanguages.length}</span> linguistic interceptors active.
+             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => toggleLanguage('ALL')}
-              className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border flex items-center gap-2 ${
-                selectedLanguages.includes('ALL') ? 'bg-[#4169E1] text-white border-[#4169E1] shadow-lg shadow-[#4169E1]/20' : 'bg-surface-container text-on-surface-variant border-outline hover:border-[#4169E1] hover:text-[#4169E1]'
-              }`}
-            >
-              {selectedLanguages.includes('ALL') && <Check size={12} />}
-              All Signals
-            </button>
-            {['en', 'no', 'ta', 'hi', 'fr'].map(l => (
-              <button
-                key={l}
-                onClick={() => toggleLanguage(l)}
-                className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border flex items-center gap-2 ${
-                  selectedLanguages.includes(l) ? 'bg-[#4169E1] text-white border-[#4169E1] shadow-lg shadow-[#4169E1]/20' : 'bg-surface-container text-on-surface-variant border-outline hover:border-[#4169E1] hover:text-[#4169E1]'
-                }`}
-              >
-                {selectedLanguages.includes(l) && <Check size={12} />}
-                {l.toUpperCase()}
-              </button>
-            ))}
+        </aside>
+
+        {/* Trend Feed */}
+        <div className="lg:col-span-9 space-y-10">
+          <div className="flex items-center justify-between px-6">
+            <div className="flex items-center gap-6">
+               <h2 className="text-2xl font-bold text-[#e4e2e0] font-headline-md italic uppercase tracking-tighter">Live_Signal_Feed</h2>
+               <div className="px-4 py-1.5 bg-[#1b1c1a] border border-[#424843] rounded-soft-sm font-label-sm text-[10px] text-[#b1cdb7] font-bold uppercase italic tracking-widest">
+                 {filteredTrends.length} Clusters Found
+               </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <AnimatePresence mode="popLayout">
+              {filteredTrends.map((trend, i) => (
+                <motion.div
+                  key={trend.id || i}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="bg-[#1b1c1a] border border-[#424843] p-10 rounded-soft-xl space-y-8 group hover:border-[#b1cdb7]/40 transition-all shadow-sm relative overflow-hidden"
+                >
+                  <div className="flex justify-between items-start relative z-10">
+                    <div className="p-3 bg-[#b1cdb7]/10 border border-[#b1cdb7]/20 rounded-soft text-[#b1cdb7]">
+                      <TrendingUp size={20} />
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                       <span className="font-label-sm text-[10px] text-[#b1cdb7] font-bold uppercase tracking-[0.2em] italic">Impact_Score</span>
+                       <span className="text-2xl font-bold text-[#e4e2e0] font-headline-md italic">{trend.score || '92.4'}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 relative z-10">
+                    <h3 className="text-xl font-bold text-[#e4e2e0] uppercase italic tracking-tight group-hover:text-[#b1cdb7] transition-colors leading-tight">
+                      {trend.topic}
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {trend.hashtags?.map((tag: string) => (
+                        <span key={tag} className="font-label-sm text-[10px] text-[#8c928c] uppercase font-bold italic opacity-60">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-8 border-t border-[#424843] flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-4">
+                      <div className="flex -space-x-3">
+                        {[1, 2, 3].map(j => (
+                          <div key={j} className="w-8 h-8 rounded-full bg-[#131412] border-2 border-[#1b1c1a] flex items-center justify-center overflow-hidden">
+                             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${trend.topic}-${j}`} alt="" className="w-full h-full object-cover opacity-60" />
+                          </div>
+                        ))}
+                      </div>
+                      <span className="font-label-sm text-[10px] text-[#8c928c] uppercase font-bold italic">Cluster_Active</span>
+                    </div>
+                    <button 
+                      onClick={() => handleGenerate(trend)}
+                      disabled={isGenerating === trend.id}
+                      className={`flex items-center gap-4 px-6 py-4 rounded-soft-lg font-label-sm text-[11px] font-bold uppercase tracking-widest transition-all italic ${
+                        isGenerating === trend.id
+                          ? 'bg-[#1b1c1a] border border-[#424843] text-[#8c928c] cursor-not-allowed'
+                          : 'bg-[#2d4535] text-[#b1cdb7] border border-[#b1cdb7]/20 hover:bg-[#b1cdb7] hover:text-[#1d3526]'
+                      }`}
+                    >
+                      {isGenerating === trend.id ? (
+                        <>In_Production <Activity size={14} className="animate-spin" /></>
+                      ) : (
+                        <>Forge_Order <ArrowUpRight size={14} /></>
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
       </div>
-
-      {/* Trends Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-80 bg-surface-container/50 animate-pulse rounded-[2.5rem] border border-outline" />
-          ))}
-        </div>
-      ) : trends.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          <AnimatePresence mode="popLayout">
-            {trends.map((trend, idx) => (
-              <motion.div
-                key={trend.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="group p-10 bg-surface border border-outline rounded-[3rem] hover:border-[#4169E1]/40 transition-all flex flex-col shadow-sm hover:shadow-2xl relative overflow-hidden"
-              >
-                <div className="flex justify-between items-start mb-8">
-                  <div className="flex flex-col gap-3">
-                    <div className="px-4 py-1.5 bg-surface-container border border-outline text-on-surface-variant text-[10px] font-black uppercase tracking-widest rounded-full w-fit">
-                      {trend.category || 'Viral Signal'}
-                    </div>
-                    <div className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full w-fit flex items-center gap-2 border ${getHeatColor(trend.heat_level)}`}>
-                       <Flame size={12} />
-                       {trend.heat_level || 'Normal'}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-on-surface-variant font-black uppercase tracking-widest leading-none mb-2 opacity-60">Viral Score</p>
-                    <p className="text-4xl font-black text-[#1E3A8A] font-headline-md italic leading-none">{trend.viral_score}%</p>
-                  </div>
-                </div>
-
-                <h3 className="text-3xl font-black text-[#1E3A8A] font-headline-md uppercase italic tracking-tighter leading-tight mb-8 group-hover:text-[#4169E1] transition-colors min-h-[4rem]">
-                  {trend.title}
-                </h3>
-
-                <div className="grid grid-cols-1 gap-6 mb-10">
-                   <div className="flex items-center gap-4 text-on-surface-variant">
-                      <div className="p-3 bg-surface-container border border-outline rounded-2xl text-[#4169E1]">
-                        <Users size={18} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-black tracking-widest opacity-40 mb-1">Audience Segment</span>
-                        <span className="text-[13px] font-mono text-[#1E3A8A] font-black uppercase italic">{trend.target_audience || 'Universal'}</span>
-                      </div>
-                   </div>
-                   <div className="flex items-center gap-4 text-on-surface-variant">
-                      <div className="p-3 bg-surface-container border border-outline rounded-2xl text-[#4169E1]">
-                        <Globe size={18} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-black tracking-widest opacity-40 mb-1">Language / Geo</span>
-                        <span className="text-[13px] font-mono text-[#1E3A8A] font-black uppercase italic">{trend.language || 'EN'} / {trend.country || 'USA'}</span>
-                      </div>
-                   </div>
-                </div>
-
-                {trend.tags && trend.tags.length > 0 && (
-                   <div className="flex flex-wrap gap-2 mb-10">
-                      {trend.tags.slice(0, 3).map((tag: string) => (
-                        <span key={tag} className="text-[11px] font-black text-[#4169E1] uppercase tracking-widest bg-[#4169E1]/5 px-3 py-1.5 rounded-xl border border-[#4169E1]/20 italic">
-                           #{tag}
-                        </span>
-                      ))}
-                   </div>
-                )}
-
-                <div className="mt-auto space-y-8">
-                  <div className="flex justify-between items-center text-[12px] font-mono text-on-surface-variant uppercase font-black">
-                    <div className="flex items-center gap-3">
-                      <TrendingUp size={18} className="text-success animate-bounce" />
-                      <span className="text-success font-black italic">{trend.growth_stat || 'Volatile'}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-[#4169E1]">
-                      <Hash size={18} />
-                      <span className="font-black italic">{trend.platform}</span>
-                    </div>
-                  </div>
-
-                  <div className="w-full h-2 bg-surface-container border border-outline rounded-full overflow-hidden shadow-inner">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${trend.viral_score}%` }}
-                      className="h-full bg-[#4169E1] shadow-[0_0_15px_rgba(65,105,225,0.4)]"
-                    />
-                  </div>
-
-                  <div className="flex gap-4">
-                    <button 
-                      onClick={() => handleDispatch(trend)}
-                      className="flex-1 py-6 bg-[#4169E1] text-white font-headline-md text-sm font-black uppercase tracking-[0.2em] rounded-2xl hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-4 shadow-xl shadow-[#4169E1]/20"
-                    >
-                      <Plus size={20} />
-                      {t('INITIATE_PRODUCTION')}
-                    </button>
-                    <button className="p-6 bg-surface-container border border-outline text-on-surface-variant rounded-2xl hover:bg-surface transition-all shadow-sm">
-                      <ExternalLink size={24} />
-                    </button>
-                  </div>
-                </div>
-
-                {lastDispatched === trend.id && (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="absolute inset-0 bg-[#4169E1]/95 flex flex-col items-center justify-center z-20 backdrop-blur-sm"
-                  >
-                    <Zap size={64} className="text-white mb-4 animate-bounce" />
-                    <span className="text-white font-black uppercase text-xl tracking-[0.3em] italic">Dispatched</span>
-                  </motion.div>
-                )}
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      ) : (
-        <div className="py-40 text-center border-2 border-dashed border-outline rounded-[4rem] bg-surface shadow-sm">
-          <div className="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-10 border border-outline shadow-inner">
-            <Radar size={48} className="text-[#4169E1] animate-spin-slow" />
-          </div>
-          <h3 className="text-3xl font-black text-[#1E3A8A] uppercase italic tracking-tighter mb-6">No Signals Detected</h3>
-          <p className="text-on-surface-variant max-w-md mx-auto mb-12 font-mono text-xs uppercase tracking-widest leading-relaxed font-black italic opacity-40">
-            The neural intercept is silent. Initiate recon to populate the visual matrix with trending topics for France, India, and Norway.
-          </p>
-          <button 
-            onClick={initiateRecon}
-            className="px-12 py-6 bg-[#4169E1] text-white font-headline-md text-base font-black uppercase tracking-[0.3em] rounded-2xl shadow-2xl shadow-[#4169E1]/30 hover:brightness-110 transition-all active:scale-95 italic"
-          >
-            Start Recon Mode
-          </button>
-        </div>
-      )}
     </div>
   );
 }
