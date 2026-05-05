@@ -10,79 +10,102 @@ import {
 export default function TrendRadar() {
   const { trends = [], fetchTrends, subscribeToChanges } = usePipelineStore();
   const [activeSignal, setActiveSignal] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     fetchTrends();
     const unsubscribe = subscribeToChanges();
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [fetchTrends, subscribeToChanges]);
 
   const safeTrends = Array.isArray(trends) ? trends : [];
 
+  const handleFeedEngine = async (trend: any) => {
+    setIsProcessing(true);
+    try {
+      const success = await triggerProduction({
+        action: 'viranode-generate',
+        topic: trend.title,
+        source: 'TREND_RADAR_INTERCEPT',
+        priority: 'HIGH'
+      });
+      if (success) {
+        // Success feedback
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
-          <div className="flex items-center gap-3 text-[#BD00FF] font-data-mono text-[10px] font-black uppercase tracking-[0.4em] mb-2 italic">
-            <Radar size={14} className="animate-pulse" />
-            GLOBAL_TREND_INTERCEPTION_ARRAY
+    <div className="max-w-[1600px] mx-auto space-y-10">
+      {/* Cinematic Header */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative">
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 text-[#00f5ff] font-data-mono text-[10px] font-black uppercase tracking-[0.5em] mb-4 italic animate-pulse-led">
+            <Radar size={14} />
+            GLOBAL_TREND_INTERCEPTION_ARRAY_v4.2
           </div>
-          <h1 className="font-headline text-[56px] font-[900] tracking-[-0.04em] leading-[0.9] text-white uppercase italic">
+          <h1 className="font-headline text-[72px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
             TREND_RADAR
           </h1>
         </div>
         
-        <div className="flex gap-4">
-           <div className="bg-[#0A0A0B] border border-white/10 p-6 flex flex-col min-w-[200px]">
-              <span className="font-label-caps text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Signals/Sec</span>
-              <span className="font-headline text-4xl font-black text-[#6bff83] italic">1,422</span>
-           </div>
-           <div className="bg-[#0A0A0B] border border-white/10 p-6 flex flex-col min-w-[200px]">
-              <span className="font-label-caps text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Neural Load</span>
-              <span className="font-headline text-4xl font-black text-[#00f5ff] italic">42%</span>
-           </div>
+        <div className="flex gap-6 relative z-10">
+          <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#00f5ff]/20 bg-[#00f5ff]/5 clipped-corner">
+             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">SIGNALS_SEC</span>
+             <span className="font-headline text-5xl font-black text-white italic tracking-tighter">1,422</span>
+          </div>
+          <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#ffaa00]/20 bg-[#ffaa00]/5 clipped-corner">
+             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">NEURAL_LOAD</span>
+             <span className="font-headline text-5xl font-black text-[#ffaa00] italic tracking-tighter">42%</span>
+          </div>
         </div>
       </header>
 
       <div className="grid grid-cols-12 gap-8">
-        {/* Main Radar Map */}
-        <section className="col-span-12 lg:col-span-8 bg-[#0A0A0B] border border-white/10 relative overflow-hidden group min-h-[600px]">
+        {/* Main Radar Intercept Map */}
+        <section className="col-span-12 lg:col-span-8 panel-kinetic border-white/5 clipped-corner min-h-[600px] relative overflow-hidden flex flex-col">
            <div className="scanline-overlay absolute inset-0 opacity-10 pointer-events-none" />
-           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(189,0,255,0.05)_0%,_transparent_70%)]" />
            
-           <div className="p-8 flex justify-between items-center border-b border-white/5 relative z-10 bg-black/40 backdrop-blur-md">
+           <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01] relative z-10">
               <div className="flex items-center gap-3">
-                 <Globe size={18} className="text-[#BD00FF]" />
-                 <h2 className="font-label-caps text-xs font-bold text-white uppercase tracking-widest">NEURAL_HEATMAP_v1.2</h2>
+                 <Globe size={18} className="text-[#00f5ff]" />
+                 <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">NEURAL_HEATMAP_SECTOR_7</h2>
               </div>
-              <div className="flex gap-2">
-                 {[1,2,3].map(i => (
-                   <div key={i} className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
-                 ))}
+              <div className="flex items-center gap-6">
+                <span className="font-data-mono text-[9px] text-zinc-600 uppercase font-black tracking-widest">SCAN_FREQ: 4.8GHZ</span>
+                <div className="flex gap-2">
+                   {[1,2,3].map(i => (
+                     <div key={i} className="w-1.5 h-1.5 bg-[#00f5ff]/20 rounded-full" />
+                   ))}
+                </div>
               </div>
            </div>
 
-           {/* Visualization Area */}
-           <div className="relative h-full flex items-center justify-center p-20">
-              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, #333 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-              
-              {/* Radar Circles */}
+           {/* Radar Visualization Area */}
+           <div className="flex-1 relative flex items-center justify-center p-20 overflow-hidden">
+              {/* Radar Circles & Grid */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(0,245,255,0.05)_0%,_transparent_70%)]" />
                  <div className="w-[300px] h-[300px] border border-white/5 rounded-full" />
                  <div className="w-[600px] h-[600px] border border-white/5 rounded-full" />
                  <div className="w-[900px] h-[900px] border border-white/5 rounded-full" />
-                 {/* Radar Beam */}
-                 <motion.div 
-                   animate={{ rotate: 360 }}
-                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                   className="absolute w-[500px] h-[500px] bg-gradient-to-tr from-[#BD00FF]/20 to-transparent origin-center rounded-full"
-                   style={{ clipPath: 'polygon(50% 50%, 100% 0, 100% 50%)' }}
-                 />
+                 
+                 {/* Crosshairs */}
+                 <div className="absolute w-full h-[1px] bg-white/5" />
+                 <div className="absolute h-full w-[1px] bg-white/5" />
+
+                 {/* Rotating Radar Sweep */}
+                 <div className="absolute w-[800px] h-[800px] animate-radar origin-center pointer-events-none">
+                    <div className="w-1/2 h-1/2 bg-gradient-to-tr from-[#00f5ff]/20 to-transparent rounded-tl-full" />
+                 </div>
               </div>
 
-              {/* Trend Nodes */}
-              {safeTrends.slice(0, 12).map((trend, i) => (
+              {/* Trend Signal Nodes */}
+              {safeTrends.slice(0, 15).map((trend, i) => (
                 <motion.div
                   key={trend.id}
                   initial={{ opacity: 0, scale: 0 }}
@@ -90,18 +113,23 @@ export default function TrendRadar() {
                   transition={{ delay: i * 0.1 }}
                   style={{ 
                     position: 'absolute',
-                    left: `${20 + Math.random() * 60}%`,
-                    top: `${20 + Math.random() * 60}%`
+                    left: `${25 + (Math.sin(i * 1.5) * 30 + 30)}%`,
+                    top: `${25 + (Math.cos(i * 1.5) * 30 + 30)}%`
                   }}
                   className="group cursor-pointer z-20"
                   onClick={() => setActiveSignal(trend)}
                 >
                    <div className="relative">
-                      <div className="w-4 h-4 bg-[#BD00FF] rounded-full animate-ping opacity-20 absolute inset-0" />
-                      <div className="w-4 h-4 bg-[#BD00FF] border-2 border-white/20 rounded-full group-hover:scale-150 transition-all shadow-[0_0_15px_#BD00FF]" />
-                      <div className="absolute left-6 top-0 bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1 opacity-0 group-hover:opacity-100 transition-all pointer-events-none min-w-[150px]">
-                         <p className="font-data-mono text-[9px] text-[#BD00FF] uppercase font-black">{trend.growth_stat || '+124%'}</p>
-                         <p className="font-headline text-xs font-bold text-white uppercase italic truncate">{trend.title}</p>
+                      <div className="w-4 h-4 bg-[#00f5ff] rounded-full animate-ping opacity-20 absolute inset-0" />
+                      <div className="w-4 h-4 bg-[#00f5ff] border-2 border-white/20 rounded-full group-hover:scale-150 transition-all shadow-[0_0_15px_#00f5ff]" />
+                      
+                      {/* Signal Label Tooltip */}
+                      <div className="absolute left-6 top-1/2 -translate-y-1/2 panel-kinetic p-4 border-[#00f5ff]/30 opacity-0 group-hover:opacity-100 transition-all pointer-events-none min-w-[180px] clipped-corner-sm">
+                         <div className="flex justify-between items-center mb-2">
+                           <span className="font-data-mono text-[9px] text-[#00f5ff] uppercase font-black italic">{trend.growth_stat || '+124%'}</span>
+                           <Activity size={10} className="text-[#00f5ff] animate-pulse-led" />
+                         </div>
+                         <p className="font-headline text-sm font-black text-white uppercase italic truncate tracking-tight">{trend.title}</p>
                       </div>
                    </div>
                 </motion.div>
@@ -109,57 +137,70 @@ export default function TrendRadar() {
            </div>
         </section>
 
-        {/* Right Panel: Intercepted Signals */}
-        <aside className="col-span-12 lg:col-span-4 space-y-6">
-           <section className="bg-[#0A0A0B] border border-white/10 p-8 flex flex-col h-full max-h-[800px]">
-              <div className="flex justify-between items-center mb-8">
+        {/* Right Panel: Intercepted Signals Feed */}
+        <aside className="col-span-12 lg:col-span-4 flex flex-col gap-8">
+           <section className="panel-kinetic p-8 flex flex-col flex-1 clipped-corner border-white/5">
+              <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
                  <div className="flex items-center gap-3">
-                    <Zap size={18} className="text-[#6bff83]" />
-                    <h2 className="font-label-caps text-xs font-bold text-white uppercase tracking-widest">LIVE_INTERCEPT_FEED</h2>
+                    <Zap size={18} className="text-[#6bff83] animate-pulse" />
+                    <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">LIVE_INTERCEPT_STREAM</h2>
                  </div>
-                 <div className="bg-[#6bff83]/10 px-2 py-1 border border-[#6bff83]/20">
-                    <span className="font-data-mono text-[9px] text-[#6bff83] font-black animate-pulse">SCANNING</span>
+                 <div className="flex items-center gap-2">
+                    <span className="font-data-mono text-[9px] text-[#6bff83] font-black italic tracking-widest uppercase">SCANNING</span>
+                    <div className="w-1.5 h-1.5 bg-[#6bff83] rounded-full animate-pulse-led" />
                  </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-4">
+              <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-2">
                  {safeTrends.map((trend, i) => (
                    <motion.div 
                      key={trend.id}
                      whileHover={{ x: 5 }}
-                     className="p-4 bg-white/[0.02] border border-white/5 flex items-center justify-between group hover:border-[#BD00FF]/30 transition-all cursor-pointer"
+                     onClick={() => setActiveSignal(trend)}
+                     className={`p-5 bg-white/[0.01] border flex items-center justify-between group transition-all cursor-pointer clipped-corner-sm ${
+                       activeSignal?.id === trend.id ? 'border-[#00f5ff] bg-[#00f5ff]/5' : 'border-white/5 hover:border-white/20'
+                     }`}
                    >
                       <div className="flex-1 min-w-0">
-                         <div className="flex items-center gap-2 mb-1">
-                            <span className="font-data-mono text-[9px] text-zinc-600 uppercase">0x{i.toString(16).toUpperCase()}</span>
-                            <span className="font-data-mono text-[9px] text-[#6bff83] font-black uppercase tracking-widest">{trend.growth_stat || '+88%'}</span>
+                         <div className="flex items-center gap-3 mb-2">
+                            <span className="font-data-mono text-[10px] text-zinc-700 font-bold">0x{i.toString(16).padStart(2, '0').toUpperCase()}</span>
+                            <span className="font-data-mono text-[10px] text-[#6bff83] font-black uppercase tracking-widest italic">{trend.growth_stat || '+88%'}</span>
                          </div>
-                         <h4 className="font-headline text-md font-bold text-white uppercase italic truncate group-hover:text-[#BD00FF] transition-colors">
+                         <h4 className="font-headline text-lg font-black text-white uppercase italic truncate group-hover:text-[#00f5ff] transition-colors tracking-tight">
                             {trend.title}
                          </h4>
                       </div>
-                      <ArrowUpRight size={16} className="text-zinc-800 group-hover:text-[#BD00FF] transition-colors" />
+                      <ArrowUpRight size={18} className={`transition-colors ${activeSignal?.id === trend.id ? 'text-[#00f5ff]' : 'text-zinc-800 group-hover:text-zinc-400'}`} />
                    </motion.div>
                  ))}
                  {safeTrends.length === 0 && (
-                   <div className="p-20 text-center text-zinc-800 font-data-mono uppercase text-xs">
-                      No signals detected in sector.
+                   <div className="flex-1 flex flex-col items-center justify-center p-20 text-center opacity-30">
+                      <Search size={48} className="text-zinc-800 mb-4" />
+                      <p className="text-zinc-600 font-data-mono uppercase tracking-[0.3em] text-[10px]">No active signals in current quadrant.</p>
                    </div>
                  )}
               </div>
 
-              <div className="mt-8 pt-8 border-t border-white/5 space-y-4">
-                 <div className="p-6 bg-[#BD00FF]/5 border border-[#BD00FF]/20 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="flex items-center gap-3 mb-4">
-                       <Shield size={16} className="text-[#BD00FF]" />
-                       <span className="font-label-caps text-[10px] font-bold text-white uppercase tracking-widest">AI_PREDICTION_ENGINE</span>
+              {/* Action Module: Neural Dispatch */}
+              <div className="mt-8 pt-8 border-t border-white/5">
+                 <div className="panel-kinetic p-8 border-[#BD00FF]/20 bg-[#BD00FF]/5 clipped-corner-sm group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-3 mb-6 relative z-10">
+                       <Shield size={18} className="text-[#BD00FF]" />
+                       <span className="font-label-caps text-[10px] font-black text-white uppercase tracking-[0.4em]">PREDICTION_ENGINE</span>
                     </div>
-                    <p className="font-data-mono text-[11px] text-zinc-400 uppercase italic leading-relaxed">
-                       "Pattern 'CYBER_FLUX' is converging with 'Y2K_RETRO'. Optimal production window: 12-24H."
+                    <p className="font-data-mono text-[11px] text-zinc-400 uppercase italic leading-relaxed relative z-10 mb-8">
+                      {activeSignal 
+                        ? `"${activeSignal.title} shows high conversion probability. Initiate production burst immediately."` 
+                        : `"Analyzing convergence patterns. Standby for target identification."`}
                     </p>
-                    <button className="w-full mt-6 py-3 bg-[#BD00FF] text-black font-headline font-black uppercase italic text-[11px] hover:shadow-[0_0_15px_#BD00FF] transition-all">
-                       FEED_THE_ENGINE
+                    <button 
+                      disabled={!activeSignal || isProcessing}
+                      onClick={() => handleFeedEngine(activeSignal)}
+                      className="btn-kinetic btn-kinetic-primary w-full group py-4 text-sm"
+                    >
+                       <span>{isProcessing ? 'PROCESSING...' : 'FEED_THE_ENGINE'}</span>
+                       {!isProcessing && <Zap size={16} className="fill-current" />}
                     </button>
                  </div>
               </div>

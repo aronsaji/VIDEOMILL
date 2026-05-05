@@ -15,7 +15,7 @@ import {
   Monitor,
   Mic2,
   Share2,
-  Database
+  Database as DatabaseIcon
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -53,90 +53,104 @@ export default function Dashboard() {
   const safeVideos = Array.isArray(videos) ? videos : [];
 
   const stats = [
-    { label: 'RENDER_FLOW', value: safeOrders.filter(o => o.status === 'processing' || o.status === 'rendering').length || 0, sub: 'ACTIVE_NODES', color: 'text-[#6bff83]', icon: Cpu },
-    { label: 'ARCHIVE_SIZE', value: safeVideos.length, sub: 'FINISHED_ASSETS', color: 'text-[#BD00FF]', icon: TrendingUp },
-    { label: 'QUEUE_DEPTH', value: safeOrders.filter(o => o.status === 'queued' || o.status === 'pending').length || 0, sub: 'TASKS_PENDING', color: 'text-[#00f5ff]', icon: Layers },
-    { label: 'LIVE_TRENDS', value: safeTrends.length, sub: 'RADAR_ACTIVE', color: 'text-[#ffaa00]', icon: Activity },
+    { label: 'RENDER_FLOW', value: safeOrders.filter(o => o.status === 'processing' || o.status === 'rendering').length || 0, sub: 'ACTIVE_NODES', color: 'text-[#6bff83]', icon: Cpu, borderColor: 'border-[#6bff83]/20' },
+    { label: 'ARCHIVE_SIZE', value: safeVideos.length, sub: 'FINISHED_ASSETS', color: 'text-[#BD00FF]', icon: TrendingUp, borderColor: 'border-[#BD00FF]/20' },
+    { label: 'QUEUE_DEPTH', value: safeOrders.filter(o => o.status === 'queued' || o.status === 'pending').length || 0, sub: 'TASKS_PENDING', color: 'text-[#00f5ff]', icon: Layers, borderColor: 'border-[#00f5ff]/20' },
+    { label: 'LIVE_TRENDS', value: safeTrends.length, sub: 'RADAR_ACTIVE', color: 'text-[#ffaa00]', icon: Activity, borderColor: 'border-[#ffaa00]/20' },
   ];
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6">
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="max-w-[1600px] mx-auto space-y-8">
+      {/* Kinetic Metrics Cluster */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
           <motion.div 
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-[#0A0A0B] border border-white/10 p-6 relative group overflow-hidden"
+            className={`panel-kinetic p-8 group clipped-corner ${stat.borderColor} bg-white/[0.01]`}
           >
-            <div className="scanline-overlay absolute inset-0 opacity-5 pointer-events-none" />
+            <div className="scanline-overlay absolute inset-0 opacity-[0.03] pointer-events-none" />
             <div className="relative z-10">
-              <div className="flex justify-between items-start mb-4">
-                <stat.icon size={20} className={stat.color} />
-                <span className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-widest">{stat.sub}</span>
+              <div className="flex justify-between items-start mb-6">
+                <div className={`p-3 bg-black/40 border border-white/5 clipped-corner-sm ${stat.color}`}>
+                   <stat.icon size={22} />
+                </div>
+                <span className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.3em] font-bold">{stat.sub}</span>
               </div>
-              <div className="font-headline text-4xl font-[900] text-white tracking-tighter mb-1">{stat.value}</div>
-              <div className="font-label-caps text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">{stat.label}</div>
+              <div className="font-headline text-5xl font-black text-white tracking-tighter mb-1 italic">
+                {String(stat.value).padStart(2, '0')}
+              </div>
+              <div className="font-label-caps text-[11px] font-bold text-zinc-500 uppercase tracking-[0.25em]">{stat.label}</div>
             </div>
-            <div className={`absolute bottom-0 left-0 h-1 bg-current opacity-20 ${stat.color}`} style={{ width: '100%' }} />
+            <div className={`absolute bottom-0 left-0 h-[2px] bg-current opacity-30 ${stat.color}`} style={{ width: '100%' }} />
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-12 gap-4">
-        {/* Main Feed: Active Productions */}
-        <section className="col-span-12 lg:col-span-8 space-y-4">
-          <div className="bg-[#0A0A0B] border border-white/10 overflow-hidden">
-            <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-              <div className="flex items-center gap-2">
-                <Play size={16} className="text-[#BD00FF]" />
-                <h2 className="font-label-caps text-xs font-bold text-white uppercase tracking-widest">LIVE_PRODUCTION_QUEUE</h2>
+      <div className="grid grid-cols-12 gap-8">
+        {/* Main Feed: Production Monitor */}
+        <section className="col-span-12 lg:col-span-8 space-y-6">
+          <div className="panel-kinetic border-[#BD00FF]/10 clipped-corner min-h-[600px] flex flex-col">
+            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-[#BD00FF] animate-pulse-led rounded-full" />
+                <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">LIVE_PRODUCTION_ORCHESTRATOR</h2>
               </div>
-              <div className="flex gap-4 font-data-mono text-[10px]">
-                <span className="text-zinc-600 uppercase">LATENCY: <span className="text-[#6bff83]">14MS</span></span>
-                <span className="text-zinc-600 uppercase">THROUGHPUT: <span className="text-[#00f5ff]">8.2/MIN</span></span>
+              <div className="flex gap-6 font-data-mono text-[10px]">
+                <span className="text-zinc-600 uppercase font-bold tracking-widest">NETWORK: <span className="text-[#6bff83]">ACTIVE</span></span>
+                <span className="text-zinc-600 uppercase font-bold tracking-widest">FPS: <span className="text-[#00f5ff]">60.0</span></span>
               </div>
             </div>
             
-            <div className="divide-y divide-white/5">
-              {safeOrders.length > 0 ? safeOrders.slice(0, 5).map((order) => (
-                <div key={order.id || order.video_id} className="p-6 flex items-center gap-6 group hover:bg-white/[0.02] transition-colors">
-                  <div className="w-24 h-32 bg-[#1c1b1c] border border-white/5 relative overflow-hidden shrink-0">
-                    <div className="absolute inset-0 bg-[#BD00FF]/10 animate-pulse" />
+            <div className="divide-y divide-white/5 flex-1">
+              {safeOrders.length > 0 ? safeOrders.slice(0, 6).map((order) => (
+                <div key={order.id || order.video_id} className="p-8 flex items-center gap-8 group hover:bg-white/[0.02] transition-all relative overflow-hidden">
+                  <div className="w-24 h-32 bg-[#0A0A0B] border border-white/10 relative overflow-hidden shrink-0 clipped-corner-sm group-hover:border-[#BD00FF]/40 transition-colors">
+                    <div className="absolute inset-0 bg-[#BD00FF]/5 group-hover:bg-[#BD00FF]/10 transition-colors" />
                     <div className="absolute inset-0 flex items-center justify-center text-zinc-800">
-                       {order.status === 'completed' ? <Play size={24} /> : <Zap size={24} />}
+                       {order.status === 'completed' ? <Play size={32} className="text-[#6bff83]/40" /> : <Zap size={32} className="text-[#BD00FF]/40 animate-pulse" />}
+                    </div>
+                    {/* Visual Progress Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${order.progress || 0}%` }}
+                        className="h-full bg-[#BD00FF]"
+                      />
                     </div>
                   </div>
+
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-2 py-0.5 font-data-mono text-[9px] font-bold uppercase tracking-widest border ${
+                    <div className="flex items-center gap-4 mb-3">
+                      <span className={`px-3 py-1 font-data-mono text-[9px] font-black uppercase tracking-widest border clipped-corner-sm ${
                         order.status === 'completed' ? 'bg-[#6bff83]/10 text-[#6bff83] border-[#6bff83]/20' : 'bg-[#BD00FF]/10 text-[#BD00FF] border-[#BD00FF]/20'
                       }`}>
                         {order.status || 'PROCESSING'}
                       </span>
-                      <span className="font-data-mono text-[10px] text-zinc-600 uppercase">ID: {String(order.id || order.video_id).slice(0,8)}</span>
+                      <span className="font-data-mono text-[10px] text-zinc-600 uppercase font-bold tracking-widest">SEC_ID: {String(order.id || order.video_id).slice(0,12)}</span>
                     </div>
-                    <h3 className="font-headline text-xl font-bold text-white uppercase italic truncate group-hover:text-[#BD00FF] transition-colors">
+                    <h3 className="font-headline text-2xl font-black text-white uppercase italic truncate group-hover:text-[#BD00FF] transition-colors tracking-tight">
                       {order.title || order.topic || 'NEURAL_GEN_TARGET'}
                     </h3>
-                    <div className="flex gap-4 mt-3">
+                    <div className="flex gap-8 mt-4">
                       <div className="flex flex-col">
-                        <span className="font-label-caps text-[9px] text-zinc-600 uppercase">PLATFORM</span>
-                        <span className="font-data-mono text-[11px] text-zinc-400 uppercase">{order.platform || 'TIKTOK'}</span>
+                        <span className="font-label-caps text-[9px] text-zinc-600 uppercase font-bold tracking-widest">NETWORK_NODE</span>
+                        <span className="font-data-mono text-[11px] text-zinc-400 uppercase font-bold">{order.platform || 'TIKTOK_V1'}</span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-label-caps text-[9px] text-zinc-600 uppercase">LANGUAGE</span>
-                        <span className="font-data-mono text-[11px] text-zinc-400 uppercase">{order.language || 'NORSK'}</span>
+                        <span className="font-label-caps text-[9px] text-zinc-600 uppercase font-bold tracking-widest">CORE_LANG</span>
+                        <span className="font-data-mono text-[11px] text-zinc-400 uppercase font-bold">{order.language || 'NORSK_TRANS'}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right flex flex-col items-end gap-2">
-                     <div className="font-data-mono text-xs text-[#6bff83]">{order.progress || '0'}%</div>
-                     <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
+
+                  <div className="text-right flex flex-col items-end gap-3">
+                     <div className="font-data-mono text-lg font-black text-[#6bff83] italic">{String(order.progress || '0').padStart(2, '0')}%</div>
+                     <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
                         <motion.div 
-                          className="h-full bg-[#6bff83]" 
+                          className="h-full bg-gradient-to-r from-[#BD00FF] to-[#6bff83]" 
                           initial={{ width: 0 }}
                           animate={{ width: `${order.progress || 0}%` }}
                         />
@@ -144,88 +158,106 @@ export default function Dashboard() {
                   </div>
                 </div>
               )) : (
-                <div className="p-20 text-center text-zinc-700 font-data-mono uppercase">
-                   No active production nodes detected.
+                <div className="flex-1 flex flex-col items-center justify-center p-20 text-center space-y-4">
+                   <div className="p-8 bg-white/[0.01] border border-white/5 clipped-corner text-zinc-800">
+                      <Cpu size={64} />
+                   </div>
+                   <p className="text-zinc-600 font-data-mono uppercase tracking-[0.3em] text-xs">No active production nodes detected in cluster.</p>
                 </div>
               )}
             </div>
           </div>
         </section>
 
-        {/* Sidebar: Telemetry & Trends */}
-        <aside className="col-span-12 lg:col-span-4 space-y-4">
-          {/* Architecture Status */}
-          <div className="bg-[#0A0A0B] border border-white/10 p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Globe size={16} className="text-[#00f5ff]" />
-              <h2 className="font-label-caps text-xs font-bold text-white uppercase tracking-widest">SYSTEM_ARCHITECTURE</h2>
+        {/* Sidebar: System Telemetry */}
+        <aside className="col-span-12 lg:col-span-4 space-y-6">
+          {/* Architecture Health */}
+          <div className="panel-kinetic p-8 border-[#00f5ff]/10 clipped-corner">
+            <div className="flex items-center gap-3 mb-8">
+              <Globe size={18} className="text-[#00f5ff]" />
+              <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">SYSTEM_ARCHITECTURE</h2>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {[
-                { name: 'Command Center', status: systemHealth.commandCenter, icon: Monitor, color: 'text-[#BD00FF]' },
-                { name: 'Voice Server', status: systemHealth.voiceServer, icon: Mic2, color: 'text-[#6bff83]' },
-                { name: 'Neural Database', status: systemHealth.neuralDatabase, icon: Database, color: 'text-[#ffaa00]' },
-                { name: 'Automation Hub', status: systemHealth.automationHub, icon: Share2, color: 'text-[#00f5ff]' },
+                { name: 'Command Center', status: systemHealth.commandCenter, icon: Monitor, color: 'text-[#BD00FF]', led: 'bg-[#BD00FF]' },
+                { name: 'Voice Server', status: systemHealth.voiceServer, icon: Mic2, color: 'text-[#6bff83]', led: 'bg-[#6bff83]' },
+                { name: 'Neural Database', status: systemHealth.neuralDatabase, icon: DatabaseIcon, color: 'text-[#ffaa00]', led: 'bg-[#ffaa00]' },
+                { name: 'Automation Hub', status: systemHealth.automationHub, icon: Share2, color: 'text-[#00f5ff]', led: 'bg-[#00f5ff]' },
               ].map((node) => (
-                <div key={node.name} className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 group">
-                  <div className="flex items-center gap-3">
-                    <node.icon size={14} className={node.color} />
-                    <span className="font-data-mono text-[10px] text-zinc-400 uppercase">{node.name}</span>
+                <div key={node.name} className="flex items-center justify-between p-4 bg-white/[0.01] border border-white/5 clipped-corner-sm group hover:bg-white/[0.03] transition-colors">
+                  <div className="flex items-center gap-4">
+                    <node.icon size={16} className={node.color} />
+                    <span className="font-data-mono text-[10px] text-zinc-400 uppercase font-bold tracking-widest">{node.name}</span>
                   </div>
-                  <span className={`font-data-mono text-[9px] px-2 py-0.5 rounded-sm ${
-                    node.status === 'ONLINE' || node.status === 'LINKED' || node.status === 'ACTIVE' 
-                    ? 'bg-[#6bff83]/10 text-[#6bff83]' 
-                    : 'bg-red-500/10 text-red-500'
-                  }`}>
-                    {node.status}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className={`font-data-mono text-[9px] px-2 py-0.5 font-black italic ${
+                      node.status === 'ONLINE' || node.status === 'LINKED' || node.status === 'ACTIVE' 
+                      ? 'text-[#6bff83]' 
+                      : 'text-red-500'
+                    }`}>
+                      {node.status}
+                    </span>
+                    <div className={`w-1.5 h-1.5 rounded-full ${node.led} animate-pulse-led`} />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* System Telemetry */}
-          <div className="bg-[#0A0A0B] border border-white/10 p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Terminal size={16} className="text-[#ffaa00]" />
-              <h2 className="font-label-caps text-xs font-bold text-white uppercase tracking-widest">ENGINE_TELEMETRY</h2>
+          {/* Engine Performance */}
+          <div className="panel-kinetic p-8 border-[#ffaa00]/10 clipped-corner">
+            <div className="flex items-center gap-3 mb-8">
+              <Terminal size={18} className="text-[#ffaa00]" />
+              <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">ENGINE_PERFORMANCE</h2>
             </div>
-            <div className="space-y-4 font-data-mono text-[11px]">
-              <div className="flex justify-between text-zinc-500 uppercase">
-                <span>Core Temperature</span>
-                <span className="text-[#6bff83]">42°C</span>
-              </div>
-              <div className="flex justify-between text-zinc-500 uppercase">
-                <span>VRAM Allocation</span>
-                <span className="text-[#BD00FF]">18.4GB / 24GB</span>
-              </div>
-              <div className="flex justify-between text-zinc-500 uppercase">
-                <span>Network Load</span>
-                <span className="text-[#00f5ff]">1.2 GBPS</span>
-              </div>
+            <div className="space-y-6">
+               {[
+                 { label: 'Core Temp', value: '42°C', percent: 42, color: 'bg-[#6bff83]' },
+                 { label: 'VRAM Usage', value: '18.4GB', percent: 76, color: 'bg-[#BD00FF]' },
+                 { label: 'Net Throughput', value: '1.2 GBPS', percent: 24, color: 'bg-[#00f5ff]' },
+               ].map((perf) => (
+                 <div key={perf.label} className="space-y-2">
+                    <div className="flex justify-between font-data-mono text-[10px] uppercase font-bold tracking-widest">
+                       <span className="text-zinc-500">{perf.label}</span>
+                       <span className="text-white">{perf.value}</span>
+                    </div>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                       <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${perf.percent}%` }}
+                        className={`h-full ${perf.color}`}
+                       />
+                    </div>
+                 </div>
+               ))}
             </div>
           </div>
 
-          {/* Trending Pulse */}
-          <div className="bg-[#BD00FF] p-6 clipped-corner group cursor-pointer relative overflow-hidden">
-            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative z-10">
-              <h3 className="font-headline text-[24px] font-[900] text-black italic uppercase leading-tight mb-4">
-                TREND_DETECTION_ACTIVE
-              </h3>
-              <div className="space-y-2">
-                {(safeTrends.length > 0 ? safeTrends : [
-                  { title: '#AI_GEN', growth_stat: '+124%' },
-                  { title: '#NEON_FLUX', growth_stat: '+88%' }
-                ]).slice(0, 3).map((trend, i) => (
-                  <div key={i} className="flex justify-between items-center bg-black/10 p-2 border-l-2 border-black">
-                    <span className="font-data-mono text-[10px] text-black font-bold uppercase">{trend.title}</span>
-                    <span className="font-data-mono text-[9px] text-black opacity-60">{trend.growth_stat || '+124%'}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 flex justify-end">
-                <ChevronRight size={20} className="text-black" />
+          {/* Radar Intercept */}
+          <div className="bg-[#BD00FF] p-1 clipped-corner">
+            <div className="bg-black p-8 clipped-corner relative overflow-hidden group cursor-pointer">
+              <div className="absolute inset-0 bg-[#BD00FF]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-6">
+                   <h3 className="font-headline text-2xl font-black text-[#BD00FF] italic uppercase leading-tight tracking-tighter">
+                     RADAR_INTERCEPT
+                   </h3>
+                   <Radar size={20} className="text-[#BD00FF] animate-radar" />
+                </div>
+                <div className="space-y-3">
+                  {(safeTrends.length > 0 ? safeTrends : [
+                    { title: '#AI_GEN_FLOW', growth_stat: '+124%' },
+                    { title: '#NEON_COMMAND', growth_stat: '+88%' }
+                  ]).slice(0, 3).map((trend, i) => (
+                    <div key={i} className="flex justify-between items-center bg-white/[0.03] p-3 border-l-2 border-[#BD00FF]">
+                      <span className="font-data-mono text-[10px] text-white font-bold uppercase tracking-widest truncate mr-4">{trend.title}</span>
+                      <span className="font-data-mono text-[9px] text-[#6bff83] font-black italic">{trend.growth_stat || '+124%'}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 flex justify-end items-center gap-2 font-data-mono text-[10px] text-[#BD00FF] font-black uppercase italic group-hover:gap-4 transition-all">
+                  VIEW_RADAR <ChevronRight size={14} />
+                </div>
               </div>
             </div>
           </div>

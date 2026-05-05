@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../types/database';
+import type { Database } from '../types';
 
 // Bruker VITE_ variabelen fra Vercel, med din faktiske prosjekt-URL som sikker fallback.
 // Dette sikrer at appen kobler seg til riktig database selv om VITE_SUPABASE_URL mangler i Vercel.

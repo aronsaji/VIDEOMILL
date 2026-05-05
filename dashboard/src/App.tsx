@@ -40,8 +40,16 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center font-data-mono text-[10px] text-[#BD00FF] tracking-[0.5em] italic">
-        INITIALIZING_SYSTEM_UPLINK...
+      <div className="min-h-screen bg-[#131314] flex flex-col items-center justify-center relative overflow-hidden">
+        <div className="fixed inset-0 bg-[linear-gradient(rgba(189,0,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(189,0,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
+        <div className="relative z-10 space-y-6 flex flex-col items-center">
+           <div className="w-16 h-16 border border-[#BD00FF]/20 flex items-center justify-center clipped-corner animate-pulse">
+              <div className="w-8 h-8 bg-[#BD00FF] clipped-corner-sm" />
+           </div>
+           <div className="font-data-mono text-[10px] text-[#BD00FF] tracking-[0.5em] italic animate-pulse">
+             INITIALIZING_KINETIC_LINK...
+           </div>
+        </div>
       </div>
     );
   }
@@ -61,6 +69,7 @@ function App() {
           <Route path="/archive" element={<Library />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/logs" element={<div className="font-data-mono text-zinc-500">SYSTEM_LOGS_TERMINAL: STABLE</div>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

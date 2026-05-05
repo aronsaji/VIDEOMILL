@@ -4,7 +4,7 @@ import {
   BarChart2, TrendingUp, Users, Clock, Eye, 
   Share2, ThumbsUp, MessageSquare, Activity,
   Zap, Target, Globe, ArrowUpRight, BarChart3,
-  Cpu, Database
+  Cpu, Database as DatabaseIcon
 } from 'lucide-react';
 
 export default function Analytics() {

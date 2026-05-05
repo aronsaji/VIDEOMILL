@@ -4,7 +4,7 @@ import { usePipelineStore } from '../store/pipelineStore';
 import { triggerProduction } from '../lib/api';
 import { 
   Cpu, Zap, Settings, Activity, Play, 
-  Terminal, Globe, Shield, Database,
+  Terminal, Globe, Shield, Database as DatabaseIcon,
   PenTool, Video, Layers, CheckCircle2
 } from 'lucide-react';
 
@@ -33,7 +33,7 @@ export default function FactoryPage() {
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -59,39 +59,45 @@ export default function FactoryPage() {
     }
   };
 
+  const activeCycles = orders.filter(o => o.status === 'rendering' || o.status === 'processing').length;
+
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
-          <div className="flex items-center gap-3 text-[#BD00FF] font-data-mono text-[10px] font-black uppercase tracking-[0.4em] mb-2 italic">
-            <Activity size={14} className="animate-pulse" />
-            AUTONOMOUS_PRODUCTION_FACILITY
+    <div className="max-w-[1600px] mx-auto space-y-10">
+      {/* Cinematic Header */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative">
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 text-[#BD00FF] font-data-mono text-[10px] font-black uppercase tracking-[0.5em] mb-4 italic animate-pulse-led">
+            <Activity size={14} />
+            AUTONOMOUS_PRODUCTION_FACILITY_v2.0
           </div>
-          <h1 className="font-headline text-[56px] font-[900] tracking-[-0.04em] leading-[0.9] text-white uppercase italic">
+          <h1 className="font-headline text-[72px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
             THE_FACTORY
           </h1>
         </div>
         
-        <div className="flex gap-4">
-          <div className="bg-[#0A0A0B] border border-white/10 p-6 flex flex-col min-w-[180px] group hover:border-[#BD00FF]/30 transition-all">
-             <span className="font-label-caps text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Active Cycles</span>
-             <span className="font-headline text-4xl font-black text-white italic">0{orders.filter(o => o.status === 'rendering').length || 0}</span>
+        <div className="flex gap-6 relative z-10">
+          <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#BD00FF]/20 bg-[#BD00FF]/5 clipped-corner">
+             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">ACTIVE_CYCLES</span>
+             <span className="font-headline text-5xl font-black text-white italic tracking-tighter">
+               {String(activeCycles).padStart(2, '0')}
+             </span>
           </div>
-          <div className="bg-[#0A0A0B] border border-white/10 p-6 flex flex-col min-w-[180px] group hover:border-[#6bff83]/30 transition-all">
-             <span className="font-label-caps text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Queue Depth</span>
-             <span className="font-headline text-4xl font-black text-[#6bff83] italic">{String(orders.length || 0).padStart(2, '0')}</span>
+          <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#6bff83]/20 bg-[#6bff83]/5 clipped-corner">
+             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">QUEUE_DEPTH</span>
+             <span className="font-headline text-5xl font-black text-[#6bff83] italic tracking-tighter">
+               {String(orders.length || 0).padStart(2, '0')}
+             </span>
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-12 gap-8">
         {/* Left Column: Automated Workstations */}
-        <div className="col-span-12 lg:col-span-4 space-y-6">
-           <section className="bg-[#0A0A0B] border border-white/10 p-8 space-y-8">
-              <div className="flex items-center gap-3">
+        <div className="col-span-12 lg:col-span-4 space-y-8">
+           <section className="panel-kinetic p-8 space-y-8 clipped-corner border-white/5">
+              <div className="flex items-center gap-3 pb-4 border-b border-white/5">
                  <Shield size={18} className="text-[#BD00FF]" />
-                 <h2 className="font-label-caps text-xs font-bold text-white uppercase tracking-widest">AGENT_WORKSTATIONS</h2>
+                 <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">AGENT_ORCHESTRATION_NODES</h2>
               </div>
               
               <div className="space-y-4">
@@ -101,100 +107,111 @@ export default function FactoryPage() {
                      initial={{ opacity: 0, x: -20 }}
                      animate={{ opacity: 1, x: 0 }}
                      transition={{ delay: i * 0.1 }}
-                     className="p-6 bg-white/[0.02] border border-white/5 group hover:bg-white/[0.04] transition-all cursor-crosshair"
+                     className="p-6 bg-white/[0.01] border border-white/5 group hover:bg-white/[0.03] transition-all cursor-crosshair clipped-corner-sm hover:border-[#BD00FF]/30"
                    >
                       <div className="flex justify-between items-start mb-4">
-                         <div className={`p-3 bg-black border border-white/5 ${agent.color}`}>
-                            <agent.icon size={20} />
+                         <div className={`p-4 bg-black/60 border border-white/5 clipped-corner-sm ${agent.color}`}>
+                            <agent.icon size={22} />
                          </div>
-                         <span className={`font-data-mono text-[9px] px-2 py-0.5 border ${
-                           agent.status === 'ACTIVE' ? 'bg-[#6bff83]/10 text-[#6bff83] border-[#6bff83]/20' : 'bg-white/5 text-zinc-500 border-white/10'
-                         }`}>
-                           {agent.status}
-                         </span>
+                         <div className="flex items-center gap-2">
+                           <span className={`font-data-mono text-[9px] px-2 py-0.5 font-black italic tracking-widest ${
+                             agent.status === 'ACTIVE' ? 'text-[#6bff83]' : 'text-zinc-600'
+                           }`}>
+                             {agent.status}
+                           </span>
+                           <div className={`w-1.5 h-1.5 rounded-full ${agent.status === 'ACTIVE' ? 'bg-[#6bff83]' : 'bg-zinc-800'} animate-pulse-led`} />
+                         </div>
                       </div>
-                      <h3 className="font-headline text-lg font-bold text-white uppercase italic mb-1 group-hover:text-[#BD00FF] transition-colors">
+                      <h3 className="font-headline text-xl font-black text-white uppercase italic mb-1 group-hover:text-[#BD00FF] transition-colors tracking-tight">
                         {agent.name}
                       </h3>
-                      <p className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-widest">{agent.role}</p>
+                      <p className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">{agent.role}</p>
                    </motion.div>
                  ))}
               </div>
            </section>
 
-           {/* Viral Probability Meter */}
-           <div className="bg-[#BD00FF] p-8 clipped-corner relative overflow-hidden group">
-              <div className="scanline-overlay absolute inset-0 opacity-10 pointer-events-none" />
-              <h3 className="font-headline text-2xl font-black text-black italic uppercase leading-none mb-6">VIRAL_CONFIDENCE</h3>
-              <div className="font-headline text-6xl font-black text-black italic tracking-tighter">
-                {prompt.length > 20 ? '94.8%' : '00.0%'}
-              </div>
-              <div className="mt-6 flex gap-1 h-8 items-end">
-                 {[40, 60, 45, 90, 80, 100].map((h, i) => (
-                   <div key={i} className="flex-1 bg-black/20" style={{ height: `${h}%` }} />
-                 ))}
+           {/* Viral Confidence Module */}
+           <div className="bg-[#BD00FF] p-[2px] clipped-corner">
+              <div className="bg-[#0A0A0B] p-8 clipped-corner relative overflow-hidden group h-[280px] flex flex-col justify-between">
+                 <div className="scanline-overlay absolute inset-0 opacity-10 pointer-events-none" />
+                 <div className="flex justify-between items-start relative z-10">
+                    <h3 className="font-headline text-2xl font-black text-[#BD00FF] italic uppercase tracking-tighter">VIRAL_ENGINE_OUTPUT</h3>
+                    <Zap size={20} className="text-[#BD00FF] animate-pulse" />
+                 </div>
+                 <div className="relative z-10">
+                    <div className="font-headline text-7xl font-black text-white italic tracking-tighter mb-2">
+                      {prompt.length > 20 ? '94.8' : '00.0'}<span className="text-3xl text-[#BD00FF]">%</span>
+                    </div>
+                    <div className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.4em] font-bold">CONFIDENCE_SCORE</div>
+                 </div>
+                 <div className="mt-4 flex gap-1.5 h-12 items-end relative z-10">
+                    {[40, 60, 45, 90, 80, 100, 70, 85, 40, 95].map((h, i) => (
+                      <div key={i} className={`flex-1 ${prompt.length > 20 ? 'bg-[#BD00FF]' : 'bg-zinc-900'} opacity-30`} style={{ height: `${h}%` }} />
+                    ))}
+                 </div>
               </div>
            </div>
         </div>
 
         {/* Right Column: Neural Dispatcher */}
-        <div className="col-span-12 lg:col-span-8 space-y-6">
-           <section className="bg-[#0A0A0B] border border-white/10 p-10 relative overflow-hidden group min-h-[500px] flex flex-col">
+        <div className="col-span-12 lg:col-span-8 space-y-8">
+           <section className="panel-kinetic p-10 relative overflow-hidden group min-h-[580px] flex flex-col clipped-corner border-white/5">
               <div className="scanline-overlay absolute inset-0 opacity-5 pointer-events-none" />
-              <div className="flex items-center gap-3 mb-10">
-                 <Zap size={20} className="text-[#BD00FF]" />
-                 <h2 className="font-label-caps text-sm font-bold text-white uppercase tracking-[0.2em]">NEURAL_DISPATCH_UNIT</h2>
+              <div className="flex items-center gap-3 mb-12">
+                 <Zap size={20} className="text-[#BD00FF] animate-pulse" />
+                 <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.4em]">NEURAL_DISPATCH_ORCHESTRATOR</h2>
               </div>
 
-              <div className="flex-1 space-y-10">
-                 <div className="relative">
+              <div className="flex-1 space-y-12 relative z-10">
+                 <div className="relative group/input">
                     <textarea 
                       value={prompt}
                       onChange={e => setPrompt(e.target.value)}
-                      className="w-full bg-transparent border-b-2 border-white/10 p-0 py-4 text-3xl font-headline font-bold text-white focus:border-[#BD00FF] focus:outline-none transition-all placeholder:text-zinc-800 uppercase italic leading-tight"
-                      placeholder="ENTER_VIRAL_OBJECTIVE_HERE..."
+                      className="w-full bg-transparent border-b border-white/10 p-0 py-6 text-4xl font-headline font-black text-white focus:border-[#BD00FF] focus:outline-none transition-all placeholder:text-zinc-800 uppercase italic leading-[1.1] tracking-tighter"
+                      placeholder="ENTER_CORE_OBJECTIVE..."
                       rows={3}
                     />
-                    <div className="absolute -bottom-1 left-0 h-[2px] bg-[#BD00FF] shadow-[0_0_15px_#BD00FF] w-0 group-focus-within:w-full transition-all duration-700" />
+                    <div className="absolute -bottom-[1px] left-0 h-[2px] bg-[#BD00FF] shadow-[0_0_20px_#BD00FF] w-0 group-focus-within/input:w-full transition-all duration-1000" />
                  </div>
 
-                 <div className="grid grid-cols-2 gap-10">
-                    <div className="space-y-4">
-                       <label className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-widest block">TARGET_NETWORK</label>
-                       <div className="grid grid-cols-1 gap-2">
+                 <div className="grid grid-cols-2 gap-12">
+                    <div className="space-y-6">
+                       <label className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.3em] block font-bold">TARGET_DEPLOYMENT_NET</label>
+                       <div className="grid grid-cols-1 gap-3">
                           {PLATFORMS.map(p => (
                             <button 
                               key={p.id}
                               onClick={() => setSelectedPlatform(p.id)}
-                              className={`flex items-center gap-3 p-4 border transition-all ${
+                              className={`flex items-center gap-4 p-5 border transition-all clipped-corner-sm ${
                                 selectedPlatform === p.id 
-                                ? 'bg-[#BD00FF]/10 border-[#BD00FF] text-white' 
-                                : 'bg-white/[0.02] border-white/5 text-zinc-500 hover:border-white/20'
+                                ? 'bg-[#BD00FF]/10 border-[#BD00FF] text-white shadow-[0_0_20px_rgba(189,0,255,0.15)]' 
+                                : 'bg-white/[0.01] border-white/5 text-zinc-500 hover:border-white/20'
                               }`}
                             >
-                               <p.icon size={16} />
-                               <span className="font-data-mono text-[11px] font-bold uppercase">{p.label}</span>
-                               {selectedPlatform === p.id && <CheckCircle2 size={14} className="ml-auto text-[#BD00FF]" />}
+                               <p.icon size={18} className={selectedPlatform === p.id ? 'text-[#BD00FF]' : ''} />
+                               <span className="font-headline text-[13px] font-black uppercase italic tracking-wider">{p.label}</span>
+                               {selectedPlatform === p.id && <div className="ml-auto w-1.5 h-1.5 bg-[#BD00FF] rounded-full animate-pulse-led" />}
                             </button>
                           ))}
                        </div>
                     </div>
 
-                    <div className="space-y-4">
-                       <label className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-widest block">LINGUISTIC_MODEL</label>
-                       <div className="grid grid-cols-1 gap-2">
+                    <div className="space-y-6">
+                       <label className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.3em] block font-bold">COGNITIVE_LANGUAGE_LAYER</label>
+                       <div className="grid grid-cols-1 gap-3">
                           {LANGUAGES.map(l => (
                             <button 
                               key={l.id}
                               onClick={() => setSelectedLanguage(l.id)}
-                              className={`flex items-center justify-between p-4 border transition-all ${
+                              className={`flex items-center justify-between p-5 border transition-all clipped-corner-sm ${
                                 selectedLanguage === l.id 
-                                ? 'bg-[#00f5ff]/10 border-[#00f5ff] text-white' 
-                                : 'bg-white/[0.02] border-white/5 text-zinc-500 hover:border-white/20'
+                                ? 'bg-[#00f5ff]/10 border-[#00f5ff] text-white shadow-[0_0_20px_rgba(0,245,255,0.15)]' 
+                                : 'bg-white/[0.01] border-white/5 text-zinc-500 hover:border-white/20'
                               }`}
                             >
-                               <span className="font-data-mono text-[11px] font-bold uppercase">{l.label}</span>
-                               <Globe size={14} className={selectedLanguage === l.id ? 'text-[#00f5ff]' : 'opacity-0'} />
+                               <span className="font-headline text-[13px] font-black uppercase italic tracking-wider">{l.label}</span>
+                               <Globe size={18} className={selectedLanguage === l.id ? 'text-[#00f5ff] animate-pulse' : 'opacity-0'} />
                             </button>
                           ))}
                        </div>
@@ -202,36 +219,44 @@ export default function FactoryPage() {
                  </div>
               </div>
 
-              <div className="pt-10">
+              <div className="pt-12 relative z-10">
                  <button 
                    disabled={isGenerating || !prompt.trim()}
                    onClick={handleGenerate}
-                   className="w-full bg-white hover:bg-[#6bff83] text-black p-8 font-headline font-black text-2xl uppercase italic flex items-center justify-center gap-4 transition-all disabled:opacity-50 disabled:bg-zinc-800 disabled:text-zinc-500 group overflow-hidden relative"
+                   className="btn-kinetic btn-kinetic-primary w-full group py-8"
                  >
-                    <div className="absolute inset-0 bg-white group-hover:bg-[#6bff83] transition-colors" />
-                    <span className="relative z-10">{isGenerating ? 'EXECUTING_NEURAL_PATH...' : 'INITIATE_PRODUCTION_CYCLE'}</span>
-                    {!isGenerating && <Play size={24} className="relative z-10 fill-current" />}
+                    <span className="text-2xl">{isGenerating ? 'EXECUTING_CYCLES...' : 'INITIATE_PRODUCTION_BURST'}</span>
+                    {!isGenerating && <Play size={28} className="fill-current" />}
+                    <div className="absolute bottom-0 left-0 h-1 bg-[#BD00FF] w-0 group-hover:w-full transition-all duration-1000" />
                  </button>
               </div>
            </section>
 
-           {/* Production Monitor Log */}
-           <section className="bg-[#0A0A0B] border border-white/10 p-6 space-y-4">
+           {/* Live Node Monitoring Log */}
+           <section className="panel-kinetic p-8 space-y-6 clipped-corner border-white/5">
               <div className="flex justify-between items-center border-b border-white/5 pb-4">
                  <div className="flex items-center gap-3">
-                    <Terminal size={14} className="text-[#6bff83]" />
-                    <h2 className="font-label-caps text-[10px] font-bold text-zinc-500 uppercase tracking-widest">LIVE_ENGINE_LOG</h2>
+                    <Terminal size={16} className="text-[#6bff83]" />
+                    <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">LIVE_NODE_TELEMETRY</h2>
                  </div>
-                 <div className="w-2 h-2 bg-[#6bff83] rounded-full animate-pulse" />
+                 <div className="flex items-center gap-2">
+                    <span className="font-data-mono text-[9px] text-[#6bff83] font-bold tracking-widest uppercase italic">UPLINK_STABLE</span>
+                    <div className="w-1.5 h-1.5 bg-[#6bff83] rounded-full animate-pulse-led" />
+                 </div>
               </div>
-              <div className="space-y-2 font-data-mono text-[11px] max-h-[120px] overflow-y-auto custom-scrollbar">
-                 {orders.length > 0 ? orders.slice(0, 4).map((order, i) => (
-                   <div key={i} className="flex gap-4 text-zinc-500">
-                      <span className="text-[#BD00FF] shrink-0">[{new Date(order.created_at).toLocaleTimeString()}]</span>
-                      <span className="truncate">TRANSCODE_REQ: {order.topic || order.title} // STATUS: <span className="text-[#6bff83]">{order.status}</span></span>
+              <div className="space-y-3 font-data-mono text-[11px] max-h-[160px] overflow-y-auto custom-scrollbar">
+                 {orders.length > 0 ? orders.slice(0, 5).map((order, i) => (
+                   <div key={i} className="flex gap-6 p-3 bg-white/[0.01] border-l-2 border-zinc-800 hover:border-[#BD00FF] transition-all group">
+                      <span className="text-zinc-600 shrink-0 font-bold">[{new Date(order.created_at).toLocaleTimeString()}]</span>
+                      <span className="text-zinc-400 truncate group-hover:text-white transition-colors">
+                        PATH_EXEC: {order.topic || order.title} // STATUS: <span className={order.status === 'completed' ? 'text-[#6bff83]' : 'text-[#BD00FF]'}>{order.status.toUpperCase()}</span>
+                      </span>
                    </div>
                  )) : (
-                   <div className="text-zinc-700 italic lowercase">listening for neural pulse...</div>
+                   <div className="text-zinc-700 italic lowercase flex items-center gap-3">
+                      <Activity size={12} className="animate-pulse" />
+                      listening for neural pulse...
+                   </div>
                  )}
               </div>
            </section>

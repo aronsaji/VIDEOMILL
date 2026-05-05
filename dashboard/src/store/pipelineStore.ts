@@ -114,7 +114,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
       const { data, error } = await supabase
         .from('performance_snapshots')
         .select('*')
-        .order('timestamp', { ascending: false });
+        .order('created_at', { ascending: false });
       if (error) throw error;
       set({ analytics: data || [] });
     } catch (err) {
