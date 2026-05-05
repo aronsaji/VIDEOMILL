@@ -130,6 +130,7 @@ async function updateStatus(id, status, extra = {}) {
 }
 
 async function callFooocus(prompt, dest) {
+  console.log("🔍 Fooocus: Starter signatur-sjekk...");
   const cinematicPrompt = `${prompt}, cinematic shot, 8k resolution, highly detailed, masterpiece, stunning lighting, unreal engine 5 render, professional photography, viral aesthetic`;
   
   const attempts = [
@@ -257,7 +258,7 @@ async function handleCinematicRender(data) {
     }
 
     for (let i = 0; i < processedClips.length - 1; i++) {
-      const dur = parseFloat(execSync(`"${FFMPEG_PATH.replace('ffmpeg.exe', 'ffprobe.exe')}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${processedClips[i]}"`).toString().trim());
+      const dur = parseFloat(execSync(`"${FFPROBE_PATH}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${processedClips[i]}"`).toString().trim());
       offset += dur - transitionTime;
       const nextOutput = `[xf${i}]`;
       filterComplex += `${i === 0 ? '[v0]' : lastOutput}[v${i+1}]xfade=transition=fade:duration=${transitionTime}:offset=${offset}${nextOutput};`;
@@ -310,8 +311,7 @@ async function handleCinematicRender(data) {
         }
       });
     }
-    // Oppdater currentTime basert på scenens varighet (minus xfade overlap hvis vi er nøye, men buffer holder her)
-    const dur = parseFloat(execSync(`"${FFMPEG_PATH.replace('ffmpeg.exe', 'ffprobe.exe')}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${processedClips[i]}"`).toString().trim());
+    const dur = parseFloat(execSync(`"${FFPROBE_PATH}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${processedClips[i]}"`).toString().trim());
     currentTime += dur;
   }
   generateAnimatedASS(allSubData, assFile);
@@ -361,14 +361,13 @@ async function handleCinematicRender(data) {
     videoMap = '[v_logo]';
   }
 
-  // Audio mix
   const mixLabel = musicFile ? '[v][m]amix=inputs=2:duration=first[a]' : '[v]amix=inputs=1[a]';
   filterComplex += `;${mixLabel}`;
 
-  const vf = subFilter ? `-vf "${videoMap}${subFilter ? ',' + subFilter : ''}"` : `-vf "${videoMap}"`;
+  const vf = subFilter ? `${videoMap},${subFilter}[v_final]` : `${videoMap}[v_final]`;
 
   console.log("🎬 Rendrer final video...");
-  execSync(`"${FFMPEG_PATH}" -y ${inputArgs} -filter_complex "${filterComplex}" ${vf} -map "${videoMap}" -map "[a]" -c:v libx264 -preset fast -shortest "${finalOutput}"`, { stdio: 'ignore' });
+  execSync(`"${FFMPEG_PATH}" -y ${inputArgs} -filter_complex "${filterComplex}" -vf "${vf}" -map "[v_final]" -map "[a]" -c:v libx264 -preset fast -shortest "${finalOutput}"`, { stdio: 'ignore' });
 
   // 7. LAST OPP
   const storagePath = `videos/${video_id}/final.mp4`;

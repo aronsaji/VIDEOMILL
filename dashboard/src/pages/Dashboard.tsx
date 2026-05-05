@@ -75,12 +75,17 @@ export default function Dashboard() {
 
   const safeOrders = Array.isArray(orders) ? orders : [];
   const safeTrends = Array.isArray(trends) ? trends : [];
-  const safeVideos = Array.isArray(videos) ? videos : [];
+  const productions = usePipelineStore(state => state.productions);
+  const safeVideos = Array.isArray(videos) && videos.length > 0 ? videos : (Array.isArray(productions) ? productions : []);
+
+  useEffect(() => {
+    console.log("📊 Dashboard Data Check:", { videosCount: safeVideos.length, system: systemHealth.voiceServer });
+  }, [safeVideos]);
 
   const stats = [
-    { label: 'RENDER_FLOW', value: safeOrders.filter(o => o.status === 'processing' || o.status === 'rendering').length || 0, sub: 'ACTIVE_NODES', color: 'text-[#6bff83]', icon: Cpu, borderColor: 'border-[#6bff83]/20' },
+    { label: 'RENDER_FLOW', value: safeVideos.filter(v => v.status === 'rendering' || v.status === 'processing').length || 0, sub: 'ACTIVE_NODES', color: 'text-[#6bff83]', icon: Cpu, borderColor: 'border-[#6bff83]/20' },
     { label: 'ARCHIVE_SIZE', value: safeVideos.length, sub: 'FINISHED_ASSETS', color: 'text-[#BD00FF]', icon: TrendingUp, borderColor: 'border-[#BD00FF]/20' },
-    { label: 'QUEUE_DEPTH', value: safeOrders.filter(o => o.status === 'queued' || o.status === 'pending').length || 0, sub: 'TASKS_PENDING', color: 'text-[#00f5ff]', icon: Layers, borderColor: 'border-[#00f5ff]/20' },
+    { label: 'QUEUE_DEPTH', value: safeVideos.filter(v => v.status === 'pending' || v.status === 'queued').length || 0, sub: 'TASKS_PENDING', color: 'text-[#00f5ff]', icon: Layers, borderColor: 'border-[#00f5ff]/20' },
     { label: 'LIVE_TRENDS', value: safeTrends.length, sub: 'RADAR_ACTIVE', color: 'text-[#ffaa00]', icon: Activity, borderColor: 'border-[#ffaa00]/20' },
   ];
 
@@ -192,7 +197,7 @@ export default function Dashboard() {
                    <div className="p-8 bg-white/[0.01] border border-white/5 clipped-corner text-zinc-800">
                       <Cpu size={64} />
                    </div>
-                   <p className="text-zinc-600 font-data-mono uppercase tracking-[0.3em] text-xs">No active production nodes detected in cluster.</p>
+                    <p className="text-[#BD00FF] font-data-mono uppercase tracking-[0.3em] text-xs animate-pulse">SCANNING NEURAL NETWORK FOR PENDING TASKS...</p>
                 </div>
               )}
             </div>
