@@ -67,7 +67,7 @@ export default function TrendAnalyzer() {
           </h1>
         </div>
 
-        <div className="flex gap-4 relative z-10">
+        <div className="flex flex-wrap gap-6 relative z-10">
           {/* Radar Filters */}
           <div className="flex bg-black/60 p-2 border border-white/5 clipped-corner-sm gap-2">
             <div className="flex flex-col gap-1">
@@ -93,19 +93,20 @@ export default function TrendAnalyzer() {
             </div>
           </div>
         
-        <div className="flex gap-4 relative z-10">
-          <div className="panel-kinetic p-6 flex flex-col min-w-[180px] group border-[#00f5ff]/20 bg-[#00f5ff]/5 clipped-corner-sm">
-             <span className="font-label-caps text-[9px] text-zinc-500 uppercase tracking-[0.3em] mb-1 font-bold">SIGNALS_SEC</span>
-             <span className="font-headline text-4xl font-black text-white italic tracking-tighter">1,422</span>
-          </div>
-          <div className="panel-kinetic p-6 flex flex-col min-w-[180px] group border-[#ffaa00]/20 bg-[#ffaa00]/5 clipped-corner-sm">
-             <span className="font-label-caps text-[9px] text-zinc-500 uppercase tracking-[0.3em] mb-1 font-bold">NEURAL_LOAD</span>
-             <span className="font-headline text-4xl font-black text-[#ffaa00] italic tracking-tighter">42%</span>
+          <div className="flex gap-4">
+            <div className="panel-kinetic p-6 flex flex-col min-w-[180px] group border-[#00f5ff]/20 bg-[#00f5ff]/5 clipped-corner-sm">
+               <span className="font-label-caps text-[9px] text-zinc-500 uppercase tracking-[0.3em] mb-1 font-bold">SIGNALS_SEC</span>
+               <span className="font-headline text-4xl font-black text-white italic tracking-tighter">1,422</span>
+            </div>
+            <div className="panel-kinetic p-6 flex flex-col min-w-[180px] group border-[#ffaa00]/20 bg-[#ffaa00]/5 clipped-corner-sm">
+               <span className="font-label-caps text-[9px] text-zinc-500 uppercase tracking-[0.3em] mb-1 font-bold">NEURAL_LOAD</span>
+               <span className="font-headline text-4xl font-black text-[#ffaa00] italic tracking-tighter">42%</span>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="space-y-8">
+      <div className="space-y-12">
         {/* Tactical Radar Visualization */}
         <section className="panel-kinetic border-white/5 clipped-corner min-h-[400px] relative overflow-hidden flex flex-col">
            <div className="scanline-overlay absolute inset-0 opacity-10 pointer-events-none" />
@@ -156,6 +157,9 @@ export default function TrendAnalyzer() {
                    </div>
                 </motion.div>
               ))}
+           </div>
+        </section>
+
         {/* INTERCEPTION_GRID: Rich Content Cards */}
         <div className="space-y-6">
            <div className="flex items-center justify-between border-b border-white/5 pb-4">

@@ -206,63 +206,52 @@ export default function Factory() {
                        </div>
                     </div>
 
-                    <div className="space-y-6">
-                       {/* Language & Voice Selection */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <label className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold block">{t('LANGUAGE')}</label>
-              <div className="flex flex-wrap gap-2">
-                {LANGUAGES.map(lang => (
-                  <button
-                    key={lang.id}
-                    onClick={() => setSelectedLanguage(lang.id)}
-                    className={`px-4 py-2 font-data-mono text-[10px] font-black transition-all border clipped-corner-sm ${
-                      selectedLanguage === lang.id
-                        ? 'bg-white text-black border-white'
-                        : 'text-zinc-500 border-white/10 hover:border-white/30'
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    <div className="space-y-8">
+                       <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                          <h2 className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] block font-bold">NEURAL_CONFIGURATION</h2>
+                          <DatabaseIcon size={16} className="text-[#BD00FF] opacity-30" />
+                       </div>
 
-            <div className="space-y-4">
-              <label className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold block">{t('VOICE_GENDER')}</label>
-              <div className="flex bg-black/40 p-1 border border-white/5 clipped-corner-sm w-fit">
-                {(['AUTO', 'MALE', 'FEMALE'] as const).map((gender) => (
-                  <button
-                    key={gender}
-                    onClick={() => setVoiceGender(gender)}
-                    className={`px-6 py-2 font-data-mono text-[10px] font-black transition-all ${
-                      voiceGender === gender 
-                        ? 'bg-[#BD00FF] text-black shadow-[0_0_15px_rgba(189,0,255,0.4)]' 
-                        : 'text-zinc-500 hover:text-white'
-                    }`}
-                  >
-                    {t(gender)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-                       <label className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.3em] block font-bold">COGNITIVE_LANGUAGE_LAYER</label>
-                       <div className="grid grid-cols-1 gap-3">
-                          {LANGUAGES.map(l => (
-                            <button 
-                              key={l.id}
-                              onClick={() => setSelectedLanguage(l.id)}
-                              className={`flex items-center justify-between p-5 border transition-all clipped-corner-sm ${
-                                selectedLanguage === l.id 
-                                ? 'bg-[#00f5ff]/10 border-[#00f5ff] text-white shadow-[0_0_20px_rgba(0,245,255,0.15)]' 
-                                : 'bg-white/[0.01] border-white/5 text-zinc-500 hover:border-white/20'
-                              }`}
-                            >
-                               <span className="font-headline text-[13px] font-black uppercase italic tracking-wider">{l.label}</span>
-                               <Globe size={18} className={selectedLanguage === l.id ? 'text-[#00f5ff] animate-pulse' : 'opacity-0'} />
-                            </button>
-                          ))}
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="space-y-4">
+                             <label className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold block italic">{t('LANGUAGE')}</label>
+                             <div className="grid grid-cols-1 gap-2">
+                                {LANGUAGES.map(lang => (
+                                  <button
+                                    key={lang.id}
+                                    onClick={() => setSelectedLanguage(lang.id)}
+                                    className={`px-4 py-4 font-data-mono text-[10px] font-black transition-all border clipped-corner-sm flex justify-between items-center ${
+                                      selectedLanguage === lang.id
+                                        ? 'bg-[#BD00FF]/20 border-[#BD00FF] text-white shadow-[0_0_15px_rgba(189,0,255,0.2)]'
+                                        : 'text-zinc-500 border-white/5 bg-white/[0.01] hover:border-white/20'
+                                    }`}
+                                  >
+                                    <span className="uppercase">{lang.label}</span>
+                                    {selectedLanguage === lang.id && <CheckCircle2 size={12} className="text-[#BD00FF]" />}
+                                  </button>
+                                ))}
+                             </div>
+                          </div>
+
+                          <div className="space-y-4">
+                             <label className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold block italic">{t('VOICE_GENDER')}</label>
+                             <div className="grid grid-cols-1 gap-2">
+                                {(['AUTO', 'MALE', 'FEMALE'] as const).map((gender) => (
+                                  <button
+                                    key={gender}
+                                    onClick={() => setVoiceGender(gender)}
+                                    className={`px-4 py-4 font-data-mono text-[10px] font-black transition-all border clipped-corner-sm flex justify-between items-center ${
+                                      voiceGender === gender 
+                                        ? 'bg-[#BD00FF] text-black shadow-[0_0_15px_rgba(189,0,255,0.4)] border-[#BD00FF]' 
+                                        : 'text-zinc-500 border-white/5 bg-white/[0.01] hover:border-white/20'
+                                    }`}
+                                  >
+                                    <span className="uppercase">{t(gender)}</span>
+                                    {voiceGender === gender && <Zap size={12} className="text-black" />}
+                                  </button>
+                                ))}
+                             </div>
+                          </div>
                        </div>
                     </div>
                  </div>
