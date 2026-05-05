@@ -14,7 +14,8 @@ import {
   Globe,
   Monitor,
   Mic2,
-  Share2
+  Share2,
+  Database
 } from 'lucide-react';
 
 export default function Dashboard() {
