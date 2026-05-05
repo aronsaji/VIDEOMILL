@@ -16,31 +16,32 @@ export default function TrendAnalyzer() {
   const [isProcessing, setIsProcessing] = useState(false);
   
   // State for dual-filtering
-  const [selectedLanguage, setSelectedLanguage] = useState('Norsk');
+  const [selectedLanguageCode, setSelectedLanguageCode] = useState('NO');
   const [selectedCountry, setSelectedCountry] = useState('NORWAY');
   const [selectedPlatform, setSelectedPlatform] = useState('ALL');
 
   const COUNTRIES = ['GLOBAL', 'USA', 'NORWAY', 'SPAIN', 'INDIA', 'FRANCE'];
   const RADAR_PLATFORMS = ['ALL', 'TIKTOK', 'X', 'YOUTUBE', 'INSTAGRAM'];
 
-  // ORDERED AS REQUESTED
+  // ORDERED AS REQUESTED + ALL
   const LANGUAGES = [
-    { id: 'Norsk', label: 'NO', country: 'NORWAY' },
-    { id: 'English', label: 'EN', country: 'USA' },
-    { id: 'Tamil', label: 'TA', country: 'INDIA' },
-    { id: 'Hindi', label: 'HI', country: 'INDIA' },
-    { id: 'Español', label: 'ES', country: 'SPAIN' },
+    { id: 'ALL', label: 'ALL', code: 'ALL' },
+    { id: 'Norsk', label: 'NO', code: 'NO' },
+    { id: 'English', label: 'EN', code: 'EN' },
+    { id: 'Tamil', label: 'TA', code: 'TA' },
+    { id: 'Hindi', label: 'HI', code: 'HI' },
+    { id: 'Español', label: 'ES', code: 'ES' },
   ];
 
   useEffect(() => {
-    // Fetching with strict filtering by BOTH country and language
-    fetchTrends(selectedCountry, selectedLanguage);
+    // We send the CODE (NO, EN, etc.) to the store
+    fetchTrends(selectedCountry, selectedLanguageCode);
     
     const unsubscribe = subscribeToChanges();
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
-  }, [fetchTrends, subscribeToChanges, selectedCountry, selectedLanguage]);
+  }, [fetchTrends, subscribeToChanges, selectedCountry, selectedLanguageCode]);
 
   const safeTrends = Array.isArray(trends) ? trends : [];
 
@@ -49,18 +50,21 @@ export default function TrendAnalyzer() {
     setIsProcessing(true);
     
     try {
+      // Find the language name from the code for the production payload
+      const langName = LANGUAGES.find(l => l.code === selectedLanguageCode)?.id || 'English';
+
       const success = await triggerProduction({
         action: 'viranode-generate',
         topic: trend.title,
         title: trend.title,
-        language: selectedLanguage, // Use the selected filter language
+        language: langName,
         source: 'TREND_RADAR_INTERCEPT',
         priority: 'HIGH',
         timestamp: new Date().toISOString()
       });
       
       if (success) {
-        alert(`✅ PRODUCTION_QUEUED: ${trend.title} [${selectedLanguage}]`);
+        alert(`✅ PRODUCTION_QUEUED: ${trend.title} [${langName}]`);
       }
     } catch (err) {
       console.error('Dispatch error:', err);
@@ -75,7 +79,7 @@ export default function TrendAnalyzer() {
         <div className="relative z-10">
           <div className="flex items-center gap-3 text-[#00f5ff] font-data-mono text-[10px] font-black uppercase tracking-[0.5em] mb-4 italic">
             <Radar size={14} className="animate-spin-slow" />
-            GEOSPATIAL_TREND_LOCATOR_v3.1
+            GEOSPATIAL_TREND_LOCATOR_v3.2
           </div>
           <h1 className="font-headline text-[52px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
             TREND_RADAR
@@ -83,7 +87,6 @@ export default function TrendAnalyzer() {
         </div>
 
         <div className="flex flex-wrap gap-6 relative z-10">
-          {/* Dual Filter Panel */}
           <div className="flex bg-black/60 p-2 border border-white/5 clipped-corner-sm gap-2">
             <div className="flex flex-col gap-1">
               <span className="font-data-mono text-[11px] text-zinc-400 px-2 uppercase">REGION</span>
@@ -111,7 +114,7 @@ export default function TrendAnalyzer() {
       </header>
 
       <div className="space-y-12">
-        {/* Language Selection Bar (Ordered as requested) */}
+        {/* Language Selection Bar (Using Codes for DB filtering) */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-6">
            <div className="flex items-center gap-3">
               <Zap size={18} className="text-[#6bff83] animate-pulse" />
@@ -122,9 +125,9 @@ export default function TrendAnalyzer() {
               {LANGUAGES.map(lang => (
                  <button
                    key={lang.id}
-                   onClick={() => setSelectedLanguage(lang.id)}
+                   onClick={() => setSelectedLanguageCode(lang.code)}
                    className={`px-6 py-2 font-data-mono text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                     selectedLanguage === lang.id 
+                     selectedLanguageCode === lang.code 
                      ? 'bg-[#00f5ff] text-black shadow-[0_0_15px_rgba(0,245,255,0.4)]' 
                      : 'text-zinc-600 hover:text-white hover:bg-white/5'
                    }`}
@@ -178,7 +181,7 @@ export default function TrendAnalyzer() {
                <div className="flex items-center justify-between pt-4 border-t border-white/5">
                  <div className="flex items-center gap-2">
                     <Globe size={12} className="text-[#00f5ff]" />
-                    <span className="font-data-mono text-[9px] text-zinc-400 font-black">{trend.language || selectedLanguage}</span>
+                    <span className="font-data-mono text-[9px] text-zinc-400 font-black">{trend.language || selectedLanguageCode}</span>
                  </div>
                  <div className="font-headline text-lg font-black text-[#6bff83] italic tracking-tighter">
                    {trend.growth_stat || '+88%'}
@@ -188,7 +191,16 @@ export default function TrendAnalyzer() {
            )) : (
              <div className="col-span-full py-20 flex flex-col items-center justify-center border-2 border-dashed border-white/5 opacity-30 rounded-3xl">
                 <Search size={48} className="mb-4 text-zinc-600" />
-                <p className="font-data-mono text-xs uppercase tracking-widest">No signals found for {selectedCountry} / {selectedLanguage}</p>
+                <p className="font-data-mono text-xs uppercase tracking-widest">No signals found for {selectedCountry} / {selectedLanguageCode}</p>
+                <button 
+                  onClick={() => {
+                    setSelectedLanguageCode('ALL');
+                    setSelectedCountry('GLOBAL');
+                  }}
+                  className="mt-4 text-[#00f5ff] text-[10px] font-black uppercase tracking-widest hover:underline"
+                >
+                  RESET_TO_GLOBAL_VIEW
+                </button>
              </div>
            )}
         </div>
