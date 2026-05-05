@@ -161,11 +161,29 @@ const TrendAnalyzer = () => {
           ))}
         </div>
       ) : (
-        <div className="h-64 flex flex-col items-center justify-center bg-black/20 rounded-2xl border border-white/5 border-dashed space-y-4">
-          <AlertCircle className="w-5 h-5 text-zinc-800" />
+        <div className="h-64 flex flex-col items-center justify-center bg-black/20 rounded-2xl border border-white/5 border-dashed space-y-6">
           <div className="text-center">
+            <AlertCircle className="w-8 h-8 text-zinc-800 mx-auto mb-4" />
             <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest">No Signals Detected</h3>
-            <p className="text-zinc-700 text-[9px] font-mono mt-1">Adjust regional matrix or linguistic filters.</p>
+            <p className="text-zinc-700 text-[9px] font-mono mt-1 mb-6">Neural database is empty or connection is pending.</p>
+            
+            <button 
+              onClick={async () => {
+                const { supabase } = await import('../lib/supabase');
+                const newTrends = [
+                  { title: "AI Video Revolution: Sora vs Kling", topic: "AI_VIDEO", growth_stat: "95% INCREASE", viral_score: 98, country: "GLOBAL", language: "english" },
+                  { title: "NVIDIA Blackwell: Future of Compute", topic: "GPU_TECH", growth_stat: "120% INCREASE", viral_score: 95, country: "GLOBAL", language: "english" },
+                  { title: "SpaceX Starship: Mars Mission Prep", topic: "SPACE_X", growth_stat: "85% INCREASE", viral_score: 92, country: "GLOBAL", language: "english" },
+                  { title: "Sustainable Tech: Green Energy 2026", topic: "GREEN_TECH", growth_stat: "40% INCREASE", viral_score: 88, country: "GLOBAL", language: "english" },
+                  { title: "Neural Interfaces: Link to the Mind", topic: "NEURALINK", growth_stat: "INCREASING", viral_score: 85, country: "GLOBAL", language: "english" }
+                ];
+                await supabase.from('trending_topics').insert(newTrends);
+                window.location.reload();
+              }}
+              className="btn-kinetic py-3 px-8 text-[10px] bg-[#BD00FF]/10 border-[#BD00FF]/30 text-[#BD00FF] hover:bg-[#BD00FF] hover:text-black"
+            >
+              INITIALIZE_EMERGENCY_RECON
+            </button>
           </div>
         </div>
       )}
