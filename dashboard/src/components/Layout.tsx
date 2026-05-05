@@ -187,7 +187,7 @@ export default function Layout() {
           <div className="relative z-10 p-4 md:p-8">
             <Outlet />
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
