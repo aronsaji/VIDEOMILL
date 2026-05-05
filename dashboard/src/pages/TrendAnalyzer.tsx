@@ -3,11 +3,11 @@ import {
   Zap, 
   TrendingUp, 
   Globe, 
-  Shield, 
   Activity, 
   AlertCircle,
-  Filter,
-  Languages
+  Clock,
+  ExternalLink,
+  Plus
 } from 'lucide-react';
 import { usePipelineStore } from '../store/pipelineStore';
 import { triggerProduction } from '../lib/api';
@@ -47,144 +47,183 @@ const TrendAnalyzer = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header - Industrial Style */}
-      <div className="border-b border-white/10 pb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <Activity className="w-4 h-4 text-green-500" />
-          <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.3em]">Geospatial_Trend_Locator_v3.2</span>
+    <div className="space-y-10 animate-in fade-in duration-700">
+      {/* Header Area */}
+      <div className="flex justify-between items-end border-b border-white/10 pb-8">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse" />
+            <span className="font-label-sm text-[10px] text-zinc-500 uppercase tracking-[0.3em]">Geospatial Trend Locator v3.2</span>
+          </div>
+          <h1 className="font-headline-lg text-4xl font-black text-white tracking-tighter uppercase italic">
+            Trend <span className="text-[#22D3EE]">Radar</span>
+          </h1>
         </div>
-        <h1 className="text-3xl font-black text-white uppercase tracking-tighter italic">
-          Trend <span className="text-green-500 text-outline">Radar</span>
-        </h1>
+        <button 
+          onClick={async () => {
+            const { supabase } = await import('../lib/supabase');
+            const newTrends = [
+              { title: "AI Video Revolution: Sora vs Kling", topic: "AI_VIDEO", growth_stat: "95% INCREASE", viral_score: 98, country: "GLOBAL", language: "english" },
+              { title: "NVIDIA Blackwell: Future of Compute", topic: "GPU_TECH", growth_stat: "120% INCREASE", viral_score: 95, country: "GLOBAL", language: "english" },
+              { title: "SpaceX Starship: Mars Mission Prep", topic: "SPACE_X", growth_stat: "85% INCREASE", viral_score: 92, country: "GLOBAL", language: "english" },
+              { title: "Sustainable Tech: Green Energy 2026", topic: "GREEN_TECH", growth_stat: "40% INCREASE", viral_score: 88, country: "GLOBAL", language: "english" },
+              { title: "Neural Interfaces: Link to the Mind", topic: "NEURALINK", growth_stat: "INCREASING", viral_score: 85, country: "GLOBAL", language: "english" }
+            ];
+            await supabase.from('trending_topics').insert(newTrends);
+            window.location.reload();
+          }}
+          className="px-6 py-3 bg-[#22D3EE]/10 border border-[#22D3EE]/30 text-[#22D3EE] font-headline-md text-[10px] font-black uppercase tracking-widest rounded hover:bg-[#22D3EE] hover:text-black transition-all flex items-center gap-2"
+        >
+          <Zap size={14} />
+          Emergency Recon
+        </button>
       </div>
 
-      {/* Region & Language Controls - NOW 100% DYNAMIC */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest whitespace-nowrap">Target Region:</span>
+      {/* Filter Matrix */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-[#0A0A0A] border border-white/5 p-8 rounded-xl">
+        <div className="space-y-4">
+          <label className="font-headline-md text-[10px] text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+            <Globe size={12} /> Target Region
+          </label>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedCountry('ALL')}
-              className={`text-[10px] font-bold px-3 py-1 rounded border transition-all ${
+              className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest border rounded transition-all ${
                 selectedCountry === 'ALL'
-                  ? 'bg-zinc-800 text-green-500 border-green-500/50'
-                  : 'text-zinc-500 border-white/5 hover:border-white/20'
+                  ? 'bg-[#22D3EE] text-black border-[#22D3EE]'
+                  : 'text-zinc-500 border-white/10 hover:border-white/30'
               }`}
             >
-              ALL
+              GLOBAL
             </button>
-            {uniqueCountries.map((r) => (
+            {uniqueCountries.map((c) => (
               <button
-                key={r}
-                onClick={() => setSelectedCountry(r)}
-                className={`text-[10px] font-bold px-3 py-1 rounded border transition-all ${
-                  selectedCountry === r
-                    ? 'bg-zinc-800 text-green-500 border-green-500/50'
-                    : 'text-zinc-500 border-white/5 hover:border-white/20'
+                key={c}
+                onClick={() => setSelectedCountry(c)}
+                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest border rounded transition-all ${
+                  selectedCountry === c
+                    ? 'bg-[#22D3EE] text-black border-[#22D3EE]'
+                    : 'text-zinc-500 border-white/10 hover:border-white/30'
                 }`}
               >
-                {r.toUpperCase()}
+                {c.toUpperCase()}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 p-1 bg-zinc-900/50 rounded-xl border border-white/5 w-fit">
-          <button
-            onClick={() => setSelectedLanguage('ALL')}
-            className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
-              selectedLanguage === 'ALL'
-                ? 'bg-green-500 text-black'
-                : 'text-zinc-500 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            ALL
-          </button>
-          {uniqueLanguages.map((langCode) => (
+        <div className="space-y-4">
+          <label className="font-headline-md text-[10px] text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+            <Activity size={12} /> Signal Language
+          </label>
+          <div className="flex flex-wrap gap-2">
             <button
-              key={langCode}
-              onClick={() => setSelectedLanguage(langCode)}
-              className={`px-6 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
-                selectedLanguage === langCode
-                  ? 'bg-green-500 text-black'
-                  : 'text-zinc-500 hover:text-white hover:bg-white/5'
+              onClick={() => setSelectedLanguage('ALL')}
+              className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest border rounded transition-all ${
+                selectedLanguage === 'ALL'
+                  ? 'bg-[#22D3EE] text-black border-[#22D3EE]'
+                  : 'text-zinc-500 border-white/10 hover:border-white/30'
               }`}
             >
-              {langCode.toUpperCase()}
+              ALL SIGNALS
             </button>
-          ))}
+            {uniqueLanguages.map((l) => (
+              <button
+                key={l}
+                onClick={() => setSelectedLanguage(l)}
+                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest border rounded transition-all ${
+                  selectedLanguage === l
+                    ? 'bg-[#22D3EE] text-black border-[#22D3EE]'
+                    : 'text-zinc-500 border-white/10 hover:border-white/30'
+                }`}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Main Grid */}
+      {/* Results Grid */}
       {isLoading ? (
-        <div className="h-64 flex flex-col items-center justify-center bg-black/20 rounded-2xl border border-white/5 border-dashed">
-          <div className="w-6 h-6 border-2 border-green-500/20 border-t-green-500 rounded-full animate-spin mb-4" />
-          <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Scanning Frequencies...</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-64 bg-white/5 animate-pulse rounded-lg border border-white/5" />
+          ))}
         </div>
       ) : trends.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[...trends]
             .sort((a, b) => (b.viral_score || 0) - (a.viral_score || 0))
             .map((trend) => (
             <div 
               key={trend.id}
-              onClick={() => handleDispatch(trend)}
-              className="group bg-zinc-900/30 border border-white/5 rounded-xl p-5 hover:border-green-500/30 hover:bg-zinc-900/60 transition-all cursor-pointer relative overflow-hidden"
+              className="bg-[#0A0A0A] border border-white/5 p-8 rounded-lg relative overflow-hidden group hover:border-[#22D3EE]/50 transition-all flex flex-col"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className="text-[9px] font-black text-green-500 uppercase px-2 py-0.5 bg-green-500/10 rounded border border-green-500/20">
-                  {trend.category || 'Viral'}
+              <div className="flex justify-between items-start mb-6">
+                <div className="px-3 py-1 bg-[#22D3EE]/10 border border-[#22D3EE]/30 text-[#22D3EE] text-[9px] font-black uppercase tracking-widest rounded">
+                  {trend.category || 'Viral Signal'}
                 </div>
-                <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-tighter">
-                  {trend.viral_score}% MATCH
+                <div className="flex flex-col items-end">
+                  <span className="font-label-sm text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Viral Score</span>
+                  <span className="font-headline-lg text-xl font-black text-white">{trend.viral_score}%</span>
                 </div>
               </div>
 
-              <h3 className="text-white font-bold text-lg leading-tight mb-4 group-hover:text-green-400 transition-colors uppercase italic">
+              <h3 className="font-headline-md text-xl font-black text-white uppercase italic tracking-tight mb-8 group-hover:text-[#22D3EE] transition-colors line-clamp-2 min-h-[3.5rem]">
                 {trend.title}
               </h3>
 
-              <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
-                <div className="text-[10px] font-mono text-zinc-500 uppercase">{trend.platform}</div>
-                <div className="text-[10px] font-bold text-white">{trend.growth_stat}</div>
+              <div className="space-y-6 mt-auto">
+                <div className="flex items-center justify-between font-label-sm text-[10px] text-zinc-500 uppercase tracking-[0.2em]">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp size={12} className="text-[#22D3EE]" />
+                    <span>{trend.growth_stat || 'High Growth'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock size={12} />
+                    <span>2h ago</span>
+                  </div>
+                </div>
+
+                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-[#22D3EE] transition-all duration-1000 ease-out shadow-[0_0_10px_#22D3EE]"
+                    style={{ width: `${trend.viral_score}%` }}
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => handleDispatch(trend)}
+                    className="flex-1 py-4 bg-[#22D3EE] text-black font-headline-md text-[10px] font-black uppercase tracking-widest rounded hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] transition-all flex items-center justify-center gap-2"
+                  >
+                    <Plus size={14} />
+                    Create Video
+                  </button>
+                  <button className="w-12 h-12 bg-white/5 border border-white/10 text-white rounded flex items-center justify-center hover:bg-white/10 transition-all">
+                    <ExternalLink size={16} />
+                  </button>
+                </div>
               </div>
 
               {/* Status Indicator */}
               {lastDispatched === trend.id && (
-                <div className="absolute inset-0 bg-green-500/90 backdrop-blur-sm flex items-center justify-center">
-                  <span className="text-black font-black uppercase text-xs tracking-widest">Neural Dispatch Sent</span>
+                <div className="absolute inset-0 bg-[#22D3EE] flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300">
+                  <Zap size={48} className="text-black mb-4 animate-bounce" />
+                  <span className="text-black font-black uppercase text-xs tracking-[0.3em]">Signal Dispatched</span>
                 </div>
               )}
             </div>
           ))}
         </div>
       ) : (
-        <div className="h-64 flex flex-col items-center justify-center bg-black/20 rounded-2xl border border-white/5 border-dashed space-y-6">
-          <div className="text-center">
-            <AlertCircle className="w-8 h-8 text-zinc-800 mx-auto mb-4" />
-            <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest">No Signals Detected</h3>
-            <p className="text-zinc-700 text-[9px] font-mono mt-1 mb-6">Neural database is empty or connection is pending.</p>
-            
-            <button 
-              onClick={async () => {
-                const { supabase } = await import('../lib/supabase');
-                const newTrends = [
-                  { title: "AI Video Revolution: Sora vs Kling", topic: "AI_VIDEO", growth_stat: "95% INCREASE", viral_score: 98, country: "GLOBAL", language: "english" },
-                  { title: "NVIDIA Blackwell: Future of Compute", topic: "GPU_TECH", growth_stat: "120% INCREASE", viral_score: 95, country: "GLOBAL", language: "english" },
-                  { title: "SpaceX Starship: Mars Mission Prep", topic: "SPACE_X", growth_stat: "85% INCREASE", viral_score: 92, country: "GLOBAL", language: "english" },
-                  { title: "Sustainable Tech: Green Energy 2026", topic: "GREEN_TECH", growth_stat: "40% INCREASE", viral_score: 88, country: "GLOBAL", language: "english" },
-                  { title: "Neural Interfaces: Link to the Mind", topic: "NEURALINK", growth_stat: "INCREASING", viral_score: 85, country: "GLOBAL", language: "english" }
-                ];
-                await supabase.from('trending_topics').insert(newTrends);
-                window.location.reload();
-              }}
-              className="btn-kinetic py-3 px-8 text-[10px] bg-[#BD00FF]/10 border-[#BD00FF]/30 text-[#BD00FF] hover:bg-[#BD00FF] hover:text-black"
-            >
-              INITIALIZE_EMERGENCY_RECON
-            </button>
-          </div>
+        <div className="py-32 flex flex-col items-center justify-center text-center border-2 border-dashed border-white/5 rounded-2xl">
+          <Radar size={48} className="text-zinc-800 mb-8 animate-pulse" />
+          <h3 className="font-headline-md text-xl font-black text-white mb-4 uppercase italic">No Signals Detected</h3>
+          <p className="text-zinc-500 max-w-sm mx-auto mb-10 font-body-md uppercase text-xs tracking-widest leading-loose">
+            The neural intercept is silent. Use the Emergency Recon module above to initialize historical data.
+          </p>
         </div>
       )}
     </div>

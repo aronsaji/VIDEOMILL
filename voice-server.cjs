@@ -169,7 +169,9 @@ async function callFooocus(prompt, dest) {
   const attempts = [
     { fn: 32, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] },
     { fn: 33, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", "png", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] },
-    { fn: 33, data: [cinematicPrompt, "text, blurry", ["Fooocus V2"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true] }
+    { fn: 31, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true] },
+    { fn: 30, data: [cinematicPrompt, "text, blurry", ["Fooocus V2"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true] },
+    { fn: 34, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true] }
   ];
 
   for (const attempt of attempts) {

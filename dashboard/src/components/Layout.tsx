@@ -1,35 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Factory, Zap, Radar, 
-  Bot, Archive, Settings, Menu, X, 
-  LogOut, User, Activity, Shield, Terminal, Globe, ClipboardList
+  Bot, Archive, Settings, Bell, Search, 
+  Terminal, Video, Plus, Globe
 } from 'lucide-react';
-import Logo from './Logo';
-import { triggerProduction } from '../lib/api';
+import { useI18nStore } from '../store/i18nStore';
 import { supabase } from '../lib/supabase';
 
 const NAV_ITEMS = [
-  { path: '/', label: 'COMMAND_CENTER', icon: LayoutDashboard, color: 'text-[#BD00FF]' },
-  { path: '/factory', label: 'THE_FACTORY', icon: Factory, color: 'text-[#6bff83]' },
-  { path: '/orders', label: 'ORDERS_TERMINAL', icon: ClipboardList, color: 'text-[#BD00FF]' },
-  { path: '/auto-series', label: 'AUTO_SERIES', icon: Zap, color: 'text-[#e90053]' },
-  { path: '/trends', label: 'TREND_RADAR', icon: Radar, color: 'text-[#00f5ff]' },
-  { path: '/agents', label: 'AI_AGENTS', icon: Bot, color: 'text-[#ffaa00]' },
-  { path: '/archive', label: 'VIDEO_ARCHIVE', icon: Archive, color: 'text-zinc-400' },
-  { path: '/settings', label: 'SETTINGS', icon: Settings, color: 'text-zinc-500' },
-  { path: '/logs', label: 'ENCRYPTED_LINK', icon: Terminal, color: 'text-[#BD00FF]' },
+  { path: '/', label: 'COMMAND_CENTER', icon: LayoutDashboard },
+  { path: '/factory', label: 'THE_FACTORY', icon: Factory },
+  { path: '/auto-series', label: 'AUTO_SERIES', icon: Zap },
+  { path: '/trends', label: 'TREND_RADAR', icon: Radar },
+  { path: '/agents', label: 'AI_AGENTS', icon: Bot },
+  { path: '/archive', label: 'VIDEO_ARCHIVE', icon: Archive },
+  { path: '/logs', label: 'SYSTEM_LOGS', icon: Terminal },
 ];
-
-import { useI18nStore } from '../store/i18nStore';
 
 export default function Layout() {
   const { language, setLanguage, t } = useI18nStore();
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [session, setSession] = useState<any>(null);
-  const [isInitiating, setIsInitiating] = useState(false);
   const location = useLocation();
+  const [isEngineOnline, setIsEngineOnline] = useState(false);
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -42,22 +35,6 @@ export default function Layout() {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const handleGlobalInitiate = async () => {
-    setIsInitiating(true);
-    try {
-      await triggerProduction({
-        action: 'FIXED_PIPELINE_START',
-        source: 'GLOBAL_SIDEBAR_CMD',
-        timestamp: new Date().toISOString()
-      });
-      // Visual feedback via temporary success state if needed
-    } finally {
-      setIsInitiating(false);
-    }
-  };
-
-  const [isEngineOnline, setIsEngineOnline] = useState(false);
 
   useEffect(() => {
     const checkEngine = async () => {
@@ -74,183 +51,109 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#131314] text-[#e5e2e3] font-sans selection:bg-[#BD00FF]/30 overflow-hidden relative">
-      {/* Kinetic Background Layer */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(189,0,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(189,0,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
-        <div className="absolute inset-0 scanline-overlay opacity-[0.05]" />
-      </div>
+    <div className="min-h-screen bg-[#050505] text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container flex overflow-hidden">
+      {/* SideNavBar - New Design */}
+      <aside className="flex flex-col h-screen fixed left-0 top-0 py-6 bg-[#050505] border-r border-white/10 w-64 z-50 shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+        <div className="px-6 mb-10 flex items-center gap-3">
+          <div className="w-8 h-8 bg-primary-container flex items-center justify-center rounded-lg shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+            <Video className="w-5 h-5 text-on-primary-container" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black text-white font-headline-md tracking-tighter uppercase">Videomill</h1>
+            <p className="font-headline-md text-[10px] uppercase tracking-[0.2em] text-zinc-500">Pro Workspace</p>
+          </div>
+        </div>
 
-      <div className="flex h-screen relative z-10">
-        {/* Sidebar - Kinetic Industrial Design */}
-        <motion.aside 
-          initial={false}
-          animate={{ width: isSidebarOpen ? 320 : 80 }}
-          className="h-full bg-[#0A0A0B]/90 backdrop-blur-md border-r border-white/5 flex flex-col relative z-50 shadow-[20px_0_50px_rgba(0,0,0,0.8)]"
-        >
-          {/* Top Branding */}
-          <div className="h-28 flex items-center px-8 border-b border-white/5 bg-black/20">
-            <Logo size={isSidebarOpen ? 'md' : 'sm'} hideText={!isSidebarOpen} />
+        <nav className="flex-1 px-4 space-y-1">
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex items-center gap-3 px-4 py-3 font-headline-md text-[11px] uppercase tracking-[0.15em] transition-all group ${
+                location.pathname === item.path
+                  ? 'bg-white/5 text-[#22D3EE] border-r-2 border-[#22D3EE]'
+                  : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900'
+              }`}
+            >
+              <item.icon size={16} className={`${location.pathname === item.path ? 'text-[#22D3EE]' : 'text-zinc-500 group-hover:text-zinc-200'}`} />
+              <span>{t(item.label)}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="px-4 mb-8">
+          <button className="w-full py-4 bg-primary-container text-on-primary-container font-headline-md text-[11px] uppercase tracking-widest rounded transition-all active:scale-[0.98] hover:brightness-110 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+            <Plus size={16} />
+            {t('NEW_PROJECT')}
+          </button>
+        </div>
+
+        <footer className="px-4 space-y-1 border-t border-white/5 pt-6">
+          <Link
+            to="/settings"
+            className={`flex items-center gap-3 px-4 py-3 font-headline-md text-[11px] uppercase tracking-[0.15em] transition-all group ${
+              location.pathname === '/settings'
+                ? 'bg-white/5 text-[#22D3EE] border-r-2 border-[#22D3EE]'
+                : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900'
+            }`}
+          >
+            <Settings size={16} />
+            <span>{t('SETTINGS')}</span>
+          </Link>
+        </footer>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 ml-64 flex flex-col h-screen overflow-y-auto custom-scrollbar">
+        {/* TopAppBar - New Design */}
+        <header className="flex justify-between items-center w-full px-12 h-16 sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-md border-b border-white/10">
+          <div className="flex items-center gap-4">
+            <h2 className="font-headline-md text-xs font-bold tracking-[0.2em] text-[#22D3EE] uppercase">Workspace Overview</h2>
           </div>
 
-          {/* User Profile Terminal (ENCRYPTED_LINK) */}
-          <AnimatePresence>
-            {isSidebarOpen && (
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="px-6 py-8 space-y-4"
-              >
-                <div className="panel-kinetic p-5 group border-[#BD00FF]/20 bg-[#BD00FF]/5 clipped-corner-sm relative">
-                  <div className="absolute top-0 right-0 p-2">
-                    <div className="w-1 h-1 bg-[#BD00FF] animate-pulse-led" />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-tr from-[#BD00FF] to-[#00f5ff] p-[1.5px] clipped-corner-sm">
-                      <div className="w-full h-full bg-black flex items-center justify-center overflow-hidden">
-                         {session?.user?.user_metadata?.avatar_url ? (
-                           <img src={session.user.user_metadata.avatar_url} alt="User" className="w-full h-full object-cover" />
-                         ) : (
-                           <User size={24} className="text-[#BD00FF]" />
-                         )}
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-headline text-[13px] font-black text-white uppercase italic tracking-tighter truncate">
-                        {session?.user?.email?.split('@')[0] || 'SAJI_OPERATOR'}
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Activity size={10} className="text-[#6bff83] animate-pulse-led" />
-                        <span className="font-data-mono text-[9px] text-[#6bff83] uppercase tracking-widest font-bold">LINK_ESTABLISHED</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <div className="flex items-center gap-8">
+            {/* Engine Status */}
+            <a 
+              href="http://localhost:3001" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={`flex items-center gap-3 px-6 py-2 border rounded transition-all group ${
+                isEngineOnline 
+                  ? 'bg-[#22D3EE]/5 border-[#22D3EE]/20 hover:border-[#22D3EE]/50' 
+                  : 'bg-red-500/5 border-red-500/20 grayscale opacity-50'
+              }`}
+            >
+              <div className={`w-1.5 h-1.5 rounded-full ${isEngineOnline ? 'bg-[#22D3EE] animate-pulse' : 'bg-red-500'}`} />
+              <span className={`font-label-sm text-[10px] font-black uppercase tracking-[0.2em] ${isEngineOnline ? 'text-[#22D3EE]' : 'text-red-500'}`}>
+                {isEngineOnline ? 'ENGINE: ONLINE' : 'ENGINE: OFFLINE'}
+              </span>
+              <Terminal size={12} className={`transition-colors ${isEngineOnline ? 'text-[#22D3EE]' : 'text-red-500'}`} />
+            </a>
 
-                {/* Global Initiate Trigger */}
-                <button 
-                  onClick={handleGlobalInitiate}
-                  disabled={isInitiating}
-                  className="w-full btn-kinetic btn-kinetic-primary py-5 px-4 text-[13px] group flex items-center justify-between"
-                >
-                  <span className="font-headline font-black italic tracking-wider">
-                    {isInitiating ? 'EXECUTING...' : t('INITIATE_PRODUCTION')}
-                  </span>
-                  <Zap size={16} className={isInitiating ? 'animate-pulse' : 'fill-current'} />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {!isSidebarOpen && (
-            <div className="px-4 py-8 flex flex-col items-center gap-4">
-               <button 
-                onClick={handleGlobalInitiate}
-                className="w-12 h-12 flex items-center justify-center bg-[#BD00FF] text-black clipped-corner-sm hover:shadow-[0_0_15px_#BD00FF] transition-all"
-               >
-                 <Zap size={18} className="fill-current" />
-               </button>
+            {/* Search */}
+            <div className="hidden lg:flex items-center bg-white/5 border border-white/10 rounded-full px-4 py-1.5 group focus-within:border-[#22D3EE] transition-all">
+              <Search className="w-4 h-4 text-zinc-500 group-focus-within:text-[#22D3EE]" />
+              <input 
+                className="bg-transparent border-none focus:ring-0 text-[11px] text-white placeholder-zinc-500 w-48 font-headline-md ml-2" 
+                placeholder="Search projects..." 
+                type="text"
+              />
             </div>
-          )}
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pt-4">
-            {NAV_ITEMS.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`
-                    relative flex items-center gap-5 px-6 py-5 transition-all duration-300 group overflow-hidden
-                    ${isActive 
-                      ? 'bg-white/[0.05] border-y border-white/5' 
-                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.02]'}
-                  `}
-                >
-                  <item.icon size={20} className={`relative z-10 transition-colors ${isActive ? item.color : 'group-hover:text-zinc-300'}`} />
-                  {isSidebarOpen && (
-                    <span className={`relative z-10 font-headline text-[13px] font-black uppercase tracking-[0.2em] italic transition-colors ${isActive ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>
-                      {t(item.label)}
-                    </span>
-                  )}
-                  {isActive && (
-                    <>
-                      <motion.div 
-                        layoutId="sidebar-active-bar"
-                        className="absolute left-0 top-0 bottom-0 w-1 bg-[#BD00FF] shadow-[0_0_15px_#BD00FF]"
-                      />
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-[#BD00FF] rounded-full mr-2 opacity-50" />
-                    </>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* System Footer Controls */}
-          <div className="p-6 bg-black/40 border-t border-white/5 mt-auto">
-            <div className={`flex ${isSidebarOpen ? 'flex-row justify-between gap-4' : 'flex-col items-center gap-6'}`}>
-              <button 
-                onClick={() => setSidebarOpen(!isSidebarOpen)}
-                className={`flex items-center justify-center p-4 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#00f5ff]/50 hover:bg-[#00f5ff]/5 transition-all group ${isSidebarOpen ? 'flex-1' : 'w-12 h-12'}`}
-                title={t('TOGGLE_NODE_INTERFACE')}
-              >
-                <Terminal size={18} className="text-zinc-500 group-hover:text-[#00f5ff] group-hover:drop-shadow-[0_0_5px_#00f5ff]" />
+            {/* Language & Profile */}
+            <div className="flex items-center gap-4 border-l border-white/10 pl-8">
+              <button className="p-2 text-zinc-400 hover:text-[#22D3EE] transition-all">
+                <Bell size={18} />
               </button>
               
-              <button 
-                onClick={() => supabase.auth.signOut()}
-                className={`flex items-center justify-center p-4 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#e90053]/50 hover:bg-[#e90053]/5 transition-all group ${isSidebarOpen ? 'flex-1' : 'w-12 h-12'}`}
-                title={t('TERMINATE_CONNECTION')}
-              >
-                <LogOut size={18} className="text-zinc-500 group-hover:text-[#e90053] group-hover:drop-shadow-[0_0_5px_#e90053]" />
-              </button>
-            </div>
-          </div>
-        </motion.aside>
-
-        {/* Main Viewport */}
-        <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-          {/* Header Bar */}
-          <header className="h-20 border-b border-white/5 flex items-center justify-between px-12 bg-[#0A0A0B]/80 backdrop-blur-md relative z-40">
-            <div className="flex items-center gap-6">
-              <button 
-                onClick={() => setSidebarOpen(!isSidebarOpen)}
-                className="p-3 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#BD00FF]/50 transition-colors"
-              >
-                 {isSidebarOpen ? <X size={18} className="text-zinc-500" /> : <Menu size={18} className="text-[#BD00FF]" />}
-              </button>
-            </div>
-            
-            <div className="flex items-center gap-8">
-              <a 
-                href="http://localhost:3001" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={`flex items-center gap-3 px-6 py-2 border clipped-corner-sm transition-all group ${
-                  isEngineOnline 
-                    ? 'bg-[#6bff83]/5 border-[#6bff83]/20 hover:border-[#6bff83]/50' 
-                    : 'bg-red-500/5 border-red-500/20 grayscale opacity-50'
-                }`}
-              >
-                <div className={`w-1.5 h-1.5 rounded-full ${isEngineOnline ? 'bg-[#6bff83] animate-pulse-led' : 'bg-red-500'}`} />
-                <span className={`font-data-mono text-[10px] font-black uppercase tracking-[0.2em] ${isEngineOnline ? 'text-[#6bff83]' : 'text-red-500'}`}>
-                  {isEngineOnline ? 'LOCAL_ENGINE: ONLINE' : 'LOCAL_ENGINE: OFFLINE'}
-                </span>
-                <Terminal size={12} className={`transition-colors ${isEngineOnline ? 'text-[#6bff83]' : 'text-red-500'}`} />
-              </a>
-
-              <div className="flex bg-black/40 p-1 border border-white/5 clipped-corner-sm">
+              <div className="flex bg-white/5 p-1 border border-white/10 rounded">
                 {(['NO', 'EN'] as const).map((lang) => (
                   <button
                     key={lang}
                     onClick={() => setLanguage(lang)}
-                    className={`px-4 py-1.5 font-data-mono text-[10px] font-black transition-all ${
+                    className={`px-3 py-1 text-[10px] font-black transition-all ${
                       language === lang 
-                        ? 'bg-[#BD00FF] text-black shadow-[0_0_10px_rgba(189,0,255,0.4)]' 
+                        ? 'bg-[#22D3EE] text-black shadow-lg shadow-[#22D3EE]/20' 
                         : 'text-zinc-500 hover:text-white'
                     }`}
                   >
@@ -259,33 +162,22 @@ export default function Layout() {
                 ))}
               </div>
 
-              <div className="hidden lg:flex items-center gap-8 px-8 py-3 bg-white/[0.02] border border-white/5 clipped-corner-sm">
-                <div className="flex items-center gap-3">
-                  <Activity size={14} className="text-[#6bff83] animate-pulse-led" />
-                  <span className="font-data-mono text-[11px] text-zinc-400 uppercase font-bold">ENGINE_LOAD: 24%</span>
-                </div>
-                <div className="w-[1px] h-4 bg-white/10" />
-                <div className="flex items-center gap-3">
-                  <Globe size={14} className="text-[#00f5ff]" />
-                  <span className="font-data-mono text-[11px] text-zinc-400 uppercase font-bold">NETWORK_LIVE</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4 text-zinc-500">
-                <Shield size={16} />
-                <span className="font-data-mono text-[11px] uppercase tracking-widest font-black italic text-[#BD00FF]">ENCRYPTED_SESSION</span>
+              <div className="w-8 h-8 rounded-full border border-[#22D3EE]/30 overflow-hidden cursor-pointer hover:border-[#22D3EE] transition-all">
+                <img 
+                  alt="User avatar" 
+                  className="w-full h-full object-cover"
+                  src={session?.user?.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
+                />
               </div>
             </div>
-          </header>
-
-          {/* Dynamic Stage */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-             <div className="p-10 pb-24">
-                <Outlet />
-             </div>
           </div>
-        </main>
-      </div>
+        </header>
+
+        {/* Viewport Wrapper */}
+        <div className="flex-1 p-10 pb-20">
+          <Outlet />
+        </div>
+      </main>
     </div>
   );
 }
