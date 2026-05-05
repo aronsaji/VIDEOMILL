@@ -48,7 +48,7 @@ export default function AutoSeries() {
             <Layers size={14} />
             AUTONOMOUS_PIPELINE_ORCHESTRATOR_v2.0
           </div>
-          <h1 className="font-headline text-[72px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
+          <h1 className="font-headline text-[52px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
             AUTO_SERIES
           </h1>
         </div>

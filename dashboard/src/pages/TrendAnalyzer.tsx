@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
+import { triggerProduction } from '../lib/api';
 import { 
   TrendingUp, Activity, Globe, Zap, 
   Terminal, Shield, Cpu, Radar,
@@ -11,6 +12,13 @@ export default function TrendRadar() {
   const { trends = [], fetchTrends, subscribeToChanges } = usePipelineStore();
   const [activeSignal, setActiveSignal] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
+
+  const LANGUAGES = [
+    { id: 'Norsk', label: 'Norway (Norsk)' },
+    { id: 'English', label: 'UK/USA (English)' },
+    { id: 'Español', label: 'Spain (Español)' },
+  ];
 
   useEffect(() => {
     fetchTrends();
@@ -23,13 +31,16 @@ export default function TrendRadar() {
   const safeTrends = Array.isArray(trends) ? trends : [];
 
   const handleFeedEngine = async (trend: any) => {
+    if (!trend) return;
     setIsProcessing(true);
     try {
       const success = await triggerProduction({
         action: 'viranode-generate',
         topic: trend.title,
+        language: selectedLanguage,
         source: 'TREND_RADAR_INTERCEPT',
-        priority: 'HIGH'
+        priority: 'HIGH',
+        timestamp: new Date().toISOString()
       });
       if (success) {
         // Success feedback
@@ -48,19 +59,23 @@ export default function TrendRadar() {
             <Radar size={14} />
             GLOBAL_TREND_INTERCEPTION_ARRAY_v4.2
           </div>
-          <h1 className="font-headline text-[72px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
+          <h1 className="font-headline text-[52px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
             TREND_RADAR
           </h1>
         </div>
         
         <div className="flex gap-6 relative z-10">
           <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#00f5ff]/20 bg-[#00f5ff]/5 clipped-corner">
-             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">SIGNALS_SEC</span>
-             <span className="font-headline text-5xl font-black text-white italic tracking-tighter">1,422</span>
+             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">TOTAL_SIGNALS</span>
+             <span className="font-headline text-5xl font-black text-white italic tracking-tighter">
+               {String(safeTrends.length).padStart(2, '0')}
+             </span>
           </div>
           <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#ffaa00]/20 bg-[#ffaa00]/5 clipped-corner">
-             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">NEURAL_LOAD</span>
-             <span className="font-headline text-5xl font-black text-[#ffaa00] italic tracking-tighter">42%</span>
+             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">GROWTH_PEAK</span>
+             <span className="font-headline text-5xl font-black text-[#ffaa00] italic tracking-tighter">
+               {safeTrends[0]?.growth_stat || '00%'}
+             </span>
           </div>
         </div>
       </header>
@@ -185,15 +200,37 @@ export default function TrendRadar() {
               <div className="mt-8 pt-8 border-t border-white/5">
                  <div className="panel-kinetic p-8 border-[#BD00FF]/20 bg-[#BD00FF]/5 clipped-corner-sm group relative overflow-hidden">
                     <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="flex items-center gap-3 mb-6 relative z-10">
+                    <div className="flex items-center gap-3 mb-4 relative z-10">
                        <Shield size={18} className="text-[#BD00FF]" />
                        <span className="font-label-caps text-[10px] font-black text-white uppercase tracking-[0.4em]">PREDICTION_ENGINE</span>
                     </div>
-                    <p className="font-data-mono text-[11px] text-zinc-400 uppercase italic leading-relaxed relative z-10 mb-8">
-                      {activeSignal 
-                        ? `"${activeSignal.title} shows high conversion probability. Initiate production burst immediately."` 
-                        : `"Analyzing convergence patterns. Standby for target identification."`}
-                    </p>
+                    
+                    <div className="space-y-4 mb-8 relative z-10">
+                       <p className="font-data-mono text-[11px] text-zinc-400 uppercase italic leading-relaxed">
+                         {activeSignal 
+                           ? `"${activeSignal.title} shows high conversion probability. Select target language and initiate."` 
+                           : `"Analyzing convergence patterns. Standby for target identification."`}
+                       </p>
+                       
+                       {activeSignal && (
+                         <div className="flex gap-2">
+                            {LANGUAGES.map(lang => (
+                              <button
+                                key={lang.id}
+                                onClick={() => setSelectedLanguage(lang.id)}
+                                className={`flex-1 py-2 px-3 font-data-mono text-[9px] font-black uppercase tracking-widest clipped-corner-sm border transition-all ${
+                                  selectedLanguage === lang.id 
+                                  ? 'bg-[#00f5ff]/20 border-[#00f5ff] text-white' 
+                                  : 'bg-black/40 border-white/5 text-zinc-600 hover:border-white/20'
+                                }`}
+                              >
+                                {lang.id}
+                              </button>
+                            ))}
+                         </div>
+                       )}
+                    </div>
+
                     <button 
                       disabled={!activeSignal || isProcessing}
                       onClick={() => handleFeedEngine(activeSignal)}

@@ -113,12 +113,12 @@ export default function Layout() {
                 <button 
                   onClick={handleGlobalInitiate}
                   disabled={isInitiating}
-                  className="w-full btn-kinetic btn-kinetic-primary py-4 px-4 text-[10px] group flex items-center justify-between"
+                  className="w-full btn-kinetic btn-kinetic-primary py-5 px-4 text-[13px] group flex items-center justify-between"
                 >
                   <span className="font-headline font-black italic tracking-wider">
                     {isInitiating ? 'EXECUTING...' : 'INITIATE_PRODUCTION'}
                   </span>
-                  <Zap size={14} className={isInitiating ? 'animate-pulse' : 'fill-current'} />
+                  <Zap size={16} className={isInitiating ? 'animate-pulse' : 'fill-current'} />
                 </button>
               </motion.div>
             )}
@@ -136,7 +136,7 @@ export default function Layout() {
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto custom-scrollbar pt-4">
+          <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pt-4">
             {NAV_ITEMS.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -144,15 +144,15 @@ export default function Layout() {
                   key={item.path}
                   to={item.path}
                   className={`
-                    relative flex items-center gap-5 px-6 py-4 transition-all duration-300 group overflow-hidden
+                    relative flex items-center gap-5 px-6 py-5 transition-all duration-300 group overflow-hidden
                     ${isActive 
                       ? 'bg-white/[0.05] border-y border-white/5' 
                       : 'text-zinc-500 hover:text-white hover:bg-white/[0.02]'}
                   `}
                 >
-                  <item.icon size={18} className={`relative z-10 transition-colors ${isActive ? item.color : 'group-hover:text-zinc-300'}`} />
+                  <item.icon size={20} className={`relative z-10 transition-colors ${isActive ? item.color : 'group-hover:text-zinc-300'}`} />
                   {isSidebarOpen && (
-                    <span className={`relative z-10 font-headline text-[11px] font-black uppercase tracking-[0.2em] italic transition-colors ${isActive ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>
+                    <span className={`relative z-10 font-headline text-[13px] font-black uppercase tracking-[0.2em] italic transition-colors ${isActive ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>
                       {item.label}
                     </span>
                   )}
@@ -174,17 +174,17 @@ export default function Layout() {
           <div className="p-4 bg-black/40 border-t border-white/5 space-y-1">
             <button 
               onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="w-full flex items-center gap-4 px-6 py-4 text-zinc-600 hover:text-white transition-colors group"
+              className="w-full flex items-center gap-4 px-6 py-5 text-zinc-600 hover:text-white transition-colors group"
             >
-              <Terminal size={18} className={!isSidebarOpen ? 'mx-auto' : ''} />
-              {isSidebarOpen && <span className="font-label-caps text-[9px] uppercase font-bold tracking-[0.2em]">TOGGLE_NODE_INTERFACE</span>}
+              <Terminal size={20} className={!isSidebarOpen ? 'mx-auto' : ''} />
+              {isSidebarOpen && <span className="font-label-caps text-[11px] uppercase font-bold tracking-[0.2em]">TOGGLE_NODE_INTERFACE</span>}
             </button>
             <button 
               onClick={() => supabase.auth.signOut()}
-              className="w-full flex items-center gap-4 px-6 py-4 text-zinc-700 hover:text-[#e90053] transition-colors group"
+              className="w-full flex items-center gap-4 px-6 py-5 text-zinc-700 hover:text-[#e90053] transition-colors group"
             >
-              <LogOut size={18} className={!isSidebarOpen ? 'mx-auto' : ''} />
-              {isSidebarOpen && <span className="font-label-caps text-[9px] uppercase font-bold tracking-[0.2em]">TERMINATE_CONNECTION</span>}
+              <LogOut size={20} className={!isSidebarOpen ? 'mx-auto' : ''} />
+              {isSidebarOpen && <span className="font-label-caps text-[11px] uppercase font-bold tracking-[0.2em]">TERMINATE_CONNECTION</span>}
             </button>
           </div>
         </motion.aside>
@@ -193,10 +193,19 @@ export default function Layout() {
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
           {/* Header Bar */}
           <header className="h-24 border-b border-white/5 flex items-center justify-between px-12 bg-[#0A0A0B]/80 backdrop-blur-md relative z-40">
-            <div className="flex items-center gap-6">
-              <div className="p-3 bg-white/[0.02] border border-white/5 clipped-corner-sm">
-                 <Shield size={18} className="text-[#BD00FF]" />
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setSidebarOpen(!isSidebarOpen)}
+                  className="p-3 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#BD00FF]/50 transition-colors"
+                >
+                   {isSidebarOpen ? <X size={18} className="text-zinc-500" /> : <Menu size={18} className="text-[#BD00FF]" />}
+                </button>
+                <div className="hidden sm:block">
+                  <Logo size="sm" hideText={!isSidebarOpen} />
+                </div>
               </div>
+
               <div className="flex flex-col">
                  <span className="font-data-mono text-[9px] text-zinc-600 uppercase tracking-[0.4em]">SYSTEM_PATH</span>
                  <span className="font-headline text-[14px] font-black text-white uppercase italic tracking-[0.1em]">
@@ -221,10 +230,14 @@ export default function Layout() {
               <div className="flex items-center gap-4">
                  <div className="text-right hidden sm:block">
                     <div className="font-data-mono text-[10px] text-white uppercase font-black tracking-widest">ENCRYPTED_V2</div>
-                    <div className="font-data-mono text-[9px] text-zinc-600 uppercase tracking-tighter">NY_CLUSTER_04</div>
+                    <div className="font-data-mono text-[9px] text-zinc-600 uppercase tracking-tighter">{session?.user?.email || 'NY_CLUSTER_04'}</div>
                  </div>
-                 <div className="w-12 h-12 bg-zinc-900/50 border border-white/10 flex items-center justify-center clipped-corner-sm hover:border-[#BD00FF]/50 transition-colors">
-                    <User size={20} className="text-zinc-500" />
+                 <div className="w-12 h-12 bg-gradient-to-tr from-[#BD00FF]/20 to-[#00f5ff]/20 border border-[#BD00FF]/30 flex items-center justify-center clipped-corner-sm hover:border-[#BD00FF] transition-all overflow-hidden">
+                    {session?.user?.user_metadata?.avatar_url ? (
+                      <img src={session.user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <User size={20} className="text-[#BD00FF]" />
+                    )}
                  </div>
               </div>
             </div>

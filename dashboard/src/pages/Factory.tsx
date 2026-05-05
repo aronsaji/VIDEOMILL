@@ -27,13 +27,19 @@ const AGENTS = [
 ];
 
 export default function FactoryPage() {
-  const { orders = [], fetchOrders } = usePipelineStore();
+  const { orders = [], fetchOrders, subscribeToChanges } = usePipelineStore();
   const [prompt, setPrompt] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('TIKTOK');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  useEffect(() => { fetchOrders(); }, [fetchOrders]);
+  useEffect(() => { 
+    fetchOrders(); 
+    const unsubscribe = subscribeToChanges();
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [fetchOrders, subscribeToChanges]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -70,7 +76,7 @@ export default function FactoryPage() {
             <Activity size={14} />
             AUTONOMOUS_PRODUCTION_FACILITY_v2.0
           </div>
-          <h1 className="font-headline text-[72px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
+          <h1 className="font-headline text-[52px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
             THE_FACTORY
           </h1>
         </div>
@@ -249,7 +255,7 @@ export default function FactoryPage() {
                    <div key={i} className="flex gap-6 p-3 bg-white/[0.01] border-l-2 border-zinc-800 hover:border-[#BD00FF] transition-all group">
                       <span className="text-zinc-600 shrink-0 font-bold">[{new Date(order.created_at).toLocaleTimeString()}]</span>
                       <span className="text-zinc-400 truncate group-hover:text-white transition-colors">
-                        PATH_EXEC: {order.topic || order.title} // STATUS: <span className={order.status === 'completed' ? 'text-[#6bff83]' : 'text-[#BD00FF]'}>{order.status.toUpperCase()}</span>
+                        PATH_EXEC: {order.topic || order.title} // LANG: <span className="text-[#00f5ff]">{order.language || 'EN'}</span> // STATUS: <span className={order.status === 'completed' ? 'text-[#6bff83]' : 'text-[#BD00FF]'}>{order.status.toUpperCase()}</span>
                       </span>
                    </div>
                  )) : (
