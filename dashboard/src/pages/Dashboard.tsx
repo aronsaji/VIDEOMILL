@@ -132,7 +132,7 @@ export default function Dashboard() {
             </div>
             
             <div className="divide-y divide-white/5 flex-1">
-              {[...safeVideos]
+              {safeVideos.length > 0 ? [...safeVideos]
                 .sort((a, b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime())
                 .slice(0, 6).map((video) => (
                 <div key={video.id} className="p-8 flex items-center gap-8 group hover:bg-white/[0.02] transition-all relative overflow-hidden">
