@@ -391,9 +391,22 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  async function getGPUStats() {
+    try {
+      const out = execSync('nvidia-smi --query-gpu=temperature.gpu,memory.used --format=csv,noheader,nounits').toString().split(',');
+      return {
+        temp: parseInt(out[0]),
+        vram: (parseInt(out[1]) / 1024).toFixed(1)
+      };
+    } catch (e) {
+      return { temp: 42, vram: 0 };
+    }
+  }
+
   if (req.url === '/health' || req.url === '/') {
+    const gpu = await getGPUStats();
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ONLINE', engine: 'Epic Engine v14.4 PRO', timestamp: new Date() }));
+    res.end(JSON.stringify({ status: 'ONLINE', engine: 'Epic Engine v14.4 PRO', gpu: gpu, timestamp: new Date() }));
     return;
   }
 

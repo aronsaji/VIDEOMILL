@@ -48,22 +48,28 @@ export default function Dashboard() {
     const unsubscribe = subscribeToChanges();
     
     // Check Voice Server (Epic Engine)
-    fetch('http://localhost:3001/render', { method: 'HEAD' })
-      .then(() => setSystemHealth(prev => ({ ...prev, voiceServer: 'ONLINE' })))
-      .catch(() => setSystemHealth(prev => ({ ...prev, voiceServer: 'OFFLINE' })));
+    const checkHealth = () => {
+      fetch('http://localhost:3001/health')
+        .then(res => res.json())
+        .then(data => {
+          setSystemHealth(prev => ({ ...prev, voiceServer: 'ONLINE' }));
+          if (data.gpu) {
+            setMetrics(prev => ({
+              ...prev,
+              temp: data.gpu.temp || prev.temp,
+              vram: data.gpu.vram || prev.vram
+            }));
+          }
+        })
+        .catch(() => setSystemHealth(prev => ({ ...prev, voiceServer: 'OFFLINE' })));
+    };
 
-    // Live Metrics Fluctuation
-    const interval = setInterval(() => {
-      setMetrics(prev => ({
-        vram: +(prev.vram + (Math.random() * 0.4 - 0.2)).toFixed(1),
-        temp: Math.floor(prev.temp + (Math.random() * 2 - 1)),
-        throughput: +(prev.throughput + (Math.random() * 0.2 - 0.1)).toFixed(1)
-      }));
-    }, 3000);
+    checkHealth();
+    const healthInterval = setInterval(checkHealth, 5000);
 
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
-      clearInterval(interval);
+      clearInterval(healthInterval);
     };
   }, [fetchInitialData, subscribeToChanges]);
 
@@ -126,7 +132,9 @@ export default function Dashboard() {
             </div>
             
             <div className="divide-y divide-white/5 flex-1">
-              {safeVideos.length > 0 ? safeVideos.slice(0, 6).map((video) => (
+              {[...safeVideos]
+                .sort((a, b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime())
+                .slice(0, 6).map((video) => (
                 <div key={video.id} className="p-8 flex items-center gap-8 group hover:bg-white/[0.02] transition-all relative overflow-hidden">
                   <div className="w-24 h-32 bg-[#0A0A0B] border border-white/10 relative overflow-hidden shrink-0 clipped-corner-sm group-hover:border-[#BD00FF]/40 transition-colors">
                     <div className="absolute inset-0 bg-[#BD00FF]/5 group-hover:bg-[#BD00FF]/10 transition-colors" />
@@ -280,7 +288,10 @@ export default function Dashboard() {
                    <Radar size={20} className="text-[#BD00FF] animate-radar" />
                 </div>
                 <div className="space-y-3">
-                  {safeTrends.slice(0, 3).map((trend: any, i: number) => (
+                  {[...safeTrends]
+                    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+                    .slice(0, 3)
+                    .map((trend: any, i: number) => (
                     <div key={trend.id || i} className="flex justify-between items-center bg-white/[0.03] p-3 border-l-2 border-[#BD00FF]">
                       <span className="font-data-mono text-[10px] text-white font-bold uppercase tracking-widest truncate mr-4">
                         {trend.title || trend.topic || 'NEURAL_SIGNAL'}
