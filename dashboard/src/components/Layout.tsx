@@ -207,9 +207,6 @@ export default function Layout() {
               >
                  {isSidebarOpen ? <X size={18} className="text-zinc-500" /> : <Menu size={18} className="text-[#BD00FF]" />}
               </button>
-              <div className="font-data-mono text-[11px] text-zinc-400 uppercase tracking-[0.3em] font-bold">
-                SYSTEM_ORCHESTRATOR_v2.0
-              </div>
             </div>
             
             <div className="flex items-center gap-8">

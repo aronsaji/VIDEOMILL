@@ -16,16 +16,18 @@ export default function TrendAnalyzer() {
   const [activeSignal, setActiveSignal] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('English');
-  const [selectedCountry, setSelectedCountry] = useState('GLOBAL');
+  const [selectedCountry, setSelectedCountry] = useState('USA');
   const [selectedPlatform, setSelectedPlatform] = useState('ALL');
 
   const COUNTRIES = ['GLOBAL', 'USA', 'NORWAY', 'SPAIN', 'INDIA', 'FRANCE'];
   const RADAR_PLATFORMS = ['ALL', 'TIKTOK', 'X', 'YOUTUBE', 'INSTAGRAM'];
 
   const LANGUAGES = [
-    { id: 'Norsk', label: 'Norway (Norsk)' },
-    { id: 'English', label: 'UK/USA (English)' },
-    { id: 'Español', label: 'Spain (Español)' },
+    { id: 'Norsk', label: 'NO', country: 'NORWAY' },
+    { id: 'English', label: 'EN', country: 'USA' },
+    { id: 'Tamil', label: 'TA', country: 'INDIA' },
+    { id: 'Hindi', label: 'HI', country: 'INDIA' },
+    { id: 'Español', label: 'ES', country: 'SPAIN' },
   ];
 
   useEffect(() => {
@@ -163,10 +165,32 @@ export default function TrendAnalyzer() {
         {/* INTERCEPTION_GRID: Rich Content Cards */}
         <div className="space-y-6">
            <div className="flex items-center justify-between border-b border-white/5 pb-4">
-              <div className="flex items-center gap-3">
-                 <Zap size={18} className="text-[#6bff83] animate-pulse" />
-                 <h2 className="font-label-caps text-[12px] font-black text-white uppercase tracking-[0.4em]">{t('LIVE_INTERCEPT_STREAM')}</h2>
+              <div className="flex flex-col md:flex-row md:items-center gap-6">
+                  <div className="flex items-center gap-3">
+                     <Zap size={18} className="text-[#6bff83] animate-pulse" />
+                     <h2 className="font-label-caps text-[12px] font-black text-white uppercase tracking-[0.4em]">{t('LIVE_INTERCEPT_STREAM')}</h2>
+                  </div>
+                  
+                  <div className="flex gap-2 bg-black/40 p-1.5 border border-white/5 clipped-corner-sm">
+                     {LANGUAGES.map(lang => (
+                        <button
+                          key={lang.id}
+                          onClick={() => {
+                            setSelectedLanguage(lang.id);
+                            setSelectedCountry(lang.country);
+                          }}
+                          className={`px-4 py-2 font-data-mono text-[9px] font-black uppercase tracking-widest transition-all ${
+                            selectedLanguage === lang.id 
+                            ? 'bg-[#00f5ff] text-black shadow-[0_0_10px_#00f5ff]' 
+                            : 'text-zinc-600 hover:text-white'
+                          }`}
+                        >
+                          {lang.id} ({lang.label})
+                        </button>
+                     ))}
+                  </div>
               </div>
+
               <div className="flex items-center gap-2">
                  <span className="font-data-mono text-[9px] text-[#6bff83] font-black tracking-widest uppercase">SCANNING</span>
                  <div className="w-1.5 h-1.5 bg-[#6bff83] rounded-full animate-pulse-led" />
@@ -188,29 +212,47 @@ export default function TrendAnalyzer() {
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-2 p-2 bg-black/40 border border-white/5 clipped-corner-sm">
                        <Zap size={14} className="text-[#00f5ff]" />
-                       <span className="font-data-mono text-[9px] text-zinc-700 font-bold">0x{i.toString(16).padStart(2, '0').toUpperCase()}</span>
+                       <span className="font-data-mono text-[10px] text-zinc-400 font-bold">0x{i.toString(16).padStart(2, '0').toUpperCase()}</span>
                     </div>
-                    <div className="flex flex-col items-end">
-                       <span className="font-headline text-lg font-black text-[#6bff83] italic tracking-tighter leading-none">{trend.growth_stat || '+55%'}</span>
-                    </div>
+                    
+                    {/* One-Click Quick Dispatch */}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFeedEngine(trend);
+                      }}
+                      className="p-3 bg-[#6bff83]/10 border border-[#6bff83]/30 text-[#6bff83] hover:bg-[#6bff83] hover:text-black transition-all clipped-corner-sm group/btn"
+                      title="QUICK_DISPATCH_TO_n8n"
+                    >
+                       <Zap size={16} className="group-hover/btn:scale-125 transition-transform" />
+                    </button>
                   </div>
 
-                  <h3 className="font-headline text-[17px] font-black text-white uppercase italic mb-6 leading-tight group-hover:text-[#00f5ff] transition-colors min-h-[48px] line-clamp-2">
+                  <h3 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleFeedEngine(trend);
+                    }}
+                    className="font-headline text-[18px] font-black text-white uppercase italic mb-6 leading-tight hover:text-[#6bff83] cursor-pointer transition-colors min-h-[48px] line-clamp-2 group/title flex items-start gap-2"
+                    title="CLICK_TO_DISPATCH_NOW"
+                  >
                     {trend.title}
+                    <ArrowUpRight size={14} className="opacity-0 group-hover/title:opacity-100 transition-opacity text-[#6bff83] shrink-0 mt-1" />
                   </h3>
 
                   <div className="flex items-center justify-between pt-4 border-t border-white/5">
                     <div className="flex items-center gap-4">
                        <div className="flex items-center gap-1.5">
-                          <Globe size={12} className="text-zinc-600" />
-                          <span className="font-data-mono text-[9px] text-zinc-500 uppercase font-black">{selectedLanguage}</span>
+                          <Globe size={12} className="text-[#00f5ff]" />
+                          <span className="font-data-mono text-[10px] text-zinc-300 uppercase font-black">{selectedLanguage}</span>
                        </div>
-                       <div className="w-[1px] h-3 bg-white/5" />
+                       <div className="w-[1px] h-3 bg-white/10" />
                        <div className="flex items-center gap-1.5">
-                          <Monitor size={12} className="text-zinc-600" />
-                          <span className="font-data-mono text-[9px] text-zinc-500 uppercase font-black">{selectedPlatform}</span>
+                          <Monitor size={12} className="text-[#BD00FF]" />
+                          <span className="font-data-mono text-[10px] text-zinc-300 uppercase font-black">{selectedPlatform}</span>
                        </div>
                     </div>
+                    <span className="font-headline text-lg font-black text-[#6bff83] italic tracking-tighter leading-none">{trend.growth_stat || '+55%'}</span>
                   </div>
                 </motion.div>
               ))}
@@ -231,32 +273,27 @@ export default function TrendAnalyzer() {
                     </p>
                  </div>
                  
-                 <div className="w-full md:w-[400px] space-y-6">
-                    <div className="grid grid-cols-3 gap-2">
-                       {LANGUAGES.map(lang => (
-                         <button
-                           key={lang.id}
-                           onClick={() => setSelectedLanguage(lang.id)}
-                           className={`py-3 px-4 font-data-mono text-[10px] font-black uppercase tracking-widest clipped-corner-sm border transition-all ${
-                             selectedLanguage === lang.id 
-                             ? 'bg-[#00f5ff]/20 border-[#00f5ff] text-white shadow-[0_0_10px_rgba(0,245,255,0.2)]' 
-                             : 'bg-black/40 border-white/5 text-zinc-700 hover:border-white/20'
-                           }`}
-                         >
-                           {lang.id}
-                         </button>
-                       ))}
-                    </div>
-
-                    <button 
+                 <div className="w-full md:w-[400px]">
+                    <button
                       disabled={!activeSignal || isProcessing}
                       onClick={() => handleFeedEngine(activeSignal)}
-                      className="btn-kinetic btn-kinetic-primary w-full group py-5 text-[12px] flex items-center justify-center gap-3"
+                      className={`w-full py-6 font-headline text-lg font-black uppercase italic tracking-widest transition-all flex items-center justify-center gap-4 clipped-corner ${
+                        !activeSignal || isProcessing
+                        ? 'bg-zinc-900 text-zinc-700 border border-white/5 cursor-not-allowed'
+                        : 'bg-[#BD00FF] text-black hover:shadow-[0_0_30px_#BD00FF] hover:scale-[1.02] active:scale-[0.98]'
+                      }`}
                     >
-                       <Zap size={18} className={isProcessing ? 'animate-pulse' : 'fill-current'} />
-                       <span className="font-headline font-black italic tracking-wider">
-                         {isProcessing ? 'SYNTHESIZING...' : 'FEED_THE_ENGINE'}
-                       </span>
+                      {isProcessing ? (
+                        <>
+                          <Activity size={24} className="animate-spin" />
+                          PROCESSING_NODE...
+                        </>
+                      ) : (
+                        <>
+                          <ArrowUpRight size={24} />
+                          INITIATE_PRODUCTION_CYCLE
+                        </>
+                      )}
                     </button>
                  </div>
               </div>

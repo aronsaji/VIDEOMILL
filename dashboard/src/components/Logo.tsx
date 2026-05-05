@@ -93,8 +93,8 @@ export default function Logo({ size = 'md', hideText = false, variant = 'default
           <div className={`${textClass} font-black text-white italic tracking-[-0.08em] uppercase leading-[0.85] font-headline vml-glitch-${uid}`}>
             Video<span className="text-cyan-400">Mill</span>
           </div>
-          <div className={`${subClass} text-[#BD00FF] font-black leading-none mt-1.5 font-data-mono uppercase tracking-[0.4em] opacity-80`}>
-            NEURAL_ENGINE_v4.2
+          <div className={`${subClass} text-[#BD00FF] font-black leading-none mt-1.5 font-data-mono uppercase tracking-[0.2em] opacity-80`}>
+            The Non-Stop Viral Engine
           </div>
         </div>
       )}

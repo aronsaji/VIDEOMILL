@@ -16,22 +16,33 @@
   --grid-color: rgba(189, 0, 255, 0.05);
 }
 
-/* Readability Overrides */
+/* Readability Overrides - Forced High Contrast */
 .text-zinc-600, .text-zinc-500, .text-slate-600, .text-slate-500, .text-gray-600, .text-gray-500 {
-  color: #94a3b8 !important; /* Lighter Slate */
+  color: #a1a1aa !important; /* Lighter Zinc */
 }
 
 .text-zinc-400, .text-slate-400, .text-zinc-300, .text-gray-400 {
-  color: #e2e8f0 !important; /* Very Light Slate */
+  color: #e4e4e7 !important; /* Near White Zinc */
 }
 
-.text-muted {
-  color: var(--text-muted) !important;
+.text-muted, .text-zinc-700 {
+  color: #d1d5db !important;
 }
 
 /* Global scale up for small technical text */
-span[class*="text-["], div[class*="text-["] {
-  font-size: clamp(12px, 1.1em, 15px) !important;
+span[class*="text-[9px]"], div[class*="text-[9px]"], 
+span[class*="text-[10px]"], div[class*="text-[10px]"],
+span[class*="text-[11px]"], div[class*="text-[11px]"] {
+  font-size: 12px !important; /* Minimum readable size */
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+}
+
+.font-label-caps {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.3em !important;
+  color: #fff !important;
 }
 
 body {
