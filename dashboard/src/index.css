@@ -5,14 +5,27 @@
 @tailwind utilities;
 
 :root {
-  --background: #000000;
-  --surface: #0a0a0b;
-  --primary-container: #22d3ee; /* Cyan-400 */
-  --secondary-container: #e90053; /* Magenta-ish for accents */
-  --surface-container-low: #0a0a0b;
-  --text-main: #f8fafc;
-  --text-muted: #d1d5db;
-  --grid-color: rgba(34, 211, 238, 0.05);
+  /* Core Palette (Light Mode) */
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-container: #f1f5f9;
+  --surface-container-low: #f8fafc;
+  
+  --primary: #0891b2;
+  --primary-container: #0891b2;
+  --on-primary-container: #ffffff;
+  
+  --secondary: #be185d;
+  --secondary-container: #be185d;
+  
+  --on-surface: #0f172a;
+  --on-surface-variant: #64748b;
+  
+  --outline: #e2e8f0;
+  --error: #ef4444;
+  --success: #10b981;
+  
+  --grid-color: rgba(8, 145, 178, 0.05);
 }
 
 /* Custom Font Utilities */
@@ -26,7 +39,7 @@ body {
     linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: 60px 60px;
-  color: var(--text-main);
+  color: var(--on-surface);
   font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   margin: 0;
@@ -38,27 +51,31 @@ span[class*="text-[9px]"], div[class*="text-[9px]"],
 span[class*="text-[10px]"], div[class*="text-[10px]"],
 span[class*="text-[11px]"], div[class*="text-[11px]"] {
   font-size: 11px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.1em !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  color: var(--on-surface-variant) !important;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #000; }
-::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary-container); }
 
 /* Scanline Overlay */
 .scanline-overlay {
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background: linear-gradient(rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.02) 50%);
   background-size: 100% 4px;
   pointer-events: none;
 }
 
-/* Kinetic Panels */
+/* Kinetic Panels (using theme variables) */
 .panel-kinetic {
-  @apply bg-surface-container-low/80 backdrop-blur-3xl border border-white/5 relative overflow-hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  background-color: var(--surface);
+  border: 1px solid var(--outline);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 /* Animations */
@@ -80,27 +97,14 @@ span[class*="text-[11px]"], div[class*="text-[11px]"] {
   animation: spin-slow 20s linear infinite;
 }
 
-/* High Contrast Technical Text */
-.text-zinc-600, .text-zinc-700, .text-zinc-800 {
-  color: #52525b !important;
+/* High Visibility Scrollbar for Horizontal Timelines */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 4px;
 }
-
-.text-zinc-500 {
-  color: #71717a !important;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--outline);
+  border-radius: 4px;
 }
-
-/* Tailwind Extensions */
-@layer utilities {
-  .bg-primary-container {
-    background-color: var(--primary-container);
-  }
-  .text-primary-container {
-    color: var(--primary-container);
-  }
-  .border-primary-container {
-    border-color: var(--primary-container);
-  }
-  .bg-surface-container-low {
-    background-color: var(--surface-container-low);
-  }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-container);
 }

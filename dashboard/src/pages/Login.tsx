@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Globe, ArrowLeft, Mail, Shield, Lock, Cpu, Zap, Sparkles, ChevronRight, Activity, Terminal } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import Logo from '../components/Logo';
+import AnimatedLogo from '../components/AnimatedLogo';
 
 function GoogleIcon() {
   return (
@@ -77,13 +77,13 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden p-6">
       {/* Cinematic Background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary-container/10 rounded-full blur-[150px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#e90053]/5 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/5 rounded-full blur-[150px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-primary/5 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-             style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '100px 100px' }} 
+             style={{ backgroundImage: 'linear-gradient(var(--primary) 1px, transparent 1px), linear-gradient(90deg, var(--primary) 1px, transparent 1px)', backgroundSize: '100px 100px' }} 
         />
       </div>
 
@@ -93,19 +93,19 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center gap-8"
         >
-          <Logo size="lg" />
-          <div className="flex items-center gap-3 bg-white/5 px-5 py-2 rounded-full border border-white/10 backdrop-blur-3xl">
-             <Shield size={14} className="text-primary-container animate-pulse" />
-             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 italic font-mono">Secure Node Access</span>
+          <AnimatedLogo size="lg" />
+          <div className="flex items-center gap-3 bg-surface/50 px-5 py-2 rounded-full border border-outline backdrop-blur-3xl">
+             <Shield size={14} className="text-primary animate-pulse" />
+             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-variant italic font-mono">Secure Node Access</span>
           </div>
         </motion.div>
 
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-surface-container-low/80 backdrop-blur-3xl rounded-[3rem] p-12 border border-white/5 shadow-2xl relative overflow-hidden"
+          className="bg-surface border border-outline rounded-[3rem] p-12 shadow-2xl relative overflow-hidden"
         >
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-container via-[#00f5ff] to-primary-container opacity-50" />
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-cyan-400 to-primary opacity-50" />
           <div className="scanline-overlay absolute inset-0 opacity-5 pointer-events-none" />
           
           <AnimatePresence mode="wait">
@@ -118,22 +118,22 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                 className="space-y-10"
               >
                 <div className="text-center space-y-4">
-                  <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter font-headline-md leading-none">Restore_<span className="text-primary-container">Access</span></h1>
-                  <p className="text-[10px] text-zinc-700 font-black uppercase tracking-[0.3em] leading-relaxed font-mono">Neural link restoration protocol</p>
+                  <h1 className="text-4xl font-black text-on-surface italic uppercase tracking-tighter font-headline-md leading-none">Restore_<span className="text-primary">Access</span></h1>
+                  <p className="text-[10px] text-on-surface-variant font-black uppercase tracking-[0.3em] leading-relaxed font-mono">Neural link restoration protocol</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-zinc-800 uppercase tracking-[0.3em] ml-6 font-mono">Identifier</label>
+                    <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.3em] ml-6 font-mono">Identifier</label>
                     <div className="relative">
-                      <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-800" size={18} />
+                      <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-on-surface-variant" size={18} />
                       <input
                         type="email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         required
                         placeholder="ID@VIDEOMILL.AI"
-                        className="w-full bg-black/40 border border-white/5 rounded-3xl px-16 py-6 text-sm text-white placeholder-zinc-900 focus:border-primary-container/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
+                        className="w-full bg-surface-container border border-outline rounded-3xl px-16 py-6 text-sm text-on-surface placeholder-on-surface-variant/30 focus:border-primary/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
                       />
                     </div>
                   </div>
@@ -141,7 +141,7 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-6 bg-white text-black hover:bg-primary-container hover:text-black rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-xl flex items-center justify-center gap-4 group"
+                    className="w-full py-6 bg-primary text-white hover:brightness-110 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-xl flex items-center justify-center gap-4 group"
                   >
                     {loading ? 'Processing...' : 'Transmit Link'}
                     <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -150,7 +150,7 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                   <button
                     type="button"
                     onClick={() => setMode('login')}
-                    className="w-full text-[10px] font-black text-zinc-700 hover:text-white uppercase tracking-[0.4em] transition-colors pt-4 font-mono italic"
+                    className="w-full text-[10px] font-black text-on-surface-variant hover:text-on-surface uppercase tracking-[0.4em] transition-colors pt-4 font-mono italic"
                   >
                     Return to Login
                   </button>
@@ -165,22 +165,22 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                 className="space-y-10"
               >
                 <div className="text-center space-y-4">
-                  <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter font-headline-md leading-none">
+                  <h1 className="text-5xl font-black text-on-surface italic uppercase tracking-tighter font-headline-md leading-none">
                     {mode === 'login' ? 'System_' : 'Node_'} 
-                    <span className="text-primary-container">{mode === 'login' ? 'Uplink' : 'Genesis'}</span>
+                    <span className="text-primary">{mode === 'login' ? 'Uplink' : 'Genesis'}</span>
                   </h1>
-                  <p className="text-[10px] text-zinc-700 font-black italic uppercase tracking-[0.3em] font-mono">Authorized Personnel Only</p>
+                  <p className="text-[10px] text-on-surface-variant font-black italic uppercase tracking-[0.3em] font-mono">Authorized Personnel Only</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 p-2 bg-black/60 rounded-[2.5rem] border border-white/5">
+                <div className="grid grid-cols-2 gap-3 p-2 bg-surface-container rounded-[2.5rem] border border-outline">
                   {(['login', 'register'] as const).map((m) => (
                     <button
                       key={m}
                       onClick={() => setMode(m)}
                       className={`py-4 rounded-3xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
                         mode === m 
-                          ? 'bg-primary-container text-black shadow-lg' 
-                          : 'text-zinc-700 hover:text-zinc-500'
+                          ? 'bg-primary text-white shadow-lg' 
+                          : 'text-on-surface-variant hover:text-on-surface'
                       }`}
                     >
                       {m}
@@ -191,37 +191,37 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {mode === 'register' && (
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-zinc-800 uppercase tracking-[0.3em] ml-6 font-mono">Operator_Name</label>
+                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.3em] ml-6 font-mono">Operator_Name</label>
                       <input
                         type="text"
                         value={name}
                         onChange={e => setName(e.target.value)}
                         placeholder="NAME_REQUIRED"
-                        className="w-full bg-black/40 border border-white/5 rounded-3xl px-8 py-5 text-sm text-white placeholder-zinc-900 focus:border-primary-container/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
+                        className="w-full bg-surface-container border border-outline rounded-3xl px-8 py-5 text-sm text-on-surface placeholder-on-surface-variant/30 focus:border-primary/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
                       />
                     </div>
                   )}
 
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-zinc-800 uppercase tracking-[0.3em] ml-6 font-mono">Identifier</label>
+                    <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.3em] ml-6 font-mono">Identifier</label>
                     <input
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
                       placeholder="ID@VIDEOMILL.AI"
-                      className="w-full bg-black/40 border border-white/5 rounded-3xl px-8 py-5 text-sm text-white placeholder-zinc-900 focus:border-primary-container/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
+                      className="w-full bg-surface-container border border-outline rounded-3xl px-8 py-5 text-sm text-on-surface placeholder-on-surface-variant/30 focus:border-primary/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
                     />
                   </div>
 
                   <div className="space-y-3">
                     <div className="flex items-center justify-between px-6">
-                      <label className="text-[10px] font-black text-zinc-800 uppercase tracking-[0.3em] font-mono">Pass-Key</label>
+                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.3em] font-mono">Pass-Key</label>
                       {mode === 'login' && (
                         <button
                           type="button"
                           onClick={() => setMode('forgot')}
-                          className="text-[9px] font-black text-primary-container hover:text-white transition-colors uppercase tracking-widest italic font-mono"
+                          className="text-[9px] font-black text-primary hover:text-on-surface transition-colors uppercase tracking-widest italic font-mono"
                         >
                           Recover Key
                         </button>
@@ -234,12 +234,12 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                         onChange={e => setPassword(e.target.value)}
                         required
                         placeholder="••••••••"
-                        className="w-full bg-black/40 border border-white/5 rounded-3xl px-8 py-5 pr-14 text-sm text-white placeholder-zinc-900 focus:border-primary-container/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
+                        className="w-full bg-surface-container border border-outline rounded-3xl px-8 py-5 pr-14 text-sm text-on-surface placeholder-on-surface-variant/30 focus:border-primary/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPass(!showPass)}
-                        className="absolute right-8 top-1/2 -translate-y-1/2 text-zinc-800 hover:text-white transition-colors"
+                        className="absolute right-8 top-1/2 -translate-y-1/2 text-on-surface-variant/40 hover:text-on-surface transition-colors"
                       >
                         {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -248,14 +248,14 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
 
                   {mode === 'register' && (
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-zinc-800 uppercase tracking-[0.3em] ml-6 font-mono">Confirm_Key</label>
+                      <label className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.3em] ml-6 font-mono">Confirm_Key</label>
                       <input
                         type={showPass ? 'text' : 'password'}
                         value={confirmPassword}
                         onChange={e => setConfirmPassword(e.target.value)}
                         required
                         placeholder="••••••••"
-                        className="w-full bg-black/40 border border-white/5 rounded-3xl px-8 py-5 text-sm text-white placeholder-zinc-900 focus:border-primary-container/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
+                        className="w-full bg-surface-container border border-outline rounded-3xl px-8 py-5 text-sm text-on-surface placeholder-on-surface-variant/30 focus:border-primary/40 outline-none transition-all italic font-black uppercase font-mono tracking-widest"
                       />
                     </div>
                   )}
@@ -263,10 +263,10 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                   <button
                     type="submit"
                     disabled={loading || googleLoading}
-                    className="w-full py-6 bg-white text-black hover:bg-primary-container hover:text-black rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-xl flex items-center justify-center gap-4 group mt-6"
+                    className="w-full py-6 bg-primary text-white hover:brightness-110 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all shadow-xl flex items-center justify-center gap-4 group mt-6"
                   >
                     {loading ? (
-                      <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
                         {mode === 'login' ? 'Initialize Uplink' : 'Forge Access'}
@@ -277,18 +277,18 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                 </form>
 
                 <div className="flex items-center gap-4 py-4">
-                  <div className="flex-1 h-[1px] bg-white/5" />
-                  <span className="text-[8px] text-zinc-900 font-black uppercase tracking-[0.4em] font-mono">External_Gateway</span>
-                  <div className="flex-1 h-[1px] bg-white/5" />
+                  <div className="flex-1 h-[1px] bg-outline" />
+                  <span className="text-[8px] text-on-surface-variant/40 font-black uppercase tracking-[0.4em] font-mono">External_Gateway</span>
+                  <div className="flex-1 h-[1px] bg-outline" />
                 </div>
 
                 <button
                   onClick={handleGoogleLogin}
                   disabled={googleLoading || loading}
-                  className="w-full flex items-center justify-center gap-4 py-5 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-800 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-[2.5rem] transition-all disabled:opacity-50 font-mono"
+                  className="w-full flex items-center justify-center gap-4 py-5 bg-surface-container hover:bg-surface-container/80 border border-outline text-on-surface-variant text-[10px] font-black uppercase tracking-[0.2em] rounded-[2.5rem] transition-all disabled:opacity-50 font-mono"
                 >
                   {googleLoading ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white/70 rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-on-surface-variant/30 border-t-on-surface-variant/70 rounded-full animate-spin" />
                   ) : (
                     <GoogleIcon />
                   )}
@@ -305,7 +305,7 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
           transition={{ delay: 0.5 }}
           className="flex flex-col items-center gap-8"
         >
-          <div className="flex items-center gap-10 text-zinc-900">
+          <div className="flex items-center gap-10 text-on-surface-variant/40">
              <div className="flex items-center gap-3">
                 <Shield size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest font-mono">AES-512</span>
@@ -315,7 +315,7 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
                 <span className="text-[9px] font-black uppercase tracking-widest font-mono">TLS-V3</span>
              </div>
           </div>
-          <p className="text-[9px] font-black text-zinc-900 uppercase tracking-[0.6em] italic font-mono">
+          <p className="text-[9px] font-black text-on-surface-variant/30 uppercase tracking-[0.6em] italic font-mono">
             VideoMill_Operations_Core_&copy;_2026
           </p>
         </motion.div>

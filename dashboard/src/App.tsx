@@ -42,14 +42,14 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#131314] flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="fixed inset-0 bg-[linear-gradient(rgba(189,0,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(189,0,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center relative overflow-hidden">
+        <div className="fixed inset-0 bg-[linear-gradient(var(--primary)_1px,transparent_1px),linear-gradient(90deg,var(--primary)_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.03]" />
         <div className="relative z-10 space-y-6 flex flex-col items-center">
-           <div className="w-16 h-16 border border-[#BD00FF]/20 flex items-center justify-center clipped-corner animate-pulse">
-              <div className="w-8 h-8 bg-[#BD00FF] clipped-corner-sm" />
+           <div className="w-16 h-16 border border-primary/20 flex items-center justify-center animate-pulse">
+              <div className="w-8 h-8 bg-primary rounded-sm" />
            </div>
-           <div className="font-data-mono text-[10px] text-[#BD00FF] tracking-[0.5em] italic animate-pulse">
-             INITIALIZING_KINETIC_LINK...
+           <div className="font-mono text-[10px] text-primary tracking-[0.5em] italic animate-pulse">
+             INITIALIZING_VIDEO_MILL...
            </div>
         </div>
       </div>
@@ -73,7 +73,7 @@ function App() {
           <Route path="/archive" element={<Library />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/logs" element={<div className="font-data-mono text-zinc-500">SYSTEM_LOGS_TERMINAL: STABLE</div>} />
+          <Route path="/logs" element={<div className="font-mono text-on-surface-variant text-[10px] uppercase">SYSTEM_LOGS_TERMINAL: STABLE</div>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

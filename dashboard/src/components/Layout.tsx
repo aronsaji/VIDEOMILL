@@ -12,19 +12,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedLogo from './AnimatedLogo';
 import LiveStatusTracker from './LiveStatusTracker';
 
-const NAV_ITEMS = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/trends', label: 'TrendRadar', icon: TrendingUp },
-  { path: '/factory', label: 'Production', icon: Factory },
-  { path: '/create-order', label: 'Create Order', icon: Plus },
-  { path: '/auto-series', label: 'AutoPilot', icon: Zap },
-  { path: '/agents', label: 'Agents', icon: Bot },
-  { path: '/archive', label: 'Archive', icon: Archive },
-  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
-];
-
 export default function Layout() {
-  const { language, setLanguage } = useI18nStore();
+  const { language, setLanguage, t } = useI18nStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [engineStatus, setEngineStatus] = useState<'online' | 'offline' | 'checking'>('checking');
@@ -66,30 +55,41 @@ export default function Layout() {
     navigate('/login');
   };
 
+  const navItems = [
+    { path: '/', label: t('COMMAND_CENTER'), icon: LayoutDashboard },
+    { path: '/trends', label: t('TREND_RADAR'), icon: TrendingUp },
+    { path: '/factory', label: t('THE_FACTORY'), icon: Factory },
+    { path: '/create-order', label: t('INITIATE_PRODUCTION'), icon: Plus },
+    { path: '/auto-series', label: t('AUTO_SERIES'), icon: Zap },
+    { path: '/agents', label: t('AI_AGENTS'), icon: Bot },
+    { path: '/archive', label: t('VIDEO_ARCHIVE'), icon: Archive },
+    { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+  ];
+
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex overflow-hidden">
-      {/* SideNavBar - Cyan Theme Edition */}
-      <aside className="flex flex-col h-screen fixed left-0 top-0 py-6 bg-[#050505] border-r border-white/10 w-64 z-50">
+    <div className="bg-background text-on-surface font-body-md min-h-screen flex overflow-hidden">
+      {/* SideNavBar - Clean Theme Edition */}
+      <aside className="flex flex-col h-screen fixed left-0 top-0 py-6 bg-surface border-r border-outline w-64 z-50 shadow-sm">
         <div className="px-6 mb-10">
           <AnimatedLogo size="sm" />
         </div>
 
         <nav className="flex-1 px-4 space-y-1">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`
-                  flex items-center gap-3 px-4 py-3 font-label-sm text-xs uppercase tracking-widest transition-all duration-200 group
+                  flex items-center gap-3 px-4 py-3 font-label-sm text-[10px] uppercase tracking-[0.15em] transition-all duration-200 group rounded-xl
                   ${isActive 
-                    ? 'bg-white/5 text-primary-container border-r-2 border-primary-container' 
-                    : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900'}
+                    ? 'bg-primary/10 text-primary border-r-2 border-primary' 
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'}
                 `}
               >
-                <item.icon size={18} className={isActive ? 'text-primary-container' : 'group-hover:text-primary-container'} />
-                <span>{item.label}</span>
+                <item.icon size={16} className={isActive ? 'text-primary' : 'group-hover:text-primary transition-colors'} />
+                <span className="font-bold">{item.label}</span>
               </Link>
             );
           })}
@@ -97,22 +97,22 @@ export default function Layout() {
 
         {/* System Health / GPU Telemetry */}
         <div className="px-4 mb-6">
-          <div className="p-4 bg-surface-container-low border border-white/5 rounded-xl space-y-3">
+          <div className="p-4 bg-surface-container border border-outline rounded-2xl space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-[9px] font-label-sm uppercase font-black text-zinc-600 tracking-widest">RTX_4080_LINK</span>
-              <div className={`w-1.5 h-1.5 rounded-full ${engineStatus === 'online' ? 'bg-[#6bff83] animate-pulse shadow-[0_0_8px_#6bff83]' : 'bg-red-500 shadow-[0_0_8px_red]'}`} />
+              <span className="text-[9px] font-label-sm uppercase font-black text-on-surface-variant/40 tracking-widest">RTX_4080_LINK</span>
+              <div className={`w-1.5 h-1.5 rounded-full ${engineStatus === 'online' ? 'bg-success animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-error shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
             </div>
             {gpuInfo && (
               <div className="space-y-2">
                 <div className="flex justify-between text-[9px] font-label-sm">
-                  <span className="text-zinc-500 uppercase">Temp</span>
-                  <span className="text-white font-bold">{gpuInfo.temp}°C</span>
+                  <span className="text-on-surface-variant uppercase">Temp</span>
+                  <span className="text-on-surface font-bold">{gpuInfo.temp}°C</span>
                 </div>
-                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-1 bg-outline rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${(gpuInfo.temp / 90) * 100}%` }}
-                    className="h-full bg-primary-container"
+                    className="h-full bg-primary"
                   />
                 </div>
               </div>
@@ -123,10 +123,10 @@ export default function Layout() {
         <div className="px-4 mb-8">
           <Link 
             to="/create-order" 
-            className="w-full py-4 bg-primary-container text-on-primary-container font-headline-md text-sm rounded transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(34,211,238,0.15)] hover:brightness-110"
+            className="w-full py-4 bg-primary text-white font-headline-md text-xs font-black rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:brightness-110 uppercase tracking-widest"
           >
             <Plus size={18} />
-            New Order
+            {t('INITIATE_PRODUCTION')}
           </Link>
         </div>
 
@@ -134,39 +134,39 @@ export default function Layout() {
           <LiveStatusTracker />
         </div>
 
-        <footer className="px-4 space-y-1 border-t border-white/5 pt-6 mt-auto">
-          <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 font-label-sm text-xs uppercase tracking-widest transition-colors">
-            <Settings size={18} />
-            <span>Settings</span>
+        <footer className="px-4 space-y-1 border-t border-outline pt-6 mt-auto">
+          <Link to="/settings" className="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-sm text-[10px] uppercase tracking-widest transition-all rounded-lg">
+            <Settings size={16} />
+            <span>{t('SETTINGS')}</span>
           </Link>
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/5 font-label-sm text-xs uppercase tracking-widest transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-error hover:bg-error/5 font-label-sm text-[10px] uppercase tracking-widest transition-all rounded-lg"
           >
-            <LogOut size={18} />
+            <LogOut size={16} />
             <span>Sign Out</span>
           </button>
         </footer>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 ml-64 flex flex-col h-screen overflow-y-auto">
+      <main className="flex-1 ml-64 flex flex-col h-screen overflow-y-auto bg-background">
         {/* TopAppBar */}
-        <header className="flex justify-between items-center w-full px-12 h-16 sticky top-0 z-40 bg-[#050505] border-b border-white/10">
+        <header className="flex justify-between items-center w-full px-12 h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline">
           <div className="flex items-center gap-6">
-            <h2 className="font-label-sm text-sm font-medium tracking-tight text-primary-container uppercase tracking-widest">
-              {location.pathname === '/' ? 'Workspace Overview' : location.pathname.split('/')[1].toUpperCase()}
+            <h2 className="font-label-sm text-[11px] font-black tracking-widest text-primary uppercase">
+              {location.pathname === '/' ? t('COMMAND_CENTER') : location.pathname.split('/')[1].toUpperCase().replace('-', '_')}
             </h2>
-            <div className="h-4 w-[1px] bg-white/10 hidden md:block" />
-            <div className="hidden md:flex bg-white/5 p-1 border border-white/10 rounded-lg">
+            <div className="h-4 w-[1px] bg-outline hidden md:block" />
+            <div className="hidden md:flex bg-surface-container p-1 border border-outline rounded-xl">
               {(['NO', 'EN'] as const).map((lang) => (
                 <button
                   key={lang}
                   onClick={() => setLanguage(lang)}
-                  className={`px-3 py-1 text-[9px] font-black transition-all rounded ${
+                  className={`px-3 py-1 text-[9px] font-black transition-all rounded-lg ${
                     language === lang 
-                      ? 'bg-primary-container text-on-primary-container shadow-lg' 
-                      : 'text-zinc-600 hover:text-white'
+                      ? 'bg-surface text-primary shadow-sm' 
+                      : 'text-on-surface-variant hover:text-on-surface'
                   }`}
                 >
                   {lang}
@@ -177,19 +177,19 @@ export default function Layout() {
 
           <div className="flex items-center gap-6">
             <div className="relative hidden lg:block group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm group-focus-within:text-primary-container transition-colors" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/40 group-focus-within:text-primary transition-colors" size={14} />
               <input 
-                className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-1.5 text-xs focus:ring-1 focus:ring-primary-container focus:border-primary-container outline-none text-zinc-300 w-64 transition-all" 
-                placeholder="Search projects..." 
+                className="bg-surface-container border border-outline rounded-xl pl-10 pr-4 py-2 text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-on-surface w-64 transition-all" 
+                placeholder="Neural search..." 
                 type="text"
               />
             </div>
-            <div className="flex items-center gap-3 border-l border-white/10 pl-6">
-              <button className="p-2 text-zinc-400 hover:bg-white/5 hover:text-white transition-all rounded-full relative">
+            <div className="flex items-center gap-3 border-l border-outline pl-6">
+              <button className="p-2 text-on-surface-variant/40 hover:bg-surface-container hover:text-on-surface transition-all rounded-full relative">
                 <Bell size={18} />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-primary-container rounded-full border border-[#050505]"></span>
+                <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-surface"></span>
               </button>
-              <div className="w-8 h-8 rounded-full bg-zinc-800 border border-white/10 overflow-hidden cursor-pointer hover:border-primary-container transition-all">
+              <div className="w-8 h-8 rounded-full bg-surface-container border border-outline overflow-hidden cursor-pointer hover:border-primary transition-all">
                 <img 
                   src={session?.user?.user_metadata?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Operator"} 
                   alt="User avatar" 
