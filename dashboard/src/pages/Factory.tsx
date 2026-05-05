@@ -86,13 +86,13 @@ export default function Factory() {
         
         <div className="flex gap-6 relative z-10">
           <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#BD00FF]/20 bg-[#BD00FF]/5 clipped-corner">
-             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">{t('ACTIVE_CYCLES')}</span>
+             <span className="font-label-caps text-[12px] text-zinc-400 uppercase tracking-[0.3em] mb-2 font-bold">{t('ACTIVE_CYCLES')}</span>
              <span className="font-headline text-5xl font-black text-white italic tracking-tighter">
                {String(activeCycles).padStart(2, '0')}
              </span>
           </div>
           <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#6bff83]/20 bg-[#6bff83]/5 clipped-corner">
-             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">{t('QUEUE_DEPTH')}</span>
+             <span className="font-label-caps text-[12px] text-zinc-400 uppercase tracking-[0.3em] mb-2 font-bold">{t('QUEUE_DEPTH')}</span>
              <span className="font-headline text-5xl font-black text-[#6bff83] italic tracking-tighter">
                {String(orders.length || 0).padStart(2, '0')}
              </span>

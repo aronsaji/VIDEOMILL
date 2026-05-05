@@ -30,18 +30,18 @@ export default function Analytics() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 text-brand-1 font-mono text-[13px] font-black uppercase tracking-[0.4em]"
+            className="flex items-center gap-3 text-[#BD00FF] font-mono text-[14px] font-black uppercase tracking-[0.4em]"
           >
             <Activity size={14} className="animate-pulse" />
             Neural Performance Metrics v1.0
           </motion.div>
           <div className="space-y-2">
             <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-              Performance <span className="text-brand-1">Analytics</span>
+              Performance <span className="text-[#BD00FF]">Analytics</span>
             </h1>
             <div className="flex items-center gap-4">
-               <div className="h-[1px] w-16 bg-brand-1/50" />
-               <p className="text-gray-500 font-bold uppercase tracking-widest text-[13px] italic">Deep data synthesis across global networks</p>
+               <div className="h-[1px] w-16 bg-[#BD00FF]/50" />
+               <p className="text-zinc-400 font-bold uppercase tracking-widest text-[14px] italic">Deep data synthesis across global networks</p>
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function Analytics() {
             
             <div className="space-y-6 relative z-10">
               <div className="flex justify-between items-center">
-                <p className="text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.3em]">{m.label}</p>
+                <p className="text-[13px] font-black font-mono text-zinc-400 uppercase tracking-[0.3em]">{m.label}</p>
                 <span className={`text-[12px] font-black font-mono px-3 py-1 rounded-full ${
                   m.isPositive ? 'bg-brand-1/10 text-brand-1 border border-brand-1/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
                 }`}>
@@ -90,8 +90,8 @@ export default function Analytics() {
                <Cpu size={64} className="text-brand-1 animate-pulse" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">Telemetry Pipeline <span className="text-brand-1">Offline</span></h3>
-              <p className="text-[13px] text-gray-600 font-bold uppercase tracking-widest italic max-w-sm mx-auto">Chart.js integration pending synchronization with local performance snapshots.</p>
+              <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">Telemetry Pipeline <span className="text-[#BD00FF]">Offline</span></h3>
+              <p className="text-[14px] text-zinc-400 font-bold uppercase tracking-widest italic max-w-sm mx-auto">Chart.js integration pending synchronization with local performance snapshots.</p>
             </div>
             <button className="btn-standard !bg-brand-1 !shadow-brand-1/30 px-10 py-4 mt-4">
                Re-Sync Data Source
@@ -102,8 +102,8 @@ export default function Analytics() {
         {/* Top Performers Sidebar */}
         <div className="card-standard !p-10 flex flex-col space-y-10">
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Top <span className="text-brand-1">Performers</span></h2>
-            <p className="text-[11px] text-gray-600 font-black font-mono uppercase tracking-[0.3em]">Last 30 Cycle Window</p>
+            <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Top <span className="text-[#BD00FF]">Performers</span></h2>
+            <p className="text-[13px] text-zinc-400 font-black font-mono uppercase tracking-[0.3em]">Last 30 Cycle Window</p>
           </div>
 
           <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
@@ -130,16 +130,16 @@ export default function Analytics() {
 
                   <div className="grid grid-cols-3 gap-6 pt-2">
                     <div className="space-y-1">
-                      <span className="text-[9px] text-gray-600 font-black font-mono uppercase tracking-widest">Views</span>
-                      <p className="text-[14px] text-white font-black italic">{(video.views / 1000).toFixed(0)}K</p>
+                      <span className="text-[11px] text-zinc-500 font-black font-mono uppercase tracking-widest">Views</span>
+                      <p className="text-[16px] text-white font-black italic">{(video.views / 1000).toFixed(0)}K</p>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] text-gray-600 font-black font-mono uppercase tracking-widest">Likes</span>
-                      <p className="text-[14px] text-white font-black italic">{(video.likes / 1000).toFixed(0)}K</p>
+                      <span className="text-[11px] text-zinc-500 font-black font-mono uppercase tracking-widest">Likes</span>
+                      <p className="text-[16px] text-white font-black italic">{(video.likes / 1000).toFixed(0)}K</p>
                     </div>
                     <div className="space-y-1 text-right">
-                      <span className="text-[9px] text-gray-600 font-black font-mono uppercase tracking-widest">CTR</span>
-                      <p className="text-[14px] text-brand-1 font-black italic">{video.ctr}</p>
+                      <span className="text-[11px] text-zinc-500 font-black font-mono uppercase tracking-widest">CTR</span>
+                      <p className="text-[16px] text-[#BD00FF] font-black italic">{video.ctr}</p>
                     </div>
                   </div>
                 </div>

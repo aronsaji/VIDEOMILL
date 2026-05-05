@@ -17,19 +17,20 @@ export default function Logo({ size = 'md', hideText = false, variant = 'default
   const css = `
     @keyframes vml-rot   { to { transform: rotate(360deg); } }
     @keyframes vml-rotR { to { transform: rotate(-360deg); } }
-    @keyframes vml-pulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
-    @keyframes vml-glow   { 0%,100%{opacity:0.15} 50%{opacity:0.4} }
-    @keyframes vml-ring  { 0%,100%{opacity:0.3;stroke-dashoffset:0} 50%{opacity:0.6} }
-    @keyframes vml-dot   { 0%,100%{opacity:0.15} 50%{opacity:0.7} }
-    @keyframes vml-scan  { 0%{transform:translateY(-100%);opacity:0} 50%{opacity:0.6} 100%{transform:translateY(100%);opacity:0} }
+    @keyframes vml-pulse { 0%,100%{opacity:0.7; filter: brightness(1);} 50%{opacity:1; filter: brightness(1.3);} }
+    @keyframes vml-glow   { 0%,100%{opacity:0.15; r: 11;} 50%{opacity:0.5; r: 13;} }
+    @keyframes vml-ring  { 0%,100%{opacity:0.3; stroke-dashoffset:0} 50%{opacity:0.6; stroke-dashoffset:10} }
+    @keyframes vml-dot   { 0%,100%{opacity:0.3; transform: scale(1);} 50%{opacity:1; transform: scale(1.5);} }
+    @keyframes vml-scan  { 0%{transform:translateY(-100%);opacity:0} 10%{opacity:0.8} 90%{opacity:0.8} 100%{transform:translateY(100%);opacity:0} }
+    @keyframes vml-flicker { 0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 1; } 20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.4; } }
     
-    .vml-rot-${uid}   { transform-origin:${dim/2}px ${dim/2}px; animation:vml-rot 20s linear infinite; }
-    .vml-rotR-${uid} { transform-origin:${dim/2}px ${dim/2}px; animation:vml-rotR 25s linear infinite; }
-    .vml-pls-${uid}   { animation:vml-pulse 2.5s ease-in-out infinite; }
-    .vml-glw-${uid}   { animation:vml-glow 3s ease-in-out infinite; }
-    .vml-rng-${uid}   { animation:vml-ring 4s linear infinite; }
-    .vml-dots-${uid}  { animation:vml-dot 2s ease-in-out infinite; }
-    .vml-scan-${uid}  { animation:vml-scan 2.5s ease-in-out infinite; }
+    .vml-rot-${uid}   { transform-origin: 28px 28px; animation: vml-rot 20s linear infinite; }
+    .vml-rotR-${uid} { transform-origin: 28px 28px; animation: vml-rotR 25s linear infinite; }
+    .vml-pls-${uid}   { animation: vml-pulse 2.5s ease-in-out infinite; }
+    .vml-glw-${uid}   { transform-origin: 28px 28px; animation: vml-glow 3s ease-in-out infinite; }
+    .vml-dots-${uid}  { transform-origin: center; animation: vml-dot 2s ease-in-out infinite; }
+    .vml-scan-${uid}  { animation: vml-scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+    .vml-flicker-${uid} { animation: vml-flicker 4s linear infinite; }
   `;
 
   const bladeAngles = [0, 60, 120, 180, 240, 300];
@@ -89,14 +90,19 @@ export default function Logo({ size = 'md', hideText = false, variant = 'default
           <circle cx="28" cy="28" r="3.5" fill="none" stroke={`url(#gMain-${uid})`} strokeWidth="0.8" opacity="0.5" />
         </g>
 
+        {/* counter-rotating orbit rings */}
         <circle cx="28" cy="28" r="19" fill="none" stroke={`url(#gOrbit-${uid})`} strokeWidth="0.6" strokeDasharray="3 5" opacity="0.4" className={`vml-rotR-${uid}`} />
         <circle cx="28" cy="28" r="13" fill="none" stroke={`url(#gMain-${uid})`} strokeWidth="0.6" opacity="0.35" className={`vml-rotR-${uid}`} />
-        <circle cx="28" cy="28" r="11" fill={`url(#gGlow-${uid})`} className={`vml-glw-${uid}`} />
+        
+        {/* Pulsing Circuit Lines */}
+        <path d="M12 28 H18 M38 28 H44 M28 12 V18 M28 38 V44" stroke="#00F5FF" strokeWidth="0.5" opacity="0.3" className={`vml-pls-${uid}`} />
+
+        <circle cx="28" cy="28" r="11" fill={`url(#gGlow-${uid})`} className={`vml-glw-${uid} vml-flicker-${uid}`} />
 
         <path
           d="M24 22 L24 34 L35 28 Z"
           fill={`url(#gAccent-${uid})`}
-          className={`vml-pls-${uid}`}
+          className={`vml-pls-${uid} vml-flicker-${uid}`}
         />
 
         {cornerDots.map((pos, i) => (

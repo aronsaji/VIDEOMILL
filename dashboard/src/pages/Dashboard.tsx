@@ -103,7 +103,7 @@ export default function Dashboard() {
               <div className="font-headline text-5xl font-black text-white tracking-tighter mb-1 italic">
                 {String(stat.value).padStart(2, '0')}
               </div>
-              <div className="font-label-caps text-[11px] font-bold text-zinc-400 uppercase tracking-[0.25em]">{t(stat.label)}</div>
+              <div className="font-label-caps text-[12px] font-bold text-zinc-300 uppercase tracking-[0.25em]">{t(stat.label)}</div>
             </div>
             <div className={`absolute bottom-0 left-0 h-[2px] bg-current opacity-30 ${stat.color}`} style={{ width: '100%' }} />
           </motion.div>
@@ -119,9 +119,9 @@ export default function Dashboard() {
                 <div className="w-2 h-2 bg-[#BD00FF] animate-pulse-led rounded-full" />
                 <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">LIVE_PRODUCTION_ORCHESTRATOR</h2>
               </div>
-              <div className="flex gap-6 font-data-mono text-[10px]">
-                <span className="text-zinc-600 uppercase font-bold tracking-widest">NETWORK: <span className="text-[#6bff83]">ACTIVE</span></span>
-                <span className="text-zinc-600 uppercase font-bold tracking-widest">FPS: <span className="text-[#00f5ff]">60.0</span></span>
+              <div className="flex gap-6 font-data-mono text-[12px]">
+                <span className="text-zinc-400 uppercase font-bold tracking-widest">NETWORK: <span className="text-[#6bff83]">ACTIVE</span></span>
+                <span className="text-zinc-400 uppercase font-bold tracking-widest">FPS: <span className="text-[#00f5ff]">60.0</span></span>
               </div>
             </div>
             

@@ -203,7 +203,7 @@ export default function Layout() {
               >
                  {isSidebarOpen ? <X size={18} className="text-zinc-500" /> : <Menu size={18} className="text-[#BD00FF]" />}
               </button>
-              <div className="font-data-mono text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold opacity-50">
+              <div className="font-data-mono text-[11px] text-zinc-400 uppercase tracking-[0.3em] font-bold">
                 SYSTEM_ORCHESTRATOR_v2.0
               </div>
             </div>
@@ -228,18 +228,18 @@ export default function Layout() {
               <div className="hidden lg:flex items-center gap-8 px-8 py-3 bg-white/[0.02] border border-white/5 clipped-corner-sm">
                 <div className="flex items-center gap-3">
                   <Activity size={14} className="text-[#6bff83] animate-pulse-led" />
-                  <span className="font-data-mono text-[10px] text-zinc-400 uppercase font-bold">ENGINE_LOAD: 24%</span>
+                  <span className="font-data-mono text-[11px] text-zinc-400 uppercase font-bold">ENGINE_LOAD: 24%</span>
                 </div>
                 <div className="w-[1px] h-4 bg-white/10" />
                 <div className="flex items-center gap-3">
                   <Globe size={14} className="text-[#00f5ff]" />
-                  <span className="font-data-mono text-[10px] text-zinc-400 uppercase font-bold">NETWORK_LIVE</span>
+                  <span className="font-data-mono text-[11px] text-zinc-400 uppercase font-bold">NETWORK_LIVE</span>
                 </div>
               </div>
               
               <div className="flex items-center gap-4 text-zinc-500">
                 <Shield size={16} />
-                <span className="font-data-mono text-[9px] uppercase tracking-widest font-black italic text-[#BD00FF]">ENCRYPTED_SESSION</span>
+                <span className="font-data-mono text-[11px] uppercase tracking-widest font-black italic text-[#BD00FF]">ENCRYPTED_SESSION</span>
               </div>
             </div>
           </header>

@@ -71,7 +71,7 @@ export default function TrendAnalyzer() {
           {/* Radar Filters */}
           <div className="flex bg-black/60 p-2 border border-white/5 clipped-corner-sm gap-2">
             <div className="flex flex-col gap-1">
-              <span className="font-data-mono text-[8px] text-zinc-600 px-2 uppercase">{t('COUNTRY')}</span>
+              <span className="font-data-mono text-[11px] text-zinc-400 px-2 uppercase">{t('COUNTRY')}</span>
               <select 
                 value={selectedCountry}
                 onChange={(e) => setSelectedCountry(e.target.value)}
@@ -82,7 +82,7 @@ export default function TrendAnalyzer() {
             </div>
             <div className="w-[1px] h-full bg-white/5" />
             <div className="flex flex-col gap-1">
-              <span className="font-data-mono text-[8px] text-zinc-600 px-2 uppercase">{t('PLATFORM')}</span>
+              <span className="font-data-mono text-[11px] text-zinc-400 px-2 uppercase">{t('PLATFORM')}</span>
               <select 
                 value={selectedPlatform}
                 onChange={(e) => setSelectedPlatform(e.target.value)}
@@ -95,11 +95,11 @@ export default function TrendAnalyzer() {
         
           <div className="flex gap-4">
             <div className="panel-kinetic p-6 flex flex-col min-w-[180px] group border-[#00f5ff]/20 bg-[#00f5ff]/5 clipped-corner-sm">
-               <span className="font-label-caps text-[9px] text-zinc-500 uppercase tracking-[0.3em] mb-1 font-bold">SIGNALS_SEC</span>
+               <span className="font-label-caps text-[11px] text-zinc-400 uppercase tracking-[0.3em] mb-1 font-bold">SIGNALS_SEC</span>
                <span className="font-headline text-4xl font-black text-white italic tracking-tighter">1,422</span>
             </div>
             <div className="panel-kinetic p-6 flex flex-col min-w-[180px] group border-[#ffaa00]/20 bg-[#ffaa00]/5 clipped-corner-sm">
-               <span className="font-label-caps text-[9px] text-zinc-500 uppercase tracking-[0.3em] mb-1 font-bold">NEURAL_LOAD</span>
+               <span className="font-label-caps text-[11px] text-zinc-400 uppercase tracking-[0.3em] mb-1 font-bold">NEURAL_LOAD</span>
                <span className="font-headline text-4xl font-black text-[#ffaa00] italic tracking-tighter">42%</span>
             </div>
           </div>
