@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { usePipelineStore } from '../store/pipelineStore';
 import { supabase } from '../lib/supabase';
 import { 
@@ -286,8 +287,8 @@ export default function Dashboard() {
           </div>
 
           {/* Radar Intercept */}
-          <div className="bg-[#BD00FF] p-0.5 clipped-corner">
-            <div className="bg-black p-8 clipped-corner relative overflow-hidden group cursor-pointer">
+          <Link to="/trends" className="block bg-[#BD00FF] p-0.5 clipped-corner hover:scale-[1.02] transition-transform">
+            <div className="bg-black p-8 clipped-corner relative overflow-hidden group">
               <div className="absolute inset-0 bg-[#BD00FF]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
                 <div className="flex justify-between items-center mb-6">
@@ -314,7 +315,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </aside>
       </div>
     </div>
