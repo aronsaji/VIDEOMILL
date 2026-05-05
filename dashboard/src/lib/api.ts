@@ -20,15 +20,14 @@ export const triggerProduction = async (payload: any) => {
     const { error } = await supabase
       .from('orders')
       .insert([{
-        user_id: user.id, // CRITICAL: Must match authenticated user
-        video_id: payload.video_id || payload.retry_video_id || `manual-${Date.now()}`,
+        user_id: user.id,
         title: payload.title || 'Untitled Production',
-        topic: payload.topic || payload.action,
-        language: payload.language || 'en',
-        ai_voice: payload.ai_voice || 'standard',
-        visual_style: payload.visual_style || 'industrial',
-        metadata: payload, 
-        status: 'pending'
+        status: 'pending',
+        metadata: {
+          ...payload,
+          dispatched_at: new Date().toISOString(),
+          agent_node: 'videomill-v2-dashboard'
+        }
       }]);
 
     if (error) {
