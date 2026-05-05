@@ -45,3 +45,28 @@ export const triggerProduction = async (payload: any) => {
     return false;
   }
 };
+
+export const retryProduction = async (videoId: string) => {
+  console.group('🔄 NEURAL_RETRY_PROTOCOL');
+  console.log('Target ID:', videoId);
+  
+  try {
+    const { error } = await supabase.rpc('handle_retry_request', { 
+      video_id: videoId 
+    });
+
+    if (error) {
+      console.error('❌ RPC Error:', error.message);
+      throw error;
+    }
+    
+    console.log('✅ Retry sequence successfully initiated');
+    console.groupEnd();
+    return true;
+  } catch (err: any) {
+    console.error('❌ Retry dispatch failure:', err.message);
+    alert(`❌ RETRY_ERROR: ${err.message}`);
+    console.groupEnd();
+    return false;
+  }
+};

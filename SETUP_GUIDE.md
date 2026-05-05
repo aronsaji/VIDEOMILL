@@ -12,6 +12,7 @@ VideoMill er delt opp i fire hovedkomponenter:
 | **Voice Server** | Lokal server for lyd-prosessering | Node.js (Express) |
 | **Neural Database** | Lagring av trender, ordre og brukere | Supabase (PostgreSQL + Auth) |
 | **Automation Hub** | Selve produksjonslinjen (Video/AI) | n8n (Webhooks) |
+| **Tunneling Node** | Sikker "bro" mellom sky og lokal PC | ngrok (HTTP Tunnel) |
 
 ---
 
@@ -40,6 +41,13 @@ cd "c:\VideoMill\NY_VIDEOMILL_V2\videomill\dashboard\dashboard"
 npm run dev
 ```
 *(Dashbordet starter på http://localhost:5173).*
+
+### 4. Aktiver Tunneling (ngrok)
+Dette er det viktigste steget for at Supabase skal kunne sende signaler til din lokale maskin. Uten dette vil ikke "Neural Dispatch" fungere.
+```powershell
+ngrok http 5678
+```
+*(Kopier "Forwarding"-adressen du får her og lim den inn i Supabase trigger-innstillingene hvis du har startet ngrok på nytt).*
 
 ---
 

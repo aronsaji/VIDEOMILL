@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
 import { 
   Play, Search, Download, Share2, X, Globe, Film, 
-  Activity, Zap, Info, Maximize2, Trash2
+  Activity, Zap, Info, Maximize2, Trash2, RefreshCcw
 } from 'lucide-react';
+import { retryProduction } from '../lib/api';
 
 export default function Library() {
   const videos = usePipelineStore(state => state.videos);
@@ -86,8 +87,32 @@ export default function Library() {
                       onMouseOut={e => e.currentTarget.pause()}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Film className="text-zinc-800 group-hover:scale-110 transition-transform duration-1000" size={64} />
+                    <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-[#0a0a0b]">
+                      {video.status === 'failed' ? (
+                        <div className="space-y-4">
+                          <X className="text-red-500 mx-auto" size={48} />
+                          <p className="font-data-mono text-[10px] text-red-400 uppercase tracking-widest italic">Node_Failure</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-6 w-full">
+                          <div className="relative">
+                            <Activity className="text-[#BD00FF] mx-auto animate-pulse" size={48} />
+                            <div className="absolute inset-0 bg-[#BD00FF]/20 blur-xl rounded-full animate-pulse" />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${video.progress || 0}%` }}
+                                className="h-full bg-gradient-to-r from-[#BD00FF] to-[#00f5ff]"
+                              />
+                            </div>
+                            <p className="font-data-mono text-[8px] text-[#BD00FF] animate-pulse uppercase tracking-[0.2em] italic">
+                              {video.sub_status || 'Initializing_Synthesis...'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -95,25 +120,32 @@ export default function Library() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                   
                   {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
-                    <div className="w-16 h-16 bg-[#BD00FF]/20 backdrop-blur-md rounded-full flex items-center justify-center border border-[#BD00FF]/50">
-                      <Play className="text-[#BD00FF] fill-[#BD00FF] ml-1" size={24} />
+                  {video.video_url && (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
+                      <div className="w-16 h-16 bg-[#BD00FF]/20 backdrop-blur-md rounded-full flex items-center justify-center border border-[#BD00FF]/50">
+                        <Play className="text-[#BD00FF] fill-[#BD00FF] ml-1" size={24} />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Top Badge */}
                   <div className="absolute top-4 left-4 flex gap-2">
-                    <span className="px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 text-[8px] font-black uppercase tracking-widest text-white italic">
-                      {video.platform || 'ASSET'}
+                    <span className={`px-3 py-1 bg-black/60 backdrop-blur-md border border-white/10 text-[8px] font-black uppercase tracking-widest italic ${video.status === 'rendering' ? 'text-[#BD00FF]' : 'text-white'}`}>
+                      {video.status === 'rendering' ? 'LIVE_RENDER' : (video.platform || 'ASSET')}
                     </span>
                   </div>
                 </div>
 
                 {/* Content Info */}
                 <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
-                  <h4 className="font-headline text-lg font-bold text-white uppercase italic leading-tight group-hover:text-[#BD00FF] transition-colors truncate">
-                    {video.title || video.topic || 'UNTITLED_NODE'}
-                  </h4>
+                  <div>
+                    <h4 className="font-headline text-lg font-bold text-white uppercase italic leading-tight group-hover:text-[#BD00FF] transition-colors truncate">
+                      {video.title || video.topic || 'UNTITLED_NODE'}
+                    </h4>
+                    {video.status === 'failed' && (
+                      <p className="text-[9px] text-red-500 font-data-mono mt-1 uppercase">ERR_LOG: {video.sub_status || 'Network_Interrupt'}</p>
+                    )}
+                  </div>
                   
                   <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -238,7 +270,20 @@ export default function Library() {
                     <Download size={16} />
                     Download
                   </a>
-                  <button className="flex items-center justify-center gap-2 py-4 bg-[#BD00FF] text-black font-headline font-bold uppercase italic text-[11px] transition-all hover:shadow-[0_0_15px_#BD00FF]">
+                  <button 
+                    onClick={async () => {
+                      const success = await retryProduction(selectedVideo.id);
+                      if (success) {
+                        alert('🔄 RETRY_INITIATED: The production node has been signaled.');
+                        setSelectedVideo(null);
+                      }
+                    }}
+                    className="flex items-center justify-center gap-2 py-4 bg-zinc-900 text-white border border-white/10 font-headline font-bold uppercase italic text-[11px] transition-all hover:bg-zinc-800 hover:border-[#BD00FF]/50"
+                  >
+                    <RefreshCcw size={16} />
+                    Retry
+                  </button>
+                  <button className="col-span-2 flex items-center justify-center gap-2 py-4 bg-[#BD00FF] text-black font-headline font-bold uppercase italic text-[11px] transition-all hover:shadow-[0_0_15px_#BD00FF]">
                     <Share2 size={16} />
                     Distribute
                   </button>

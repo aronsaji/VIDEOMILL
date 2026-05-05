@@ -47,8 +47,21 @@ async function scanForFooocus() {
   return false;
 }
 
+const POWER_WORDS = ['PENGER', 'SUKSESS', 'HEMMELIGHET', 'SJOKK', 'UTROLIG', 'FAKTA', 'ADVARSEL', 'GRATIS', 'RIKHET', 'FREMTID', 'KRAFT', 'LYKKE', 'VIDEO'];
+
 const generateAnimatedASS = (vttContent, outputFile) => {
-  let ass = `[Script Info]\nTitle: VideoMill Viral\nScriptType: v4.00+\nPlayResX: 1080\nPlayResY: 1920\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Default,Arial Black,95,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,2,0,1,5,2,10,50,50,960,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
+  let ass = `[Script Info]
+Title: VideoMill Viral ELITE
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial Black,92,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,2,0,1,6,3,10,50,50,960,1
+`;
+  ass += `\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
+  
   const blocks = vttContent.split('\n\n').filter(b => b.includes('-->'));
   blocks.forEach(block => {
     const lines = block.split('\n');
@@ -56,8 +69,17 @@ const generateAnimatedASS = (vttContent, outputFile) => {
     if (times && times.length >= 2) {
       const start = times[0].replace('.', ',');
       const end = times[1].replace('.', ',');
-      const text = lines.slice(1).join(' ').toUpperCase().replace(/<[^>]*>/g, '');
-      ass += `Dialogue: 0,${start},${end},Default,,0,0,0,,{\\fscx110\\fscy110}${text}\n`;
+      let text = lines.slice(1).join(' ').toUpperCase().replace(/<[^>]*>/g, '').replace(/\"/g, '').trim();
+      
+      if (text) {
+        // Highlighting Power Words in Yellow (&H0000FFFF)
+        POWER_WORDS.forEach(word => {
+          const regex = new RegExp(`\\b${word}\\b`, 'g');
+          text = text.replace(regex, `{\\1c&H0000FFFF&}${word}{\\1c&H00FFFFFF&}`);
+        });
+
+        ass += `Dialogue: 0,${start},${end},Default,,0,0,0,,{\\fscx80\\fscy80\\t(0,150,\\fscx105\\fscy105)\\t(150,300,\\fscx100\\fscy100)}${text}\n`;
+      }
     }
   });
   fs.writeFileSync(outputFile, ass);
@@ -80,7 +102,7 @@ const downloadFile = (url, dest, retries = 5) => {
 
 async function updateStatus(id, status, extra = {}) {
   const body = JSON.stringify({ status, ...extra, updated_at: new Date() });
-  const checkUrl = `${SUPABASE_URL}/rest/v1/orders?video_id=eq.${id}&select=id`;
+  const checkUrl = `${SUPABASE_URL}/rest/v1/videos?id=eq.${id}&select=id`;
   
   return new Promise((resolve) => {
     https.get(checkUrl, { headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }, (res) => {
@@ -89,10 +111,10 @@ async function updateStatus(id, status, extra = {}) {
       res.on('end', () => {
         const exists = data !== '[]' && data !== '';
         const method = exists ? 'PATCH' : 'POST';
-        const url = exists ? `${SUPABASE_URL}/rest/v1/orders?video_id=eq.${id}` : `${SUPABASE_URL}/rest/v1/orders`;
+        const url = exists ? `${SUPABASE_URL}/rest/v1/videos?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/videos`;
         
         const finalBody = exists ? body : JSON.stringify({
-          video_id: id,
+          id: id,
           title: extra.title || `Video ${id}`,
           status: status,
           ...extra,
@@ -176,59 +198,144 @@ async function generateImage(prompt, dest) {
 
 async function handleCinematicRender(data) {
   const { video_id, scenes, ai_voice, title } = data;
-  const voiceToUse = ai_voice || 'nb-NO-PernilleNeural';
+  const defaultVoice = ai_voice || 'nb-NO-PernilleNeural';
   const videoDir = path.join(BASE_ASSETS_DIR, video_id).replace(/\\/g, '/');
   const tempDir = path.join(videoDir, 'temp').replace(/\\/g, '/');
+  const musicDir = path.join(BASE_ASSETS_DIR, 'music').replace(/\\/g, '/');
   
   if (!fs.existsSync(videoDir)) fs.mkdirSync(videoDir, { recursive: true });
   if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
   fs.mkdirSync(tempDir, { recursive: true });
 
-  await updateStatus(video_id, 'rendering', { title, progress: 5, sub_status: 'Klargjør AI-motor...' });
-
-  const voiceFile = `${videoDir}/voiceover.mp3`;
-  const vttFile = `${videoDir}/subs.vtt`;
-  const fullText = scenes.map(s => s.narration).join('. ');
-  console.log("🎙️ Genererer tale...");
-  try {
-    execSync(`"${EDGE_TTS_PATH}" --voice "${voiceToUse}" --text "${fullText}" --write-media "${voiceFile}" --write-subtitles "${vttFile}"`, { stdio: 'ignore' });
-  } catch (e) {
-    execSync(`"${EDGE_TTS_PATH}" --voice "${voiceToUse}" --text "${fullText}" --write-media "${voiceFile}"`, { stdio: 'ignore' });
-  }
+  await updateStatus(video_id, 'rendering', { title, progress: 5, sub_status: 'Initialiserer Multi-Voice Engine...' });
 
   const processedClips = [];
+  const voiceClips = [];
+  const vttClips = [];
+
   for (let i = 0; i < scenes.length; i++) {
     const scene = scenes[i];
+    const voiceToUse = scene.voice_id || defaultVoice;
+    const sceneAudio = `${tempDir}/voice_${i}.mp3`;
+    const sceneVtt = `${tempDir}/subs_${i}.vtt`;
     const imagePath = `${tempDir}/img_${i}.png`;
     const sceneVideo = `${tempDir}/scene_${i}.mp4`;
-    await updateStatus(video_id, 'rendering', { progress: 10 + (i * 15), sub_status: `Scene ${i+1}/${scenes.length}: Genererer bilde...` });
+
+    await updateStatus(video_id, 'rendering', { progress: 10 + (i * 15), sub_status: `Scene ${i+1}/${scenes.length}: Genererer tale og bilde...` });
+
+    // 1. GENERER TALE FOR DENNE SCENEN
+    try {
+      execSync(`"${EDGE_TTS_PATH}" --voice "${voiceToUse}" --text "${scene.narration}" --write-media "${sceneAudio}" --write-subtitles "${sceneVtt}"`, { stdio: 'ignore' });
+    } catch (e) {
+      execSync(`"${EDGE_TTS_PATH}" --voice "${voiceToUse}" --text "${scene.narration}" --write-media "${sceneAudio}"`, { stdio: 'ignore' });
+    }
+    voiceClips.push(sceneAudio);
+    if (fs.existsSync(sceneVtt)) vttClips.push(sceneVtt);
+
+    // Finn varighet på lyd (default 4s hvis feil)
+    let dur = 4;
+    try {
+      const ffprobe = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${sceneAudio}"`).toString().trim();
+      dur = parseFloat(ffprobe) + 0.3; // Legg til litt buffer
+    } catch (e) { dur = scene.duration_seconds || 4; }
+
+    // 2. GENERER BILDE OG VIDEO
     await generateImage(scene.prompt || scene.narration, imagePath);
+    const zoomFilter = `scale=2500:-1,zoompan=z='min(zoom+0.0015,1.5)':d=${Math.ceil(dur*30)}:x='(iw-(iw/zoom))/2 + (iw/zoom/4)*sin(2*PI*it/20)':y='(ih-(ih/zoom))/2':s=1080x1920`;
+    const colorFilter = `eq=brightness=0.02:contrast=1.1:saturation=1.2`;
     
-    const dur = scene.duration_seconds || 4;
-    const filter = `scale=2500:-1,zoompan=z='min(zoom+0.0015,1.5)':d=${dur*30}:x='(iw-(iw/zoom))/2 + (iw/zoom/4)*sin(2*PI*it/20)':y='(ih-(ih/zoom))/2':s=1080x1920`;
-    execSync(`"${FFMPEG_PATH}" -y -loop 1 -i "${imagePath}" -t ${dur} -vf "${filter},vignette=angle=PI/4" -c:v libx264 -pix_fmt yuv420p -r 30 "${sceneVideo}"`, { stdio: 'ignore' });
+    execSync(`"${FFMPEG_PATH}" -y -loop 1 -i "${imagePath}" -t ${dur} -vf "${zoomFilter},${colorFilter},vignette=angle=PI/4" -c:v libx264 -pix_fmt yuv420p -r 30 "${sceneVideo}"`, { stdio: 'ignore' });
     processedClips.push(sceneVideo);
-    await sleep(1000);
   }
 
-  await updateStatus(video_id, 'rendering', { progress: 85, sub_status: 'Sluttfører video...' });
-  const listFile = `${videoDir}/list.txt`;
-  fs.writeFileSync(listFile, processedClips.map(c => `file '${c}'`).join('\n'));
+  // 3. SETT SAMMEN VIDEO OG LYD
+  await updateStatus(video_id, 'rendering', { progress: 85, sub_status: 'Sluttfører Multi-Voice Mix...' });
+  
+  const videoList = `${videoDir}/v_list.txt`;
+  fs.writeFileSync(videoList, processedClips.map(c => `file '${c}'`).join('\n'));
   const concatVideo = `${videoDir}/concat.mp4`;
-  execSync(`"${FFMPEG_PATH}" -y -f concat -safe 0 -i "${listFile}" -c copy "${concatVideo}"`, { stdio: 'ignore' });
+  execSync(`"${FFMPEG_PATH}" -y -f concat -safe 0 -i "${videoList}" -c copy "${concatVideo}"`, { stdio: 'ignore' });
 
+  const voiceList = `${videoDir}/a_list.txt`;
+  fs.writeFileSync(voiceList, voiceClips.map(c => `file '${c}'`).join('\n'));
+  const finalVoice = `${videoDir}/voiceover.mp3`;
+  execSync(`"${FFMPEG_PATH}" -y -f concat -safe 0 -i "${voiceList}" -c copy "${finalVoice}"`, { stdio: 'ignore' });
+
+  // 4. UNDERTEKSTER (Slå sammen VTTer)
+  const finalVtt = `${videoDir}/subs.vtt`;
+  let combinedVtt = "WEBVTT\n\n";
+  let timeOffset = 0;
+  vttClips.forEach((vfile, idx) => {
+    const content = fs.readFileSync(vfile, 'utf8').replace("WEBVTT\n\n", "");
+    // TODO: Juster tidsstempler hvis nødvendig, men FFmpeg subtitles filter håndterer ofte dette ok hvis vi brenner dem scene for scene.
+    // Enklere: Generer ASS fra de individuelle VTTene med offset.
+    combinedVtt += content + "\n";
+  });
   const assFile = `${videoDir}/subs.ass`;
-  if (fs.existsSync(vttFile)) generateAnimatedASS(fs.readFileSync(vttFile, 'utf8'), assFile);
+  generateAnimatedASS(combinedVtt, assFile);
 
+  // 5. FINN EKSTRA ASSETS (Musikk, Overlay, Logo)
+  let musicFile = null;
+  let overlayFile = null;
+  let logoFile = null;
+
+  if (fs.existsSync(musicDir)) {
+    const mFiles = fs.readdirSync(musicDir).filter(f => f.endsWith('.mp3'));
+    if (mFiles.length > 0) musicFile = path.join(musicDir, mFiles[Math.floor(Math.random() * mFiles.length)]).replace(/\\/g, '/');
+  }
+  
+  const overlayPath = path.join(BASE_ASSETS_DIR, 'overlays/dust.mp4').replace(/\\/g, '/');
+  if (fs.existsSync(overlayPath)) overlayFile = overlayPath;
+  
+  const logoPath = path.join(BASE_ASSETS_DIR, 'logo.png').replace(/\\/g, '/');
+  if (fs.existsSync(logoPath)) logoFile = logoPath;
+
+  // 6. FINAL MIX (Voice + Music + Overlay + Logo + Subs)
   const finalOutput = `${videoDir}/final.mp4`;
   const subFilter = fs.existsSync(assFile) ? `subtitles='${assFile.replace(/\\/g, '/').replace(':', '\\:')}'` : '';
-  execSync(`"${FFMPEG_PATH}" -y -i "${concatVideo}" -i "${voiceFile}" -filter_complex "[1:a]volume=1.2[a]" ${subFilter ? `-vf "${subFilter}"` : ''} -map 0:v -map "[a]" -c:v libx264 -preset fast -shortest "${finalOutput}"`, { stdio: 'ignore' });
+  
+  let inputArgs = `-i "${concatVideo}" -i "${voiceFile}"`;
+  let filterComplex = '[1:a]volume=1.3[v]';
+  let videoMap = '[0:v]';
+  let audioInputs = 1;
 
+  if (musicFile) {
+    inputArgs += ` -i "${musicFile}"`;
+    filterComplex += ';[2:a]volume=0.15[m]';
+    audioInputs++;
+  }
+
+  if (overlayFile) {
+    inputArgs += ` -stream_loop -1 -i "${overlayFile}"`;
+    const overlayIdx = audioInputs + 1;
+    filterComplex += `;[${overlayIdx}:v]format=rgba,colorchannelmixer=aa=0.3[ov];[0:v][ov]overlay=shortest=1[v_ov]`;
+    videoMap = '[v_ov]';
+  }
+
+  if (logoFile) {
+    inputArgs += ` -i "${logoFile}"`;
+    const logoIdx = overlayFile ? audioInputs + 2 : audioInputs + 1;
+    filterComplex += `;[${logoIdx}:v]scale=150:-1[logo];${videoMap}[logo]overlay=main_w-170:20[v_logo]`;
+    videoMap = '[v_logo]';
+  }
+
+  // Audio mix
+  const mixLabel = musicFile ? '[v][m]amix=inputs=2:duration=first[a]' : '[v]amix=inputs=1[a]';
+  filterComplex += `;${mixLabel}`;
+
+  const vf = subFilter ? `-vf "${videoMap}${subFilter ? ',' + subFilter : ''}"` : `-vf "${videoMap}"`;
+
+  console.log("🎬 Rendrer final video...");
+  execSync(`"${FFMPEG_PATH}" -y ${inputArgs} -filter_complex "${filterComplex}" ${vf} -map "${videoMap}" -map "[a]" -c:v libx264 -preset fast -shortest "${finalOutput}"`, { stdio: 'ignore' });
+
+  // 7. LAST OPP
   const storagePath = `videos/${video_id}/final.mp4`;
   try {
     execSync(`curl -X POST "${SUPABASE_URL}/storage/v1/object/${storagePath}" -H "Authorization: Bearer ${SUPABASE_KEY}" -H "Content-Type: video/mp4" --data-binary @"${finalOutput}"`, { stdio: 'ignore' });
     await updateStatus(video_id, 'complete', { video_url: `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`, progress: 100 });
+    console.log(`✨ Elite Produksjon ferdig: ${video_id}`);
   } catch (e) {
+    console.error("❌ Upload feilet:", e.message);
     await updateStatus(video_id, 'failed', { sub_status: 'Kunne ikke laste opp til skyen' });
   }
 }

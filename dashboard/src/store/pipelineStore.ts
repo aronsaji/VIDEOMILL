@@ -31,11 +31,6 @@ interface PipelineState {
   fetchVideos: () => Promise<void>;
   fetchTrends: (country?: string, language?: string) => Promise<void>;
   fetchFilterOptions: () => Promise<void>;
-  fetchAnalytics: () => Promise<void>;
-  fetchSeries: () => Promise<void>;
-  fetchEpisodes: () => Promise<void>;
-  fetchSeries: () => Promise<void>;
-  fetchEpisodes: () => Promise<void>;
   fetchAgentLogs: () => Promise<void>;
   fetchSocialAccounts: () => Promise<void>;
   subscribeToChanges: () => () => void;
@@ -115,7 +110,8 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     try {
       const { data: snapshots, error: snapError } = await supabase
         .from('performance_snapshots')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: true });
       
       if (snapError) throw snapError;
 
@@ -131,6 +127,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
       if (prodError) throw prodError;
 
       set({ 
+        analytics: snapshots || [],
         analyticsData: {
           totalViews,
           totalWatchTime,
@@ -221,29 +218,6 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     }
   },
 
-  fetchAnalytics: async () => {
-    try {
-      const { data, error } = await supabase
-        .from('performance_snapshots')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      set({ analytics: data || [] });
-    } catch (err) {
-      console.error('Error fetching analytics:', err);
-    }
-  },
-
-  fetchSeries: async () => {
-    try {
-      const { data, error } = await supabase.from('series').select('*');
-      if (error) throw error;
-      set({ series: data || [] });
-    } catch (err) {
-      console.error('Error fetching series:', err);
-    }
-  },
-
   fetchEpisodes: async () => {
     try {
       const { data, error } = await supabase.from('episodes').select('*, series:series_id(title)');
@@ -283,6 +257,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
         .on('postgres_changes', { event: '*', schema: 'public', table: 'productions' }, () => get().fetchProductions())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, () => get().fetchTrends())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'agent_logs' }, () => get().fetchAgentLogs())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'performance_snapshots' }, () => get().fetchAnalytics())
         .subscribe();
 
       return () => {

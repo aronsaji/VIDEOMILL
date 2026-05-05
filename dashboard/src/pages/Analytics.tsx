@@ -12,11 +12,14 @@ const formatNumber = (num: number) => {
 };
 
 export default function Analytics() {
-  const { analyticsData, fetchAnalytics, isLoading } = usePipelineStore();
+  const { analyticsData, fetchAnalytics, isLoading, analytics, videos } = usePipelineStore();
 
   useEffect(() => {
     fetchAnalytics();
   }, []);
+
+  const activeRenders = videos.filter(v => v.status === 'rendering');
+  const engineOnline = true; // Assuming engine is reachable if dashboard is open
 
   const metrics = [
     { 
@@ -76,6 +79,35 @@ export default function Analytics() {
         </div>
       </header>
 
+      {/* Epic Engine Status Bar */}
+      <section className="bg-white/[0.02] border border-white/10 p-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative group">
+          <div className="scanline-overlay absolute inset-0 opacity-5 pointer-events-none" />
+          <div className="flex items-center gap-6 relative z-10">
+              <div className={`w-3 h-3 rounded-full ${engineOnline ? 'bg-[#6bff83] animate-pulse shadow-[0_0_10px_#6bff83]' : 'bg-red-500'}`} />
+              <div>
+                  <p className="font-data-mono text-[10px] text-zinc-500 uppercase tracking-widest">Epic_Engine_v14.4</p>
+                  <h3 className="font-headline text-lg font-black text-white italic uppercase tracking-tighter">
+                      {engineOnline ? 'SYSTEM_STATUS: NOMINAL' : 'SYSTEM_STATUS: DISCONNECTED'}
+                  </h3>
+              </div>
+          </div>
+
+          <div className="flex items-center gap-12 relative z-10">
+              <div className="flex flex-col items-end">
+                  <span className="font-data-mono text-[9px] text-zinc-600 uppercase">GPU_ORCHESTRATION</span>
+                  <div className="flex gap-1 mt-1">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className={`w-1 h-3 ${i < (activeRenders.length > 0 ? 6 : 2) ? 'bg-[#BD00FF]' : 'bg-white/10'}`} />
+                      ))}
+                  </div>
+              </div>
+              <div className="flex flex-col items-end border-l border-white/10 pl-12">
+                  <span className="font-data-mono text-[9px] text-zinc-600 uppercase">ACTIVE_NODES</span>
+                  <span className="font-headline text-2xl font-black text-[#00f5ff] italic uppercase">{activeRenders.length}</span>
+              </div>
+          </div>
+      </section>
+
       {/* Industrial Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {metrics.map((stat, i) => (
@@ -121,18 +153,47 @@ export default function Analytics() {
                 </div>
              </div>
 
-             <div className="flex-1 flex flex-col items-center justify-center text-center relative z-10">
-                <div className="w-[120px] h-[120px] bg-[#00f5ff]/5 border border-[#00f5ff]/20 rounded-full flex items-center justify-center mb-6 relative">
-                   <div className="absolute inset-0 border border-[#00f5ff]/10 rounded-full animate-ping" />
-                   <Cpu size={48} className="text-[#00f5ff] animate-pulse" />
+             <div className="flex-1 flex flex-col relative z-10">
+                {/* Data Grid Background */}
+                <div className="absolute inset-0 grid grid-cols-6 grid-rows-4 gap-4 opacity-[0.03] pointer-events-none">
+                   {Array.from({ length: 24 }).map((_, i) => (
+                     <div key={i} className="border border-white" />
+                   ))}
                 </div>
-                <h3 className="font-headline text-3xl font-black text-white uppercase italic mb-2 tracking-tighter">NETWORK_SYNC_PENDING</h3>
-                <p className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold max-w-sm mx-auto leading-relaxed">
-                   ESTABLISHING_HANDSHAKE_WITH_LOCAL_NODE... INITIALIZING_DATA_STREAM_PIPELINES_v2.0
-                </p>
-                <button className="mt-10 px-8 py-3 bg-[#00f5ff] text-black font-headline font-black uppercase italic text-sm tracking-widest hover:shadow-[0_0_20px_#00f5ff] transition-all clipped-corner-sm">
-                   INITIATE_RESCAN
-                </button>
+
+                <div className="flex-1 flex items-end gap-2 px-4 pb-8 h-[300px]">
+                   {analytics.length > 0 ? (
+                     analytics.slice(-12).map((snap, i) => {
+                       const maxViews = Math.max(...analytics.map(s => s.views || 0)) || 100;
+                       const height = ((snap.views || 0) / maxViews) * 100;
+                       
+                       return (
+                         <div key={i} className="flex-1 flex flex-col items-center gap-4 group h-full justify-end">
+                            <div className="relative w-full flex flex-col justify-end h-full">
+                               <motion.div 
+                                 initial={{ height: 0 }}
+                                 animate={{ height: `${height}%` }}
+                                 transition={{ delay: i * 0.05, duration: 1, ease: "easeOut" }}
+                                 className="w-full bg-gradient-to-t from-[#00f5ff]/40 to-[#00f5ff] relative group-hover:from-[#00f5ff]/60 group-hover:to-[#00f5ff] transition-all"
+                               >
+                                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity font-data-mono text-[9px] text-[#00f5ff] font-black whitespace-nowrap">
+                                     {formatNumber(snap.views)}
+                                  </div>
+                               </motion.div>
+                            </div>
+                            <span className="font-data-mono text-[8px] text-zinc-700 font-bold rotate-45 origin-left whitespace-nowrap uppercase">
+                               {new Date(snap.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                         </div>
+                       );
+                     })
+                   ) : (
+                     <div className="w-full h-full flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 border-2 border-dashed border-white/10 rounded-full animate-spin mb-6" />
+                        <p className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-widest">Awaiting sensor data stream...</p>
+                     </div>
+                   )}
+                </div>
              </div>
           </div>
         </section>

@@ -6,8 +6,9 @@ import {
   Search, Filter, Download, Share2, 
   ExternalLink, Play, Clock, BarChart3, 
   History, Link as LinkIcon, CheckCircle2,
-  AlertCircle, LayoutGrid, List
+  AlertCircle, LayoutGrid, List, RefreshCcw
 } from 'lucide-react';
+import { retryProduction } from '../lib/api';
 
 export default function Archive() {
   const { videos = [], fetchVideos, subscribeToChanges } = usePipelineStore();
@@ -155,9 +156,29 @@ export default function Archive() {
                       loop
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-4 text-zinc-800">
-                       <Play size={48} className="opacity-20" />
-                       <span className="font-data-mono text-[9px] uppercase tracking-[0.3em]">PREVIEW_UNAVAILABLE</span>
+                    <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-[#0a0a0b]">
+                      {video.status === 'failed' ? (
+                        <div className="space-y-4">
+                          <AlertCircle className="text-red-500 mx-auto" size={48} />
+                          <p className="font-data-mono text-[10px] text-red-400 uppercase tracking-widest italic">Node_Failure</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-6 w-full">
+                          <Activity className="text-[#BD00FF] mx-auto animate-pulse" size={40} />
+                          <div className="space-y-2">
+                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${video.progress || 0}%` }}
+                                className="h-full bg-gradient-to-r from-[#BD00FF] to-[#00f5ff]"
+                              />
+                            </div>
+                            <p className="font-data-mono text-[8px] text-[#BD00FF] animate-pulse uppercase tracking-[0.2em] italic">
+                              {video.sub_status || 'Initializing_Synthesis...'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -181,8 +202,15 @@ export default function Archive() {
                      </h3>
                      
                      <div className="grid grid-cols-2 gap-2">
-                        <button className="py-3 bg-white/5 border border-white/10 text-white font-headline font-bold uppercase italic text-[10px] hover:bg-white hover:text-black transition-all flex items-center justify-center gap-2">
-                           <Download size={14} /> SAVE
+                        <button 
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const success = await retryProduction(video.id);
+                            if (success) alert('🔄 RETRY_INITIATED');
+                          }}
+                          className="py-3 bg-zinc-900 border border-white/10 text-white font-headline font-bold uppercase italic text-[10px] hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+                        >
+                           <RefreshCcw size={14} /> RETRY
                         </button>
                         <button className="py-3 bg-[#BD00FF] text-black font-headline font-bold uppercase italic text-[10px] hover:shadow-[0_0_15px_#BD00FF] transition-all flex items-center justify-center gap-2">
                            <Share2 size={14} /> REPOST
