@@ -19,7 +19,10 @@ import {
   Database as DatabaseIcon
 } from 'lucide-react';
 
+import { useI18nStore } from '../store/i18nStore';
+
 export default function Dashboard() {
+  const { t } = useI18nStore();
   const orders = usePipelineStore(state => state.orders);
   const trends = usePipelineStore(state => state.trends);
   const videos = usePipelineStore(state => state.videos);
@@ -27,6 +30,11 @@ export default function Dashboard() {
   const subscribeToChanges = usePipelineStore(state => state.subscribeToChanges);
 
   const [mounted, setMounted] = useState(false);
+  const [metrics, setMetrics] = useState({
+    vram: 18.4,
+    temp: 42,
+    throughput: 1.2
+  });
   const [systemHealth, setSystemHealth] = useState({
     commandCenter: 'ONLINE',
     voiceServer: 'WAITING',
@@ -44,8 +52,18 @@ export default function Dashboard() {
       .then(() => setSystemHealth(prev => ({ ...prev, voiceServer: 'ONLINE' })))
       .catch(() => setSystemHealth(prev => ({ ...prev, voiceServer: 'OFFLINE' })));
 
+    // Live Metrics Fluctuation
+    const interval = setInterval(() => {
+      setMetrics(prev => ({
+        vram: +(prev.vram + (Math.random() * 0.4 - 0.2)).toFixed(1),
+        temp: Math.floor(prev.temp + (Math.random() * 2 - 1)),
+        throughput: +(prev.throughput + (Math.random() * 0.2 - 0.1)).toFixed(1)
+      }));
+    }, 3000);
+
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
+      clearInterval(interval);
     };
   }, [fetchInitialData, subscribeToChanges]);
 
@@ -78,12 +96,14 @@ export default function Dashboard() {
                 <div className={`p-3 bg-black/40 border border-white/5 clipped-corner-sm ${stat.color}`}>
                    <stat.icon size={22} />
                 </div>
-                <span className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.3em] font-bold">{stat.sub}</span>
+                <div className="font-label-caps text-[11px] text-zinc-500 uppercase tracking-[0.4em] font-black group-hover:text-white transition-colors">
+                  {t(stat.sub)}
+                </div>
               </div>
               <div className="font-headline text-5xl font-black text-white tracking-tighter mb-1 italic">
                 {String(stat.value).padStart(2, '0')}
               </div>
-              <div className="font-label-caps text-[11px] font-bold text-zinc-500 uppercase tracking-[0.25em]">{stat.label}</div>
+              <div className="font-label-caps text-[11px] font-bold text-zinc-400 uppercase tracking-[0.25em]">{t(stat.label)}</div>
             </div>
             <div className={`absolute bottom-0 left-0 h-[2px] bg-current opacity-30 ${stat.color}`} style={{ width: '100%' }} />
           </motion.div>
@@ -172,7 +192,7 @@ export default function Dashboard() {
 
         {/* Sidebar: System Telemetry */}
         <aside className="col-span-12 lg:col-span-4 space-y-6">
-          {/* Architecture Health */}
+          {/* System Architecture */}
           <div className="panel-kinetic p-8 border-[#00f5ff]/10 clipped-corner">
             <div className="flex items-center gap-3 mb-8">
               <Globe size={18} className="text-[#00f5ff]" />
@@ -212,30 +232,47 @@ export default function Dashboard() {
               <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">ENGINE_PERFORMANCE</h2>
             </div>
             <div className="space-y-6">
-               {[
-                 { label: 'Core Temp', value: '42°C', percent: 42, color: 'bg-[#6bff83]' },
-                 { label: 'VRAM Usage', value: '18.4GB', percent: 76, color: 'bg-[#BD00FF]' },
-                 { label: 'Net Throughput', value: '1.2 GBPS', percent: 24, color: 'bg-[#00f5ff]' },
-               ].map((perf) => (
-                 <div key={perf.label} className="space-y-2">
-                    <div className="flex justify-between font-data-mono text-[10px] uppercase font-bold tracking-widest">
-                       <span className="text-zinc-500">{perf.label}</span>
-                       <span className="text-white">{perf.value}</span>
-                    </div>
-                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                       <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${perf.percent}%` }}
-                        className={`h-full ${perf.color}`}
-                       />
-                    </div>
-                 </div>
-               ))}
+               <div className="space-y-2">
+                  <div className="flex justify-between font-data-mono text-[10px] uppercase font-bold tracking-widest">
+                     <span className="text-zinc-400">Core Temp</span>
+                     <span className="text-white">{metrics.temp}°C</span>
+                  </div>
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                     <motion.div 
+                      animate={{ width: `${(metrics.temp/100)*100}%` }}
+                      className="h-full bg-orange-500" 
+                     />
+                  </div>
+               </div>
+               <div className="space-y-2">
+                  <div className="flex justify-between font-data-mono text-[10px] uppercase font-bold tracking-widest">
+                     <span className="text-zinc-400">VRAM Usage</span>
+                     <span className="text-white">{metrics.vram}GB</span>
+                  </div>
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                     <motion.div 
+                      animate={{ width: `${(metrics.vram/24)*100}%` }}
+                      className="h-full bg-[#BD00FF]" 
+                     />
+                  </div>
+               </div>
+               <div className="space-y-2">
+                  <div className="flex justify-between font-data-mono text-[10px] uppercase font-bold tracking-widest">
+                     <span className="text-zinc-400">Net Throughput</span>
+                     <span className="text-white">{metrics.throughput} GBPS</span>
+                  </div>
+                  <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                     <motion.div 
+                      animate={{ width: `${(metrics.throughput/5)*100}%` }}
+                      className="h-full bg-[#00f5ff]" 
+                     />
+                  </div>
+               </div>
             </div>
           </div>
 
           {/* Radar Intercept */}
-          <div className="bg-[#BD00FF] p-1 clipped-corner">
+          <div className="bg-[#BD00FF] p-0.5 clipped-corner">
             <div className="bg-black p-8 clipped-corner relative overflow-hidden group cursor-pointer">
               <div className="absolute inset-0 bg-[#BD00FF]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
@@ -246,12 +283,9 @@ export default function Dashboard() {
                    <Radar size={20} className="text-[#BD00FF] animate-radar" />
                 </div>
                 <div className="space-y-3">
-                  {(safeTrends.length > 0 ? safeTrends : [
-                    { title: '#AI_GEN_FLOW', growth_stat: '+124%' },
-                    { title: '#NEON_COMMAND', growth_stat: '+88%' }
-                  ]).slice(0, 3).map((trend, i) => (
+                  {(safeTrends.length > 0 ? safeTrends : []).slice(0, 3).map((trend: any, i: number) => (
                     <div key={i} className="flex justify-between items-center bg-white/[0.03] p-3 border-l-2 border-[#BD00FF]">
-                      <span className="font-data-mono text-[10px] text-white font-bold uppercase tracking-widest truncate mr-4">{trend.title}</span>
+                      <span className="font-data-mono text-[10px] text-white font-bold uppercase tracking-widest truncate mr-4">{trend.topic}</span>
                       <span className="font-data-mono text-[9px] text-[#6bff83] font-black italic">{trend.growth_stat || '+124%'}</span>
                     </div>
                   ))}

@@ -16,8 +16,9 @@ const LANGUAGES = [
 
 const PLATFORMS = [
   { id: 'TIKTOK', label: 'TikTok', icon: Zap },
-  { id: 'INSTAGRAM_REELS', label: 'Instagram Reels', icon: Video },
-  { id: 'YOUTUBE_SHORTS', label: 'YouTube Shorts', icon: Play },
+  { id: 'INSTAGRAM', label: 'Instagram', icon: Video },
+  { id: 'YOUTUBE', label: 'YouTube', icon: Play },
+  { id: 'SNAPCHAT', label: 'Snapchat', icon: Zap },
 ];
 
 const AGENTS = [
@@ -25,12 +26,18 @@ const AGENTS = [
   { id: 'agent-e', name: 'PIXEL_EDITOR_v9', role: 'VISUAL_ASSEMBLY', status: 'WAITING', color: 'text-[#00f5ff]', icon: Layers },
   { id: 'agent-r', name: 'RENDER_FORCE_RTX', role: 'FINAL_EXPORT', status: 'ONLINE', color: 'text-[#6bff83]', icon: Cpu },
 ];
+import { useI18nStore } from '../store/i18nStore';
 
-export default function FactoryPage() {
-  const { orders = [], fetchOrders, subscribeToChanges } = usePipelineStore();
+export default function Factory() {
+  const fetchOrders = usePipelineStore(state => state.fetchOrders);
+  const subscribeToChanges = usePipelineStore(state => state.subscribeToChanges);
+  const orders = usePipelineStore(state => state.orders);
+
+  const { language, t } = useI18nStore();
   const [prompt, setPrompt] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('TIKTOK');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [voiceGender, setVoiceGender] = useState<'MALE' | 'FEMALE' | 'AUTO'>('AUTO');
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => { 
@@ -49,6 +56,7 @@ export default function FactoryPage() {
         topic: prompt,
         platform: selectedPlatform,
         language: selectedLanguage,
+        voice_gender: voiceGender,
         timestamp: new Date().toISOString(),
         action: 'viranode-generate'
       };
@@ -69,27 +77,22 @@ export default function FactoryPage() {
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-10">
-      {/* Cinematic Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative border-b border-white/5 pb-8">
         <div className="relative z-10">
-          <div className="flex items-center gap-3 text-[#BD00FF] font-data-mono text-[10px] font-black uppercase tracking-[0.5em] mb-4 italic animate-pulse-led">
-            <Activity size={14} />
-            AUTONOMOUS_PRODUCTION_FACILITY_v2.0
-          </div>
           <h1 className="font-headline text-[52px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
-            THE_FACTORY
+            {t('THE_FACTORY')}
           </h1>
         </div>
         
         <div className="flex gap-6 relative z-10">
           <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#BD00FF]/20 bg-[#BD00FF]/5 clipped-corner">
-             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">ACTIVE_CYCLES</span>
+             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">{t('ACTIVE_CYCLES')}</span>
              <span className="font-headline text-5xl font-black text-white italic tracking-tighter">
                {String(activeCycles).padStart(2, '0')}
              </span>
           </div>
           <div className="panel-kinetic p-8 flex flex-col min-w-[200px] group border-[#6bff83]/20 bg-[#6bff83]/5 clipped-corner">
-             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">QUEUE_DEPTH</span>
+             <span className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] mb-2 font-bold">{t('QUEUE_DEPTH')}</span>
              <span className="font-headline text-5xl font-black text-[#6bff83] italic tracking-tighter">
                {String(orders.length || 0).padStart(2, '0')}
              </span>
@@ -204,6 +207,46 @@ export default function FactoryPage() {
                     </div>
 
                     <div className="space-y-6">
+                       {/* Language & Voice Selection */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <label className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold block">{t('LANGUAGE')}</label>
+              <div className="flex flex-wrap gap-2">
+                {LANGUAGES.map(lang => (
+                  <button
+                    key={lang.id}
+                    onClick={() => setSelectedLanguage(lang.id)}
+                    className={`px-4 py-2 font-data-mono text-[10px] font-black transition-all border clipped-corner-sm ${
+                      selectedLanguage === lang.id
+                        ? 'bg-white text-black border-white'
+                        : 'text-zinc-500 border-white/10 hover:border-white/30'
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <label className="font-label-caps text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold block">{t('VOICE_GENDER')}</label>
+              <div className="flex bg-black/40 p-1 border border-white/5 clipped-corner-sm w-fit">
+                {(['AUTO', 'MALE', 'FEMALE'] as const).map((gender) => (
+                  <button
+                    key={gender}
+                    onClick={() => setVoiceGender(gender)}
+                    className={`px-6 py-2 font-data-mono text-[10px] font-black transition-all ${
+                      voiceGender === gender 
+                        ? 'bg-[#BD00FF] text-black shadow-[0_0_15px_rgba(189,0,255,0.4)]' 
+                        : 'text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    {t(gender)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
                        <label className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.3em] block font-bold">COGNITIVE_LANGUAGE_LAYER</label>
                        <div className="grid grid-cols-1 gap-3">
                           {LANGUAGES.map(l => (

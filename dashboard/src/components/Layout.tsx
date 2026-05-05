@@ -21,7 +21,10 @@ const NAV_ITEMS = [
   { path: '/logs', label: 'ENCRYPTED_LINK', icon: Terminal, color: 'text-[#BD00FF]' },
 ];
 
+import { useI18nStore } from '../store/i18nStore';
+
 export default function Layout() {
+  const { language, setLanguage, t } = useI18nStore();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [session, setSession] = useState<any>(null);
   const [isInitiating, setIsInitiating] = useState(false);
@@ -116,7 +119,7 @@ export default function Layout() {
                   className="w-full btn-kinetic btn-kinetic-primary py-5 px-4 text-[13px] group flex items-center justify-between"
                 >
                   <span className="font-headline font-black italic tracking-wider">
-                    {isInitiating ? 'EXECUTING...' : 'INITIATE_PRODUCTION'}
+                    {isInitiating ? 'EXECUTING...' : t('INITIATE_PRODUCTION')}
                   </span>
                   <Zap size={16} className={isInitiating ? 'animate-pulse' : 'fill-current'} />
                 </button>
@@ -147,13 +150,13 @@ export default function Layout() {
                     relative flex items-center gap-5 px-6 py-5 transition-all duration-300 group overflow-hidden
                     ${isActive 
                       ? 'bg-white/[0.05] border-y border-white/5' 
-                      : 'text-zinc-500 hover:text-white hover:bg-white/[0.02]'}
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.02]'}
                   `}
                 >
                   <item.icon size={20} className={`relative z-10 transition-colors ${isActive ? item.color : 'group-hover:text-zinc-300'}`} />
                   {isSidebarOpen && (
                     <span className={`relative z-10 font-headline text-[13px] font-black uppercase tracking-[0.2em] italic transition-colors ${isActive ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>
-                      {item.label}
+                      {t(item.label)}
                     </span>
                   )}
                   {isActive && (
@@ -177,14 +180,14 @@ export default function Layout() {
               className="w-full flex items-center gap-4 px-6 py-5 text-zinc-600 hover:text-white transition-colors group"
             >
               <Terminal size={20} className={!isSidebarOpen ? 'mx-auto' : ''} />
-              {isSidebarOpen && <span className="font-label-caps text-[11px] uppercase font-bold tracking-[0.2em]">TOGGLE_NODE_INTERFACE</span>}
+              {isSidebarOpen && <span className="font-label-caps text-[11px] uppercase font-bold tracking-[0.2em]">{t('TOGGLE_NODE_INTERFACE')}</span>}
             </button>
             <button 
               onClick={() => supabase.auth.signOut()}
               className="w-full flex items-center gap-4 px-6 py-5 text-zinc-700 hover:text-[#e90053] transition-colors group"
             >
               <LogOut size={20} className={!isSidebarOpen ? 'mx-auto' : ''} />
-              {isSidebarOpen && <span className="font-label-caps text-[11px] uppercase font-bold tracking-[0.2em]">TERMINATE_CONNECTION</span>}
+              {isSidebarOpen && <span className="font-label-caps text-[11px] uppercase font-bold tracking-[0.2em]">{t('TERMINATE_CONNECTION')}</span>}
             </button>
           </div>
         </motion.aside>
@@ -192,29 +195,36 @@ export default function Layout() {
         {/* Main Viewport */}
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
           {/* Header Bar */}
-          <header className="h-24 border-b border-white/5 flex items-center justify-between px-12 bg-[#0A0A0B]/80 backdrop-blur-md relative z-40">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => setSidebarOpen(!isSidebarOpen)}
-                  className="p-3 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#BD00FF]/50 transition-colors"
-                >
-                   {isSidebarOpen ? <X size={18} className="text-zinc-500" /> : <Menu size={18} className="text-[#BD00FF]" />}
-                </button>
-                <div className="hidden sm:block">
-                  <Logo size="sm" hideText={!isSidebarOpen} />
-                </div>
-              </div>
-
-              <div className="flex flex-col">
-                 <span className="font-data-mono text-[9px] text-zinc-600 uppercase tracking-[0.4em]">SYSTEM_PATH</span>
-                 <span className="font-headline text-[14px] font-black text-white uppercase italic tracking-[0.1em]">
-                   {location.pathname === '/' ? 'ROOT_CMD' : location.pathname.toUpperCase().replace('/', '').replace('-', '_')}
-                 </span>
+          <header className="h-20 border-b border-white/5 flex items-center justify-between px-12 bg-[#0A0A0B]/80 backdrop-blur-md relative z-40">
+            <div className="flex items-center gap-6">
+              <button 
+                onClick={() => setSidebarOpen(!isSidebarOpen)}
+                className="p-3 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#BD00FF]/50 transition-colors"
+              >
+                 {isSidebarOpen ? <X size={18} className="text-zinc-500" /> : <Menu size={18} className="text-[#BD00FF]" />}
+              </button>
+              <div className="font-data-mono text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold opacity-50">
+                SYSTEM_ORCHESTRATOR_v2.0
               </div>
             </div>
             
             <div className="flex items-center gap-8">
+              <div className="flex bg-black/40 p-1 border border-white/5 clipped-corner-sm">
+                {(['NO', 'EN'] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setLanguage(lang)}
+                    className={`px-4 py-1.5 font-data-mono text-[10px] font-black transition-all ${
+                      language === lang 
+                        ? 'bg-[#BD00FF] text-black shadow-[0_0_10px_rgba(189,0,255,0.4)]' 
+                        : 'text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    {lang}
+                  </button>
+                ))}
+              </div>
+
               <div className="hidden lg:flex items-center gap-8 px-8 py-3 bg-white/[0.02] border border-white/5 clipped-corner-sm">
                 <div className="flex items-center gap-3">
                   <Activity size={14} className="text-[#6bff83] animate-pulse-led" />
@@ -227,18 +237,9 @@ export default function Layout() {
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                 <div className="text-right hidden sm:block">
-                    <div className="font-data-mono text-[10px] text-white uppercase font-black tracking-widest">ENCRYPTED_V2</div>
-                    <div className="font-data-mono text-[9px] text-zinc-600 uppercase tracking-tighter">{session?.user?.email || 'NY_CLUSTER_04'}</div>
-                 </div>
-                 <div className="w-12 h-12 bg-gradient-to-tr from-[#BD00FF]/20 to-[#00f5ff]/20 border border-[#BD00FF]/30 flex items-center justify-center clipped-corner-sm hover:border-[#BD00FF] transition-all overflow-hidden">
-                    {session?.user?.user_metadata?.avatar_url ? (
-                      <img src={session.user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <User size={20} className="text-[#BD00FF]" />
-                    )}
-                 </div>
+              <div className="flex items-center gap-4 text-zinc-500">
+                <Shield size={16} />
+                <span className="font-data-mono text-[9px] uppercase tracking-widest font-black italic text-[#BD00FF]">ENCRYPTED_SESSION</span>
               </div>
             </div>
           </header>
