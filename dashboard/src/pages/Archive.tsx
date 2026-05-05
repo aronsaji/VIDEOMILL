@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';
-import { History, RefreshCw, CheckCircle2, AlertTriangle, Loader, Search, Filter, Database, ArrowUpRight } from 'lucide-react';
+import { History, RefreshCw, CheckCircle2, AlertTriangle, Loader, Search, Filter, Database, ArrowUpRight, Download, Share2 } from 'lucide-react';
 import type { OrderStatus } from '../types';
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  queued:           { label: 'Queued',           color: 'text-gray-400',      bg: 'bg-white/5' },
-  script_generation:{ label: 'Drafting',         color: 'text-brand-1',       bg: 'bg-brand-1/10' },
-  rendering:        { label: 'Synthesizing',     color: 'text-brand-1',       bg: 'bg-brand-1/10' },
-  uploading:        { label: 'Broadcasting',     color: 'text-brand-1',       bg: 'bg-brand-1/10' },
-  complete:         { label: 'Archived',         color: 'text-brand-1',       bg: 'bg-brand-1/10' },
-  published:        { label: 'Released',         color: 'text-brand-1',       bg: 'bg-brand-1/10' },
-  failed:           { label: 'Corrupted',        color: 'text-red-400',       bg: 'bg-red-400/10' },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  queued:           { label: 'Queued',       color: 'text-gray-400',      bg: 'bg-white/5',       border: 'border-zinc-700' },
+  script_generation:{ label: 'Processing',  color: 'text-violet-400',    bg: 'bg-violet-500/10', border: 'border-violet-500/30' },
+  rendering:        { label: 'Processing',  color: 'text-violet-400',    bg: 'bg-violet-500/10', border: 'border-violet-500/30' },
+  uploading:        { label: 'Uploading',    color: 'text-violet-400',    bg: 'bg-violet-500/10', border: 'border-violet-500/30' },
+  complete:         { label: 'Completed',    color: 'text-emerald-400',   bg: 'bg-emerald-500/10',border: 'border-emerald-500/30' },
+  published:        { label: 'Completed',    color: 'text-emerald-400',   bg: 'bg-emerald-500/10',border: 'border-emerald-500/30' },
+  failed:           { label: 'Failed',       color: 'text-red-400',       bg: 'bg-red-500/10',    border: 'border-red-500/30' },
 };
 
 export default function Archive() {
@@ -30,141 +30,192 @@ export default function Archive() {
     return matchesStatus && matchesSearch;
   });
 
+  const isCompleted = (status: string) => status === 'complete' || status === 'published';
+  const isProcessing = (status: string) => status === 'rendering' || status === 'script_generation' || status === 'uploading' || status === 'queued';
+
   return (
     <div className="space-y-10 max-w-7xl mx-auto pb-20">
-      {/* Header & Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full bg-brand-1 shadow-[0_0_8px_#00f5ff]"></div>
-            <span className="font-mono text-[10px] font-black text-brand-1 uppercase tracking-[0.3em] italic">Data Integrity Active</span>
-          </div>
-          <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">
-            Media <span className="text-brand-1">Archive</span>
-          </h1>
-          <p className="text-[13px] text-gray-500 font-bold uppercase tracking-widest italic opacity-70">Historical record of neural production cycles & distribution logs.</p>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-brand-1 transition-colors" size={18} />
-            <input 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Query archive..."
-              className="bg-black/40 border border-white/5 rounded-2xl pl-12 pr-6 py-4 text-[14px] font-bold text-white focus:border-brand-1/30 outline-none w-72 transition-all placeholder:text-gray-600 italic uppercase tracking-widest"
-            />
-          </div>
-          <button 
-            onClick={() => fetchOrders()}
-            className="p-4 bg-white/5 text-gray-400 rounded-2xl hover:bg-brand-1/10 transition-all border border-white/5 hover:text-white"
-          >
-            <RefreshCw size={20} />
-          </button>
-        </div>
-      </div>
+      {/* Header */}
+      <header className="mb-8">
+        <h2 className="font-['Space_Grotesk'] text-3xl font-semibold text-white uppercase tracking-tight mb-1">VIDEO ARCHIVE</h2>
+        <p className="text-xs text-zinc-500 uppercase tracking-widest">Overview of all generated videos and their system status.</p>
+      </header>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-        {['all', 'queued', 'rendering', 'complete', 'failed'].map((s) => (
+      {/* Filters */}
+      <section className="flex flex-wrap items-center justify-between gap-4 border-y border-zinc-800 py-4">
+        <div className="flex gap-2">
           <button
-            key={s}
-            onClick={() => setStatusFilter(s as any)}
-            className={`px-8 py-3 rounded-xl text-[13px] font-black uppercase tracking-[0.2em] transition-all border shrink-0 ${
-              statusFilter === s 
-                ? 'bg-brand-1 text-white border-brand-1 shadow-lg' 
-                : 'bg-white/5 text-gray-500 border-white/5 hover:border-white/10 hover:text-white'
+            onClick={() => setStatusFilter('all')}
+            className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded flex items-center gap-1 transition-all ${
+              statusFilter === 'all'
+                ? 'bg-violet-500 text-white'
+                : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-violet-500'
             }`}
           >
-            {s === 'all' ? 'FULL LOG' : s}
+            <Search size={14} />
+            ALL
           </button>
-        ))}
-      </div>
-
-      {/* Data Grid */}
-      <div className="card-standard overflow-hidden !p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-white/5 text-[11px] font-black font-mono text-gray-500 uppercase tracking-[0.4em] bg-black/40">
-                <th className="px-10 py-8">Ref_ID</th>
-                <th className="px-10 py-8">Production_Details</th>
-                <th className="px-10 py-8">Process_Status</th>
-                <th className="px-10 py-8 text-right">Timestamp</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="py-32 text-center">
-                    <div className="flex flex-col items-center gap-4 opacity-20">
-                       <Database size={64} className="text-gray-500" />
-                       <span className="text-xs font-black font-mono uppercase tracking-[0.5em]">No Records Found</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-brand-1/5 transition-all group cursor-pointer">
-                    <td className="px-10 py-8">
-                       <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-white/10 group-hover:bg-brand-1 transition-colors" />
-                          <span className="font-mono text-[13px] text-gray-500 group-hover:text-white transition-colors">
-                            {order.id?.slice(0, 12)}
-                          </span>
-                       </div>
-                    </td>
-                    <td className="px-10 py-8">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                           <p className="text-sm font-black text-white group-hover:text-brand-1 transition-colors italic uppercase tracking-tight">
-                            {order.title || order.topic}
-                          </p>
-                          <ArrowUpRight size={14} className="text-gray-700 opacity-0 group-hover:opacity-100 transition-all -translate-y-1 group-hover:translate-y-0" />
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-[11px] font-black font-mono px-2 py-0.5 bg-white/5 text-gray-500 rounded-md border border-white/5 uppercase">
-                            {order.language || 'Global'}
-                          </span>
-                          <span className="text-[11px] font-black font-mono px-2 py-0.5 bg-brand-1/5 text-brand-1/40 rounded-md border border-brand-1/10 uppercase">
-                            {order.ai_voice?.split('-')[2] || 'Neural_Core'}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-10 py-8">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/5 ${STATUS_CONFIG[order.status]?.bg || 'bg-white/5'}`}>
-                          {order.status === 'complete' || order.status === 'published' ? (
-                            <CheckCircle2 size={16} className="text-brand-1" />
-                          ) : order.status === 'failed' ? (
-                            <AlertTriangle size={16} className="text-red-400" />
-                          ) : (
-                            <Loader size={16} className="text-brand-1 animate-spin" />
-                          )}
-                           <span className={`text-[12px] font-black uppercase tracking-widest ${STATUS_CONFIG[order.status]?.color || 'text-gray-400'}`}>
-                            {STATUS_CONFIG[order.status]?.label || order.status}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-10 py-8 text-right">
-                       <div className="flex flex-col items-end">
-                          <span className="text-[12px] font-black text-gray-600 font-mono group-hover:text-white transition-colors">
-                            {order.created_at ? new Date(order.created_at).toLocaleDateString() : '---'}
-                          </span>
-                          <span className="text-[10px] font-mono text-gray-700 uppercase tracking-widest">
-                            {order.created_at ? new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'UTC_NULL'}
-                          </span>
-                       </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <button
+            onClick={() => setStatusFilter('published' as any)}
+            className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded flex items-center gap-1 transition-all ${
+              statusFilter === 'published'
+                ? 'bg-violet-500 text-white'
+                : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-violet-500'
+            }`}
+          >
+            <CheckCircle2 size={14} />
+            COMPLETED
+          </button>
+          <button
+            onClick={() => setStatusFilter('failed' as any)}
+            className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded flex items-center gap-1 transition-all ${
+              statusFilter === 'failed'
+                ? 'bg-violet-500 text-white'
+                : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-violet-500'
+            }`}
+          >
+            <AlertTriangle size={14} />
+            FAILED
+          </button>
         </div>
-      </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-zinc-500 uppercase tracking-tighter">System Health:</span>
+          <div className="flex gap-[2px]">
+            <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
+            <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
+            <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
+            <div className="w-1 h-3 bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]"></div>
+            <div className="w-1 h-3 bg-zinc-800"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* Video Grid */}
+      {filteredOrders.length === 0 ? (
+        <div className="py-32 text-center">
+          <div className="flex flex-col items-center gap-4 opacity-20">
+            <Database size={64} className="text-gray-500" />
+            <span className="text-xs font-bold font-mono uppercase tracking-widest">No Records Found</span>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredOrders.map((order, i) => {
+            const config = STATUS_CONFIG[order.status] || STATUS_CONFIG.queued;
+            return (
+              <motion.div
+                key={order.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="group relative flex flex-col overflow-hidden rounded-sm"
+                style={{
+                  background: 'rgba(31, 31, 35, 0.4)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(149, 142, 160, 0.1)',
+                }}
+              >
+                {/* Thumbnail Area */}
+                <div className="relative aspect-video overflow-hidden">
+                  {isCompleted(order.status) ? (
+                    <>
+                      <div className="w-full h-full bg-gradient-to-br from-zinc-900 via-violet-950/30 to-zinc-900 flex items-center justify-center">
+                        <CheckCircle2 size={48} className="text-violet-500/20" />
+                      </div>
+                      {/* Scanline overlay */}
+                      <div
+                        className="absolute inset-0 opacity-30 pointer-events-none"
+                        style={{
+                          background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1) 50%)',
+                          backgroundSize: '100% 4px',
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
+                    </>
+                  ) : order.status === 'failed' ? (
+                    <div className="w-full h-full bg-red-950/20 flex flex-col items-center justify-center gap-1">
+                      <AlertTriangle size={32} className="text-red-400" />
+                      <p className="font-mono text-[10px] text-red-400 uppercase">RENDER_ERROR</p>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full bg-zinc-900 flex flex-col items-center justify-center gap-2">
+                      <Loader size={28} className="text-violet-500 animate-pulse" />
+                      <div className="w-1/2 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+                          style={{ width: `${order.progress || 30}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-[10px] font-mono text-violet-400 uppercase animate-pulse">
+                        Synthesizing... {order.progress || 30}%
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Status Badge */}
+                  <div className="absolute top-2 right-2">
+                    <span className={`${config.bg} ${config.color} ${config.border} border px-2 py-1 text-[10px] font-bold rounded-sm uppercase`} style={{ backdropFilter: 'blur(8px)' }}>
+                      {config.label}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="p-4 flex flex-col gap-2 flex-1">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-['Space_Grotesk'] text-base font-medium text-white mb-1 uppercase">
+                        {(order.title || order.topic || 'UNTITLED_RENDER').toUpperCase().replace(/\s+/g, '_').slice(0, 24)}
+                      </h3>
+                      <span className="font-mono text-xs text-zinc-500 tracking-wide">
+                        SYNTH_ID: {order.id?.slice(0, 3).toUpperCase()}-{order.id?.slice(3, 4).toUpperCase()}
+                      </span>
+                    </div>
+                    {isCompleted(order.status) && (
+                      <div className="text-right">
+                        <p className="text-[10px] text-zinc-500 uppercase">Views</p>
+                        <p className="text-violet-400 font-black text-sm">---</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="mt-auto flex gap-2 border-t border-zinc-800/50 pt-3">
+                    {isCompleted(order.status) ? (
+                      <>
+                        <button className="flex-1 border border-zinc-700 hover:border-violet-500 hover:bg-violet-500/10 text-zinc-300 py-2 rounded transition-all flex items-center justify-center gap-1 text-[12px] font-bold uppercase">
+                          <Download size={14} />
+                          Download
+                        </button>
+                        <button className="flex-1 border border-zinc-700 hover:border-violet-500 hover:bg-violet-500/10 text-zinc-300 py-2 rounded transition-all flex items-center justify-center gap-1 text-[12px] font-bold uppercase">
+                          <Share2 size={14} />
+                          Share
+                        </button>
+                      </>
+                    ) : order.status === 'failed' ? (
+                      <button
+                        onClick={() => fetchOrders()}
+                        className="flex-1 bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 py-2 rounded transition-all flex items-center justify-center gap-1 text-[12px] font-bold uppercase"
+                      >
+                        <RefreshCw size={14} />
+                        Retry Generation
+                      </button>
+                    ) : (
+                      <button
+                        className="flex-1 border border-zinc-800 text-zinc-700 py-2 rounded flex items-center justify-center gap-1 text-[12px] font-bold uppercase cursor-not-allowed"
+                        disabled
+                      >
+                        <Loader size={14} className="animate-spin" />
+                        Pending
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
