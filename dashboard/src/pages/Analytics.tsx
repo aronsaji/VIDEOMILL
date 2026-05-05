@@ -2,155 +2,151 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   BarChart2, TrendingUp, Users, Clock, Eye, 
-  Share2, ThumbsUp, MessageSquare, Activity,
-  Zap, Target, Globe, ArrowUpRight, BarChart3,
-  Cpu, Database as DatabaseIcon
+  Activity, Zap, Globe, ArrowUpRight, BarChart3,
+  Cpu, Database as DatabaseIcon, Layers, Shield
 } from 'lucide-react';
 
 export default function Analytics() {
-  // Mock data for analytics
+  // Enhanced metrics with modern styling
   const metrics = [
-    { label: 'Total Views', value: '1.2M', change: '+14%', isPositive: true, icon: Eye },
-    { label: 'Watch Time', value: '45.2K hrs', change: '+8%', isPositive: true, icon: Clock },
-    { label: 'Retention', value: '62%', change: '-2%', isPositive: false, icon: Users },
-    { label: 'Engagement', value: '84.3K', change: '+24%', isPositive: true, icon: TrendingUp },
+    { label: 'TOTAL_NETWORK_VIEWS', value: '1.2M', change: '+14%', isPositive: true, icon: Eye, color: 'text-[#00f5ff]' },
+    { label: 'WATCH_TIME_ACCUMULATED', value: '45.2K', change: '+8%', isPositive: true, icon: Clock, color: 'text-[#BD00FF]' },
+    { label: 'AUDIENCE_RETENTION', value: '62%', change: '-2%', isPositive: false, icon: Users, color: 'text-[#ffaa00]' },
+    { label: 'NEURAL_ENGAGEMENT', value: '84.3K', change: '+24%', isPositive: true, icon: Activity, color: 'text-[#6bff83]' },
   ];
 
   const topVideos = [
-    { id: 'VM-8289', title: 'The Quiet Luxury trend explained', views: 890000, likes: 45000, shares: 12000, ctr: '8.4%' },
-    { id: 'VM-8280', title: 'Why software engineering is changing forever', views: 210000, likes: 18000, shares: 3400, ctr: '6.2%' },
-    { id: 'VM-8275', title: 'Tech news you missed this week', views: 95000, likes: 5200, shares: 800, ctr: '4.1%' },
+    { id: 'VM-8289', title: 'The Quiet Luxury trend explained', views: '890K', ctr: '8.4%', trend: '+12%' },
+    { id: 'VM-8280', title: 'Why software engineering is changing forever', views: '210K', ctr: '6.2%', trend: '+5%' },
+    { id: 'VM-8275', title: 'Tech news you missed this week', views: '95K', ctr: '4.1%', trend: '+2%' },
   ];
 
   return (
-    <div className="space-y-12 max-w-[1600px] mx-auto pb-20 px-4 lg:px-0">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-        <div className="space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 text-[#BD00FF] font-mono text-[14px] font-black uppercase tracking-[0.4em]"
-          >
-            <Activity size={14} className="animate-pulse" />
-            Neural Performance Metrics v1.0
-          </motion.div>
-          <div className="space-y-2">
-            <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-              Performance <span className="text-[#BD00FF]">Analytics</span>
-            </h1>
-            <div className="flex items-center gap-4">
-               <div className="h-[1px] w-16 bg-[#BD00FF]/50" />
-               <p className="text-zinc-400 font-bold uppercase tracking-widest text-[14px] italic">Deep data synthesis across global networks</p>
-            </div>
+    <div className="max-w-[1600px] mx-auto space-y-10">
+      {/* Tactical Header */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative border-b border-white/5 pb-8">
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 text-[#BD00FF] font-data-mono text-[10px] font-black uppercase tracking-[0.5em] mb-4 italic animate-pulse-led">
+            <Activity size={14} />
+            NEURAL_PERFORMANCE_METRICS_v2.4
           </div>
+          <h1 className="font-headline text-[52px] font-[900] tracking-[-0.05em] leading-[0.8] text-white uppercase italic">
+            DATA_SYNTHESIS
+          </h1>
         </div>
-      </div>
+        
+        <div className="flex gap-4 relative z-10">
+           <div className="flex items-center gap-2 px-4 py-2 bg-black/40 border border-white/5 clipped-corner-sm">
+              <Shield size={14} className="text-[#6bff83]" />
+              <span className="font-data-mono text-[9px] text-zinc-400 font-black tracking-widest uppercase">ENCRYPTION: AES-256</span>
+           </div>
+        </div>
+      </header>
 
-      {/* Main Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {metrics.map((m, i) => (
+      {/* Industrial Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {metrics.map((stat, i) => (
           <motion.div 
-            key={m.label}
+            key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="card-standard !p-8 group relative overflow-hidden"
+            className="panel-kinetic p-8 flex flex-col group border-white/5 bg-white/[0.01] clipped-corner relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-               <m.icon size={60} className="text-brand-1" />
+            <div className="scanline-overlay absolute inset-0 opacity-5 pointer-events-none" />
+            <div className="flex justify-between items-start mb-6">
+               <div className={`p-3 bg-black/60 border border-white/5 clipped-corner-sm ${stat.color}`}>
+                  <stat.icon size={20} />
+               </div>
+               <span className={`font-data-mono text-[10px] font-black ${stat.isPositive ? 'text-[#6bff83]' : 'text-[#e90053]'}`}>
+                  {stat.change}
+               </span>
             </div>
-            
-            <div className="space-y-6 relative z-10">
-              <div className="flex justify-between items-center">
-                <p className="text-[13px] font-black font-mono text-zinc-400 uppercase tracking-[0.3em]">{m.label}</p>
-                <span className={`text-[12px] font-black font-mono px-3 py-1 rounded-full ${
-                  m.isPositive ? 'bg-brand-1/10 text-brand-1 border border-brand-1/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                }`}>
-                  {m.change}
-                </span>
-              </div>
-              <p className="text-4xl font-black text-white italic tracking-tighter uppercase">{m.value}</p>
-            </div>
+            <div className="font-headline text-5xl font-black text-white italic tracking-tighter mb-2">{stat.value}</div>
+            <span className="font-label-caps text-[10px] text-zinc-600 uppercase tracking-[0.3em] font-bold">{stat.label}</span>
           </motion.div>
         ))}
       </div>
 
-      {/* Main Visualization Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Graph Placeholder Section */}
-        <div className="lg:col-span-2 card-standard !p-12 flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden group">
-          <div className="absolute inset-0 bg-brand-1/[0.01] pointer-events-none" />
-          <div className="absolute -top-20 -right-20 p-24 opacity-[0.02] group-hover:rotate-12 transition-transform duration-1000">
-            <BarChart3 size={400} className="text-brand-1" />
-          </div>
-          
-          <div className="text-center space-y-6 relative z-10">
-            <div className="p-8 bg-brand-1/5 rounded-[40px] border border-brand-1/10 inline-block">
-               <Cpu size={64} className="text-brand-1 animate-pulse" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">Telemetry Pipeline <span className="text-[#BD00FF]">Offline</span></h3>
-              <p className="text-[14px] text-zinc-400 font-bold uppercase tracking-widest italic max-w-sm mx-auto">Chart.js integration pending synchronization with local performance snapshots.</p>
-            </div>
-            <button className="btn-standard !bg-brand-1 !shadow-brand-1/30 px-10 py-4 mt-4">
-               Re-Sync Data Source
-            </button>
-          </div>
-        </div>
-
-        {/* Top Performers Sidebar */}
-        <div className="card-standard !p-10 flex flex-col space-y-10">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter">Top <span className="text-[#BD00FF]">Performers</span></h2>
-            <p className="text-[13px] text-zinc-400 font-black font-mono uppercase tracking-[0.3em]">Last 30 Cycle Window</p>
-          </div>
-
-          <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-            {topVideos.map((video, i) => (
-              <motion.div 
-                key={video.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + (i * 0.1) }}
-                className="p-8 bg-black/40 border border-white/5 rounded-[32px] hover:border-brand-1/30 transition-all group/item cursor-pointer"
-              >
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <p className="text-[15px] font-black text-white group-hover/item:text-brand-1 transition-colors italic uppercase tracking-tight leading-tight flex-1 mr-4">
-                      {video.title}
-                    </p>
-                    <ArrowUpRight size={16} className="text-gray-700 group-hover/item:text-brand-1 transition-colors shrink-0" />
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <span className="text-[12px] font-black font-mono text-brand-1/50 uppercase tracking-widest">{video.id}</span>
-                    <div className="h-[1px] flex-1 bg-white/5" />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-6 pt-2">
-                    <div className="space-y-1">
-                      <span className="text-[11px] text-zinc-500 font-black font-mono uppercase tracking-widest">Views</span>
-                      <p className="text-[16px] text-white font-black italic">{(video.views / 1000).toFixed(0)}K</p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[11px] text-zinc-500 font-black font-mono uppercase tracking-widest">Likes</span>
-                      <p className="text-[16px] text-white font-black italic">{(video.likes / 1000).toFixed(0)}K</p>
-                    </div>
-                    <div className="space-y-1 text-right">
-                      <span className="text-[11px] text-zinc-500 font-black font-mono uppercase tracking-widest">CTR</span>
-                      <p className="text-[16px] text-[#BD00FF] font-black italic">{video.ctr}</p>
-                    </div>
-                  </div>
+      <div className="grid grid-cols-12 gap-8">
+        {/* Main Analytics Canvas */}
+        <section className="col-span-12 lg:col-span-8">
+          <div className="panel-kinetic p-10 clipped-corner border-white/5 min-h-[500px] flex flex-col relative overflow-hidden">
+             <div className="scanline-overlay absolute inset-0 opacity-5 pointer-events-none" />
+             
+             <div className="flex items-center justify-between mb-12 relative z-10">
+                <div className="flex items-center gap-3">
+                   <BarChart3 size={18} className="text-[#00f5ff]" />
+                   <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">TELEMETRY_VISUALIZATION</h2>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+                <div className="flex gap-2">
+                   {['24H', '7D', '30D', 'ALL'].map(t => (
+                     <button key={t} className="px-3 py-1 font-data-mono text-[9px] font-black text-zinc-500 hover:text-white transition-colors border border-transparent hover:border-white/10 clipped-corner-sm">
+                        {t}
+                     </button>
+                   ))}
+                </div>
+             </div>
 
-          <button className="w-full py-6 bg-white/5 hover:bg-brand-1/10 border border-white/5 rounded-[24px] text-[11px] text-gray-500 hover:text-white font-black uppercase tracking-[0.3em] transition-all italic mt-auto">
-             View Full Report
-          </button>
-        </div>
+             <div className="flex-1 flex flex-col items-center justify-center text-center relative z-10">
+                <div className="w-[120px] h-[120px] bg-[#00f5ff]/5 border border-[#00f5ff]/20 rounded-full flex items-center justify-center mb-6 relative">
+                   <div className="absolute inset-0 border border-[#00f5ff]/10 rounded-full animate-ping" />
+                   <Cpu size={48} className="text-[#00f5ff] animate-pulse" />
+                </div>
+                <h3 className="font-headline text-3xl font-black text-white uppercase italic mb-2 tracking-tighter">NETWORK_SYNC_PENDING</h3>
+                <p className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold max-w-sm mx-auto leading-relaxed">
+                   ESTABLISHING_HANDSHAKE_WITH_LOCAL_NODE... INITIALIZING_DATA_STREAM_PIPELINES_v2.0
+                </p>
+                <button className="mt-10 px-8 py-3 bg-[#00f5ff] text-black font-headline font-black uppercase italic text-sm tracking-widest hover:shadow-[0_0_20px_#00f5ff] transition-all clipped-corner-sm">
+                   INITIATE_RESCAN
+                </button>
+             </div>
+          </div>
+        </section>
+
+        {/* Tactical Feed: Top Performers */}
+        <section className="col-span-12 lg:col-span-4 space-y-8">
+           <div className="panel-kinetic p-8 space-y-8 clipped-corner border-white/5 min-h-[500px]">
+              <div className="flex items-center gap-3 border-b border-white/5 pb-6">
+                 <Target size={18} className="text-[#BD00FF]" />
+                 <h2 className="font-label-caps text-[11px] font-black text-white uppercase tracking-[0.3em]">HIGH_VALUE_TARGETS</h2>
+              </div>
+
+              <div className="space-y-6">
+                 {topVideos.map((video, i) => (
+                   <motion.div 
+                     key={i}
+                     initial={{ opacity: 0, x: 20 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     transition={{ delay: 0.3 + (i * 0.1) }}
+                     className="p-6 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#BD00FF]/30 transition-all group cursor-crosshair"
+                   >
+                      <div className="flex justify-between items-start mb-4">
+                         <span className="font-data-mono text-[10px] text-[#BD00FF] font-black tracking-widest">{video.id}</span>
+                         <ArrowUpRight size={14} className="text-zinc-700 group-hover:text-[#BD00FF] transition-colors" />
+                      </div>
+                      <h4 className="font-headline text-lg font-black text-white uppercase italic tracking-tight mb-6 group-hover:text-[#BD00FF] transition-colors line-clamp-2 leading-tight">
+                         {video.title}
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4">
+                         <div>
+                            <span className="font-label-caps text-[8px] text-zinc-600 uppercase block font-bold tracking-widest">IMPRESSIONS</span>
+                            <span className="font-headline text-xl text-white font-black italic tracking-tighter">{video.views}</span>
+                         </div>
+                         <div>
+                            <span className="font-label-caps text-[8px] text-zinc-600 uppercase block font-bold tracking-widest">CONVERSION</span>
+                            <span className="font-headline text-xl text-[#6bff83] font-black italic tracking-tighter">{video.ctr}</span>
+                         </div>
+                      </div>
+                   </motion.div>
+                 ))}
+              </div>
+
+              <button className="w-full py-4 bg-white/[0.02] border border-white/10 text-zinc-600 hover:text-white hover:bg-white/[0.05] transition-all font-headline font-black uppercase italic text-[11px] tracking-widest clipped-corner-sm mt-4">
+                 EXTRACT_FULL_LOGS
+              </button>
+           </div>
+        </section>
       </div>
     </div>
   );

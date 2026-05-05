@@ -18,7 +18,7 @@ interface PipelineState {
   fetchOrders: () => Promise<void>;
   fetchProductions: () => Promise<void>;
   fetchVideos: () => Promise<void>;
-  fetchTrends: (country?: string) => Promise<void>;
+  fetchTrends: (country?: string, language?: string) => Promise<void>;
   fetchAnalytics: () => Promise<void>;
   fetchSeries: () => Promise<void>;
   fetchEpisodes: () => Promise<void>;
@@ -88,7 +88,7 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     return get().fetchProductions();
   },
 
-  fetchTrends: async (country?: string) => {
+  fetchTrends: async (country?: string, language?: string) => {
     try {
       let query = supabase
         .from('trending_topics')
@@ -97,6 +97,10 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
       
       if (country && country !== 'GLOBAL' && country !== 'ALL') {
         query = query.eq('country', country);
+      }
+
+      if (language && language !== 'ALL') {
+        query = query.eq('language', language);
       }
 
       const { data, error } = await query;

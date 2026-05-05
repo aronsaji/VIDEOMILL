@@ -1,41 +1,34 @@
-export const triggerProduction = async (payload: any) => {
-  const envUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
-  
-  // Determine the correct endpoint based on action
-  const endpoint = payload.action === 'SERIES_START' 
-    ? 'series-start' 
-    : (payload.retry_video_id || payload.action === 'viranode-retry' ? 'viranode-retry' : 'viranode-generate');
+import { supabase } from './supabase';
 
-  let WEBHOOK_URL = envUrl;
-  
-  if (!WEBHOOK_URL) {
-    console.warn('⚠️ No VITE_N8N_WEBHOOK_URL detected. Falling back to localhost.');
-    WEBHOOK_URL = `http://localhost:5678/webhook/${endpoint}`;
-  } else {
-    // Force the correct endpoint even if .env has a different one
-    const baseUrl = WEBHOOK_URL.split('/webhook/')[0];
-    WEBHOOK_URL = `${baseUrl}/webhook/${endpoint}`;
-  }
-  
-  console.group('📡 N8N_COMM_PROTOCOL');
+export const triggerProduction = async (payload: any) => {
+  console.group('📡 SUPABASE_DISPATCH_PROTOCOL');
   console.log('Action:', payload.action);
-  console.log('Endpoint:', endpoint);
-  console.log('Final URL:', WEBHOOK_URL);
-  console.groupEnd();
+  console.log('Routing through Supabase orders table...');
   
   try {
-    const response = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-Source': 'VideoMill-Tactical-v2',
-      },
-      body: JSON.stringify(payload)
-    });
+    // We insert into orders table. The Supabase Trigger handle_new_order() 
+    // will catch this and forward it to n8n server-side (No CORS issues).
+    const { error } = await supabase
+      .from('orders')
+      .insert([{
+        video_id: payload.video_id || payload.retry_video_id || `manual-${Date.now()}`,
+        title: payload.title || 'Untitled Production',
+        topic: payload.topic || payload.action,
+        language: payload.language || 'en',
+        ai_voice: payload.ai_voice || 'standard',
+        visual_style: payload.visual_style || 'industrial',
+        metadata: payload, // Store the full original payload in metadata
+        status: 'pending'
+      }]);
+
+    if (error) throw error;
     
-    return response.ok;
+    console.log('✅ Order successfully queued in database');
+    console.groupEnd();
+    return true;
   } catch (err) {
-    console.error('❌ Network failure during dispatch:', err);
+    console.error('❌ Database dispatch failure:', err);
+    console.groupEnd();
     return false;
   }
 };
