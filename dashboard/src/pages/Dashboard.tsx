@@ -126,18 +126,18 @@ export default function Dashboard() {
             </div>
             
             <div className="divide-y divide-white/5 flex-1">
-              {safeOrders.length > 0 ? safeOrders.slice(0, 6).map((order) => (
-                <div key={order.id || order.video_id} className="p-8 flex items-center gap-8 group hover:bg-white/[0.02] transition-all relative overflow-hidden">
+              {safeVideos.length > 0 ? safeVideos.slice(0, 6).map((video) => (
+                <div key={video.id} className="p-8 flex items-center gap-8 group hover:bg-white/[0.02] transition-all relative overflow-hidden">
                   <div className="w-24 h-32 bg-[#0A0A0B] border border-white/10 relative overflow-hidden shrink-0 clipped-corner-sm group-hover:border-[#BD00FF]/40 transition-colors">
                     <div className="absolute inset-0 bg-[#BD00FF]/5 group-hover:bg-[#BD00FF]/10 transition-colors" />
                     <div className="absolute inset-0 flex items-center justify-center text-zinc-800">
-                       {order.status === 'completed' ? <Play size={32} className="text-[#6bff83]/40" /> : <Zap size={32} className="text-[#BD00FF]/40 animate-pulse" />}
+                       {video.status === 'completed' ? <Play size={32} className="text-[#6bff83]/40" /> : <Zap size={32} className="text-[#BD00FF]/40 animate-pulse" />}
                     </div>
                     {/* Visual Progress Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
                       <motion.div 
                         initial={{ width: 0 }}
-                        animate={{ width: `${order.progress || 0}%` }}
+                        animate={{ width: `${video.progress || 0}%` }}
                         className="h-full bg-[#BD00FF]"
                       />
                     </div>
@@ -146,34 +146,31 @@ export default function Dashboard() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-4 mb-3">
                       <span className={`px-3 py-1 font-data-mono text-[9px] font-black uppercase tracking-widest border clipped-corner-sm ${
-                        order.status === 'completed' ? 'bg-[#6bff83]/10 text-[#6bff83] border-[#6bff83]/20' : 'bg-[#BD00FF]/10 text-[#BD00FF] border-[#BD00FF]/20'
+                        video.status === 'completed' ? 'bg-[#6bff83]/10 text-[#6bff83] border-[#6bff83]/20' : 'bg-[#BD00FF]/10 text-[#BD00FF] border-[#BD00FF]/20'
                       }`}>
-                        {order.status || 'PROCESSING'}
+                        {video.status || 'PROCESSING'}
                       </span>
-                      <span className="font-data-mono text-[10px] text-zinc-600 uppercase font-bold tracking-widest">SEC_ID: {String(order.id || order.video_id).slice(0,12)}</span>
+                      <span className="font-data-mono text-[10px] text-zinc-600 uppercase font-bold tracking-widest">SEC_ID: {String(video.id).slice(0,12)}</span>
                     </div>
                     <h3 className="font-headline text-2xl font-black text-white uppercase italic truncate group-hover:text-[#BD00FF] transition-colors tracking-tight">
-                      {order.title || order.topic || 'NEURAL_GEN_TARGET'}
+                      {video.title || video.topic || 'NEURAL_GEN_TARGET'}
                     </h3>
                     <div className="flex gap-8 mt-4">
                       <div className="flex flex-col">
-                        <span className="font-label-caps text-[9px] text-zinc-600 uppercase font-bold tracking-widest">NETWORK_NODE</span>
-                        <span className="font-data-mono text-[11px] text-zinc-400 uppercase font-bold">{order.platform || 'TIKTOK_V1'}</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-label-caps text-[9px] text-zinc-600 uppercase font-bold tracking-widest">CORE_LANG</span>
-                        <span className="font-data-mono text-[11px] text-zinc-400 uppercase font-bold">{order.language || 'NORSK_TRANS'}</span>
+                        <span className="font-data-mono text-[8px] text-[#BD00FF] animate-pulse uppercase mb-1">
+                          {video.sub_status || 'Waiting_for_node...'}
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right flex flex-col items-end gap-3">
-                     <div className="font-data-mono text-lg font-black text-[#6bff83] italic">{String(order.progress || '0').padStart(2, '0')}%</div>
+                     <div className="font-data-mono text-lg font-black text-[#6bff83] italic">{String(video.progress || '0').padStart(2, '0')}%</div>
                      <div className="w-32 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
                         <motion.div 
                           className="h-full bg-gradient-to-r from-[#BD00FF] to-[#6bff83]" 
                           initial={{ width: 0 }}
-                          animate={{ width: `${order.progress || 0}%` }}
+                          animate={{ width: `${video.progress || 0}%` }}
                         />
                      </div>
                   </div>

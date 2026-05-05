@@ -58,28 +58,18 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial Black,92,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,2,0,1,6,3,10,50,50,960,1
+Style: Default,Arial Black,80,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,2,0,1,5,2,2,10,10,120,1
 `;
   ass += `\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
   
-  const blocks = vttContent.split('\n\n').filter(b => b.includes('-->'));
-  blocks.forEach(block => {
-    const lines = block.split('\n');
-    const times = lines[0].match(/(\d+:\d+:\d+\.\d+)/g);
-    if (times && times.length >= 2) {
-      const start = times[0].replace('.', ',');
-      const end = times[1].replace('.', ',');
-      let text = lines.slice(1).join(' ').toUpperCase().replace(/<[^>]*>/g, '').replace(/\"/g, '').trim();
-      
-      if (text) {
-        // Highlighting Power Words in Yellow (&H0000FFFF)
-        POWER_WORDS.forEach(word => {
-          const regex = new RegExp(`\\b${word}\\b`, 'g');
-          text = text.replace(regex, `{\\1c&H0000FFFF&}${word}{\\1c&H00FFFFFF&}`);
-        });
-
-        ass += `Dialogue: 0,${start},${end},Default,,0,0,0,,{\\fscx80\\fscy80\\t(0,150,\\fscx105\\fscy105)\\t(150,300,\\fscx100\\fscy100)}${text}\n`;
-      }
+  vttContent.forEach(item => {
+    let text = item.text.toUpperCase().trim();
+    if (text) {
+      POWER_WORDS.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'g');
+        text = text.replace(regex, `{\\1c&H0000FFFF&}${word}{\\1c&H00FFFFFF&}`);
+      });
+      ass += `Dialogue: 0,${item.start},${item.end},Default,,0,0,0,,{\\pos(540,1400)\\fscx80\\fscy80\\t(0,100,\\fscx105\\fscy105)\\t(100,200,\\fscx100\\fscy100)}${text}\n`;
     }
   });
   fs.writeFileSync(outputFile, ass);
@@ -102,7 +92,7 @@ const downloadFile = (url, dest, retries = 5) => {
 
 async function updateStatus(id, status, extra = {}) {
   const body = JSON.stringify({ status, ...extra, updated_at: new Date() });
-  const checkUrl = `${SUPABASE_URL}/rest/v1/videos?id=eq.${id}&select=id`;
+  const checkUrl = `${SUPABASE_URL}/rest/v1/productions?id=eq.${id}&select=id`;
   
   return new Promise((resolve) => {
     https.get(checkUrl, { headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }, (res) => {
@@ -111,7 +101,7 @@ async function updateStatus(id, status, extra = {}) {
       res.on('end', () => {
         const exists = data !== '[]' && data !== '';
         const method = exists ? 'PATCH' : 'POST';
-        const url = exists ? `${SUPABASE_URL}/rest/v1/videos?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/videos`;
+        const url = exists ? `${SUPABASE_URL}/rest/v1/productions?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/productions`;
         
         const finalBody = exists ? body : JSON.stringify({
           id: id,
@@ -251,28 +241,77 @@ async function handleCinematicRender(data) {
   // 3. SETT SAMMEN VIDEO OG LYD
   await updateStatus(video_id, 'rendering', { progress: 85, sub_status: 'Sluttfører Multi-Voice Mix...' });
   
-  const videoList = `${videoDir}/v_list.txt`;
-  fs.writeFileSync(videoList, processedClips.map(c => `file '${c}'`).join('\n'));
   const concatVideo = `${videoDir}/concat.mp4`;
-  execSync(`"${FFMPEG_PATH}" -y -f concat -safe 0 -i "${videoList}" -c copy "${concatVideo}"`, { stdio: 'ignore' });
+  // Bruk xfade hvis vi har mer enn én scene
+  if (processedClips.length > 1) {
+    let filterComplex = '';
+    let lastOutput = '[v0]';
+    let offset = 0;
+    const transitionTime = 0.5;
+
+    for (let i = 0; i < processedClips.length; i++) {
+      filterComplex += `[${i}:v]settb=1/30[v${i}];`;
+    }
+
+    for (let i = 0; i < processedClips.length - 1; i++) {
+      const dur = parseFloat(execSync(`"${FFMPEG_PATH.replace('ffmpeg.exe', 'ffprobe.exe')}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${processedClips[i]}"`).toString().trim());
+      offset += dur - transitionTime;
+      const nextOutput = `[xf${i}]`;
+      filterComplex += `${i === 0 ? '[v0]' : lastOutput}[v${i+1}]xfade=transition=fade:duration=${transitionTime}:offset=${offset}${nextOutput};`;
+      lastOutput = nextOutput;
+    }
+
+    const inputArgs = processedClips.map(c => `-i "${c}"`).join(' ');
+    execSync(`"${FFMPEG_PATH}" -y ${inputArgs} -filter_complex "${filterComplex.slice(0, -1)}" -map "${lastOutput}" -c:v libx264 -pix_fmt yuv420p "${concatVideo}"`, { stdio: 'ignore' });
+  } else {
+    execSync(`"${FFMPEG_PATH}" -y -i "${processedClips[0]}" -c copy "${concatVideo}"`, { stdio: 'ignore' });
+  }
 
   const voiceList = `${videoDir}/a_list.txt`;
   fs.writeFileSync(voiceList, voiceClips.map(c => `file '${c}'`).join('\n'));
   const finalVoice = `${videoDir}/voiceover.mp3`;
   execSync(`"${FFMPEG_PATH}" -y -f concat -safe 0 -i "${voiceList}" -c copy "${finalVoice}"`, { stdio: 'ignore' });
 
-  // 4. UNDERTEKSTER (Slå sammen VTTer)
-  const finalVtt = `${videoDir}/subs.vtt`;
-  let combinedVtt = "WEBVTT\n\n";
-  let timeOffset = 0;
-  vttClips.forEach((vfile, idx) => {
-    const content = fs.readFileSync(vfile, 'utf8').replace("WEBVTT\n\n", "");
-    // TODO: Juster tidsstempler hvis nødvendig, men FFmpeg subtitles filter håndterer ofte dette ok hvis vi brenner dem scene for scene.
-    // Enklere: Generer ASS fra de individuelle VTTene med offset.
-    combinedVtt += content + "\n";
-  });
+  // 4. UNDERTEKSTER (Med offset-logikk)
   const assFile = `${videoDir}/subs.ass`;
-  generateAnimatedASS(combinedVtt, assFile);
+  const allSubData = [];
+  let currentTime = 0;
+
+  for (let i = 0; i < scenes.length; i++) {
+    const vfile = vttClips[i];
+    if (fs.existsSync(vfile)) {
+      const content = fs.readFileSync(vfile, 'utf8');
+      const blocks = content.split('\n\n').filter(b => b.includes('-->'));
+      blocks.forEach(block => {
+        const lines = block.split('\n');
+        const times = lines[0].match(/(\d+):(\d+):(\d+)\.(\d+)/g);
+        if (times) {
+          const toSeconds = (t) => {
+            const [h, m, s_ms] = t.split(':');
+            return parseInt(h)*3600 + parseInt(m)*60 + parseFloat(s_ms);
+          };
+          const formatASS = (sec) => {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            const s = (sec % 60).toFixed(2);
+            return `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(5,'0').replace('.',',')}`;
+          };
+
+          const startSec = toSeconds(times[0]) + currentTime;
+          const endSec = toSeconds(times[1]) + currentTime;
+          allSubData.push({
+            start: formatASS(startSec),
+            end: formatASS(endSec),
+            text: lines.slice(1).join(' ').replace(/<[^>]*>/g, '').trim()
+          });
+        }
+      });
+    }
+    // Oppdater currentTime basert på scenens varighet (minus xfade overlap hvis vi er nøye, men buffer holder her)
+    const dur = parseFloat(execSync(`"${FFMPEG_PATH.replace('ffmpeg.exe', 'ffprobe.exe')}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${processedClips[i]}"`).toString().trim());
+    currentTime += dur;
+  }
+  generateAnimatedASS(allSubData, assFile);
 
   // 5. FINN EKSTRA ASSETS (Musikk, Overlay, Logo)
   let musicFile = null;
@@ -294,7 +333,7 @@ async function handleCinematicRender(data) {
   const finalOutput = `${videoDir}/final.mp4`;
   const subFilter = fs.existsSync(assFile) ? `subtitles='${assFile.replace(/\\/g, '/').replace(':', '\\:')}'` : '';
   
-  let inputArgs = `-i "${concatVideo}" -i "${voiceFile}"`;
+  let inputArgs = `-i "${concatVideo}" -i "${finalVoice}"`;
   let filterComplex = '[1:a]volume=1.3[v]';
   let videoMap = '[0:v]';
   let audioInputs = 1;
@@ -332,7 +371,7 @@ async function handleCinematicRender(data) {
   const storagePath = `videos/${video_id}/final.mp4`;
   try {
     execSync(`curl -X POST "${SUPABASE_URL}/storage/v1/object/${storagePath}" -H "Authorization: Bearer ${SUPABASE_KEY}" -H "Content-Type: video/mp4" --data-binary @"${finalOutput}"`, { stdio: 'ignore' });
-    await updateStatus(video_id, 'complete', { video_url: `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`, progress: 100 });
+    await updateStatus(video_id, 'completed', { video_url: `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`, progress: 100, sub_status: 'Mesterverk ferdigstilt!' });
     console.log(`✨ Elite Produksjon ferdig: ${video_id}`);
   } catch (e) {
     console.error("❌ Upload feilet:", e.message);
@@ -341,6 +380,23 @@ async function handleCinematicRender(data) {
 }
 
 const server = http.createServer((req, res) => {
+  // CORS Headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  if (req.url === '/health' || req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ONLINE', engine: 'Epic Engine v14.4 PRO', timestamp: new Date() }));
+    return;
+  }
+
   if (req.method === 'POST' && req.url === '/render') {
     let body = '';
     req.on('data', chunk => body += chunk);
@@ -348,14 +404,17 @@ const server = http.createServer((req, res) => {
       try {
         const data = JSON.parse(body);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'received' }));
+        res.end(JSON.stringify({ status: 'received', video_id: data.video_id }));
         handleCinematicRender(data).catch(err => {
           console.error("🔥 Render error:", err);
           updateStatus(data.video_id, 'failed', { sub_status: err.message });
         });
       } catch (e) { res.writeHead(400); res.end('Error'); }
     });
-  } else { res.writeHead(404); res.end(); }
+  } else { 
+    res.writeHead(404); 
+    res.end(JSON.stringify({ error: 'Not Found' })); 
+  }
 });
 
 scanForFooocus().then(() => {
