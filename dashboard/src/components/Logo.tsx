@@ -10,122 +10,91 @@ export default function Logo({ size = 'md', hideText = false, variant = 'default
   const raw = useId();
   const uid = raw.replace(/[^a-z0-9]/gi, '');
 
-  const dim       = size === 'sm' ? 28 : size === 'md' ? 40 : 56;
-  const textClass = size === 'sm' ? 'text-base' : size === 'md' ? 'text-xl' : 'text-2xl';
-  const subClass  = size === 'sm' ? 'text-[9px]' : size === 'md' ? 'text-[10px]' : 'text-xs';
+  const dim       = size === 'sm' ? 32 : size === 'md' ? 44 : 60;
+  const textClass = size === 'sm' ? 'text-lg' : size === 'md' ? 'text-2xl' : 'text-3xl';
+  const subClass  = size === 'sm' ? 'text-[8px]' : size === 'md' ? 'text-[9px]' : 'text-[10px]';
 
   const css = `
     @keyframes vml-rot   { to { transform: rotate(360deg); } }
     @keyframes vml-rotR { to { transform: rotate(-360deg); } }
-    @keyframes vml-pulse { 0%,100%{opacity:0.7; filter: brightness(1);} 50%{opacity:1; filter: brightness(1.3);} }
-    @keyframes vml-glow   { 0%,100%{opacity:0.15; r: 11;} 50%{opacity:0.5; r: 13;} }
-    @keyframes vml-ring  { 0%,100%{opacity:0.3; stroke-dashoffset:0} 50%{opacity:0.6; stroke-dashoffset:10} }
-    @keyframes vml-dot   { 0%,100%{opacity:0.3; transform: scale(1);} 50%{opacity:1; transform: scale(1.5);} }
-    @keyframes vml-scan  { 0%{transform:translateY(-100%);opacity:0} 10%{opacity:0.8} 90%{opacity:0.8} 100%{transform:translateY(100%);opacity:0} }
-    @keyframes vml-flicker { 0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 1; } 20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.4; } }
+    @keyframes vml-pulse { 0%,100%{opacity:0.8; filter: brightness(1.2);} 50%{opacity:1; filter: brightness(1.6);} }
+    @keyframes vml-glow   { 0%,100%{opacity:0.2;} 50%{opacity:0.6;} }
+    @keyframes vml-scan  { 0%{transform:translateY(-100%);opacity:0} 10%{opacity:0.5} 90%{opacity:0.5} 100%{transform:translateY(100%);opacity:0} }
+    @keyframes vml-glitch { 0% { transform: translate(0); } 20% { transform: translate(-1px, 1px); } 40% { transform: translate(-1px, -1px); } 60% { transform: translate(1px, 1px); } 80% { transform: translate(1px, -1px); } 100% { transform: translate(0); } }
     
-    .vml-rot-${uid}   { transform-origin: 28px 28px; animation: vml-rot 20s linear infinite; }
-    .vml-rotR-${uid} { transform-origin: 28px 28px; animation: vml-rotR 25s linear infinite; }
-    .vml-pls-${uid}   { animation: vml-pulse 2.5s ease-in-out infinite; }
+    .vml-rot-${uid}   { transform-origin: 28px 28px; animation: vml-rot 15s linear infinite; }
+    .vml-pls-${uid}   { animation: vml-pulse 2s ease-in-out infinite; }
     .vml-glw-${uid}   { transform-origin: 28px 28px; animation: vml-glow 3s ease-in-out infinite; }
-    .vml-dots-${uid}  { transform-origin: center; animation: vml-dot 2s ease-in-out infinite; }
-    .vml-scan-${uid}  { animation: vml-scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-    .vml-flicker-${uid} { animation: vml-flicker 4s linear infinite; }
+    .vml-scan-${uid}  { animation: vml-scan 4s linear infinite; }
+    .vml-glitch-${uid} { animation: vml-glitch 5s step-end infinite; }
   `;
 
-  const bladeAngles = [0, 60, 120, 180, 240, 300];
-  const cornerDots = variant === 'minimal' ? [] : [8, 44];
-
   return (
-    <div className="flex items-center gap-2.5 group cursor-pointer select-none">
+    <div className="flex items-center gap-4 group cursor-pointer select-none">
       <svg
         width={dim} height={dim}
         viewBox="0 0 56 56"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        className="drop-shadow-[0_0_8px_rgba(0,245,255,0.2)]"
       >
         <defs>
           <style>{css}</style>
+          
           <linearGradient id={`gMain-${uid}`} x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
             <stop offset="0%"   stopColor="#00F5FF" />
-            <stop offset="45%"  stopColor="#00D4E5" />
-            <stop offset="100%" stopColor="#0891B2" />
+            <stop offset="100%" stopColor="#BD00FF" />
           </linearGradient>
-          <linearGradient id={`gAccent-${uid}`} x1="20" y1="20" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stopColor="#ffffff" stopOpacity="0.95" />
-            <stop offset="60%"  stopColor="#00F5FF" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="#00D4E5" stopOpacity="0.7" />
-          </linearGradient>
-          <linearGradient id={`gBg-${uid}`} x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stopColor="#0B0F1A" />
-            <stop offset="100%" stopColor="#080C14" />
-          </linearGradient>
-          <radialGradient id={`gGlow-${uid}`} cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stopColor="#00F5FF" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#00F5FF" stopOpacity="0" />
-          </radialGradient>
-          <linearGradient id={`gOrbit-${uid}`} x1="0" y1="0" x2="56" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stopColor="#00F5FF" stopOpacity="0.4" />
-            <stop offset="50%"  stopColor="#00F5FF" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#00F5FF" stopOpacity="0.4" />
-          </linearGradient>
+
+          <pattern id={`hexGrid-${uid}`} width="8" height="8" patternUnits="userSpaceOnUse">
+            <path d="M4 0L8 2V6L4 8L0 6V2L4 0Z" fill="none" stroke="white" strokeWidth="0.2" opacity="0.1" />
+          </pattern>
+
+          <clipPath id={`clipShape-${uid}`}>
+            <path d="M0 10L10 0H56V46L46 56H0V10Z" />
+          </clipPath>
         </defs>
 
-        <rect x="2" y="2" width="52" height="52" rx="14" fill={`url(#gBg-${uid})`} />
-        <rect x="2" y="2" width="52" height="52" rx="14" fill="none" stroke="#00F5FF" strokeWidth="0.5" opacity="0.15" />
-        <rect x="2" y="2" width="52" height="52" rx="14" fill="none" stroke={`url(#gMain-${uid})`} strokeWidth="1.2" opacity="0.6" />
-        <rect x="4" y="4" width="48" height="48" rx="12" fill="none" stroke="#00F5FF" strokeWidth="0.3" opacity="0.2" />
+        {/* Tactical Clipped Background */}
+        <path d="M0 10L10 0H56V46L46 56H0V10Z" fill="#0A0A0B" stroke="white" strokeWidth="0.5" strokeOpacity="0.1" />
+        <path d="M0 10L10 0H56V46L46 56H0V10Z" fill={`url(#hexGrid-${uid})`} />
+        
+        {/* Accent Borders */}
+        <path d="M0 10L10 0H25" stroke="#00F5FF" strokeWidth="1.5" />
+        <path d="M56 46L46 56H31" stroke="#BD00FF" strokeWidth="1.5" />
 
+        {/* Core Mechanical Turbine */}
         <g className={`vml-rot-${uid}`}>
-          {bladeAngles.map((a) => (
-            <ellipse
+          {[0, 90, 180, 270].map((a) => (
+            <path
               key={a}
-              cx="28" cy="14"
-              rx="2.2" ry="6"
+              d="M28 28 L28 10 L34 14 L28 28"
               fill={`url(#gMain-${uid})`}
-              opacity="0.7"
+              opacity="0.8"
               transform={`rotate(${a} 28 28)`}
+              stroke="white"
+              strokeWidth="0.2"
+              strokeOpacity="0.3"
             />
           ))}
-          <circle cx="28" cy="28" r="3.5" fill="none" stroke={`url(#gMain-${uid})`} strokeWidth="0.8" opacity="0.5" />
+          <circle cx="28" cy="28" r="4" fill="#0A0A0B" stroke="#00F5FF" strokeWidth="1" />
+          <circle cx="28" cy="28" r="1.5" fill="#00F5FF" className={`vml-pls-${uid}`} />
         </g>
 
-        {/* counter-rotating orbit rings */}
-        <circle cx="28" cy="28" r="19" fill="none" stroke={`url(#gOrbit-${uid})`} strokeWidth="0.6" strokeDasharray="3 5" opacity="0.4" className={`vml-rotR-${uid}`} />
-        <circle cx="28" cy="28" r="13" fill="none" stroke={`url(#gMain-${uid})`} strokeWidth="0.6" opacity="0.35" className={`vml-rotR-${uid}`} />
+        {/* Data Scan Line */}
+        <rect x="2" y="10" width="52" height="1" fill="#00F5FF" opacity="0.4" className={`vml-scan-${uid}`} />
         
-        {/* Pulsing Circuit Lines */}
-        <path d="M12 28 H18 M38 28 H44 M28 12 V18 M28 38 V44" stroke="#00F5FF" strokeWidth="0.5" opacity="0.3" className={`vml-pls-${uid}`} />
-
-        <circle cx="28" cy="28" r="11" fill={`url(#gGlow-${uid})`} className={`vml-glw-${uid} vml-flicker-${uid}`} />
-
-        <path
-          d="M24 22 L24 34 L35 28 Z"
-          fill={`url(#gAccent-${uid})`}
-          className={`vml-pls-${uid} vml-flicker-${uid}`}
-        />
-
-        {cornerDots.map((pos, i) => (
-          <g key={i}>
-            <circle cx={pos} cy={pos} r="1.5" fill="#00F5FF" opacity="0.5" className={`vml-dots-${uid}`} style={{animationDelay: `${i * 0.5}s`}} />
-            <circle cx={56 - pos} cy={pos} r="1.5" fill="#00F5FF" opacity="0.5" className={`vml-dots-${uid}`} style={{animationDelay: `${(i + 2) * 0.5}s`}} />
-            <circle cx={pos} cy={56 - pos} r="1.5" fill="#00F5FF" opacity="0.5" className={`vml-dots-${uid}`} style={{animationDelay: `${(i + 4) * 0.5}s`}} />
-            <circle cx={56 - pos} cy={56 - pos} r="1.5" fill="#00F5FF" opacity="0.5" className={`vml-dots-${uid}`} style={{animationDelay: `${(i + 6) * 0.5}s`}} />
-          </g>
-        ))}
-
-        {variant === 'default' && (
-          <rect x="6" y="15" width="44" height="1" fill="#00F5FF" opacity="0.3" className={`vml-scan-${uid}`} />
-        )}
+        {/* Optical Glow */}
+        <circle cx="28" cy="28" r="20" fill="url(#radialGlow)" opacity="0.1" className={`vml-glw-${uid}`} />
       </svg>
 
       {!hideText && (
         <div className="flex flex-col">
-          <div className={`${textClass} font-black text-white italic tracking-tighter uppercase leading-none font-headline`}>
+          <div className={`${textClass} font-black text-white italic tracking-[-0.08em] uppercase leading-[0.85] font-headline vml-glitch-${uid}`}>
             Video<span className="text-cyan-400">Mill</span>
           </div>
-          <div className={`${subClass} text-cyan-400/70 font-semibold leading-none mt-0.5 font-data-mono uppercase tracking-[0.2em]`}>
-            NON-STOP VIRAL ENGINE
+          <div className={`${subClass} text-[#BD00FF] font-black leading-none mt-1.5 font-data-mono uppercase tracking-[0.4em] opacity-80`}>
+            NEURAL_ENGINE_v4.2
           </div>
         </div>
       )}

@@ -173,22 +173,25 @@ export default function Layout() {
             })}
           </nav>
 
-          {/* System Footer */}
-          <div className="p-4 bg-black/40 border-t border-white/5 space-y-1">
-            <button 
-              onClick={() => setSidebarOpen(!isSidebarOpen)}
-              className="w-full flex items-center gap-4 px-6 py-5 text-zinc-600 hover:text-white transition-colors group"
-            >
-              <Terminal size={20} className={!isSidebarOpen ? 'mx-auto' : ''} />
-              {isSidebarOpen && <span className="font-label-caps text-[11px] uppercase font-bold tracking-[0.2em]">{t('TOGGLE_NODE_INTERFACE')}</span>}
-            </button>
-            <button 
-              onClick={() => supabase.auth.signOut()}
-              className="w-full flex items-center gap-4 px-6 py-5 text-zinc-700 hover:text-[#e90053] transition-colors group"
-            >
-              <LogOut size={20} className={!isSidebarOpen ? 'mx-auto' : ''} />
-              {isSidebarOpen && <span className="font-label-caps text-[11px] uppercase font-bold tracking-[0.2em]">{t('TERMINATE_CONNECTION')}</span>}
-            </button>
+          {/* System Footer Controls */}
+          <div className="p-6 bg-black/40 border-t border-white/5 mt-auto">
+            <div className={`flex ${isSidebarOpen ? 'flex-row justify-between gap-4' : 'flex-col items-center gap-6'}`}>
+              <button 
+                onClick={() => setSidebarOpen(!isSidebarOpen)}
+                className={`flex items-center justify-center p-4 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#00f5ff]/50 hover:bg-[#00f5ff]/5 transition-all group ${isSidebarOpen ? 'flex-1' : 'w-12 h-12'}`}
+                title={t('TOGGLE_NODE_INTERFACE')}
+              >
+                <Terminal size={18} className="text-zinc-500 group-hover:text-[#00f5ff] group-hover:drop-shadow-[0_0_5px_#00f5ff]" />
+              </button>
+              
+              <button 
+                onClick={() => supabase.auth.signOut()}
+                className={`flex items-center justify-center p-4 bg-white/[0.02] border border-white/5 clipped-corner-sm hover:border-[#e90053]/50 hover:bg-[#e90053]/5 transition-all group ${isSidebarOpen ? 'flex-1' : 'w-12 h-12'}`}
+                title={t('TERMINATE_CONNECTION')}
+              >
+                <LogOut size={18} className="text-zinc-500 group-hover:text-[#e90053] group-hover:drop-shadow-[0_0_5px_#e90053]" />
+              </button>
+            </div>
           </div>
         </motion.aside>
 
