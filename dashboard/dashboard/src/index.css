@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Videomill Identity - The Naturalist Studio */
+  --background: #131412;
+  --surface: #131412;
+  --surface-dim: #131412;
+  --surface-bright: #393938;
+  --surface-container-lowest: #0d0e0d;
+  --surface-container-low: #1b1c1a;
+  --surface-container: #1f201e;
+  --surface-container-high: #292a29;
+  --surface-container-highest: #343533;
+  
+  --on-surface: #e4e2e0;
+  --on-surface-variant: #c2c8c1;
+  --inverse-surface: #e4e2e0;
+  --inverse-on-surface: #30312f;
+  
+  --outline: #8c928c;
+  --outline-variant: #424843;
+  
+  --primary: #b1cdb7;
+  --on-primary: #1d3526;
+  --primary-container: #2d4535;
+  --on-primary-container: #97b29d;
+  --inverse-primary: #4b6452;
+  
+  --secondary: #bec9bf;
+  --on-secondary: #29332c;
+  --secondary-container: #414c44;
+  --on-secondary-container: #b0bbb1;
+  
+  --tertiary: #e9bbbe;
+  --on-tertiary: #46282b;
+  --tertiary-container: #57373a;
+  --on-tertiary-container: #cca1a4;
+  
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+  
+  --success: #b1cdb7; /* Mapping success to primary green for theme consistency */
+  
+  --grid-color: rgba(177, 205, 183, 0.03);
+}
+
+/* Custom Font Utilities */
+.font-headline-lg {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.font-headline-md {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.font-body-lg {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.font-body-md {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.font-label-sm {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
+
+body {
+  background-color: var(--background);
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 40px 40px;
+  color: var(--on-surface);
+  font-family: 'Epilogue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Rounded Utilities */
+.rounded-soft-sm { border-radius: 0.125rem; }
+.rounded-soft { border-radius: 0.25rem; }
+.rounded-soft-md { border-radius: 0.375rem; }
+.rounded-soft-lg { border-radius: 0.5rem; }
+.rounded-soft-xl { border-radius: 0.75rem; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--surface-container-highest); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* Layout Utilities */
+.panel-naturalist {
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: 0.5rem;
+}
+
+/* Animations */
+@keyframes pulse-mist {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
+.animate-mist {
+  animation: pulse-mist 4s ease-in-out infinite;
+}
+
+/* Inner Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}

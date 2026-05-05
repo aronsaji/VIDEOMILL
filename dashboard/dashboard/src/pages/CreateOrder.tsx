@@ -3,7 +3,12 @@ import {
   Zap, Video, MessageSquare, Bot, 
   Settings2, Activity, Globe, Info,
   Search, TrendingUp, Sparkles, Send,
+<<<<<<< HEAD:dashboard/src/pages/CreateOrder.tsx
   Cpu, Languages, Target, Mic2, Music2
+=======
+  Cpu, Languages, Target, Mic2, Music2,
+  Layers, ArrowUpRight
+>>>>>>> baeefa0 (Fix: Update root directory to dashboard/dashboard):dashboard/dashboard/src/pages/CreateOrder.tsx
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePipelineStore } from '../store/pipelineStore';

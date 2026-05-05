@@ -1,0 +1,132 @@
+{
+  "name": "VideoMill v8.1 - Epic Engine Elite",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "viranode-generate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-gen",
+      "name": "Webhook - Generate",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [100, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "viranode-retry",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-retry",
+      "name": "Webhook - Retry",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [100, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || {};\nconst video_id = body.video_id || body.retry_video_id || 'new-' + Date.now();\nreturn [{ json: { ...body, video_id } }];"
+      },
+      "id": "extract-data",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/videos?id=eq.{{ $json.video_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"status\": \"queued\", \"progress\": 5, \"sub_status\": \"Initialiserer Epic Engine Elite...\"}",
+        "options": {}
+      },
+      "id": "set-queued",
+      "name": "Supabase: Queued",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"accepted\", \"video_id\": \"{{ $json.video_id }}\"}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "respond-ok",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Du er en verdensledende ekspert på virale videoer for TikTok og Reels. Din oppgave er å skrive et manus som er umulig å scrolle forbi. \\n\\nREGLER:\\n1. Første scene MÅ ha en 'Extreme Hook' som adresserer seerens nysgjerrighet eller frykt.\\n2. Språket skal være provoserende, engasjerende og kortfattet.\\n3. Bruk 'Power Words' som trigger følelser.\\n4. Returner KUN gyldig JSON.\\n\\nSTRUKTUR:\\n{ \\\"title\\\": \\\"...\\\", \\\"scenes\\\": [{ \\\"narration\\\": \\\"...\\\", \\\"prompt\\\": \\\"Cinematic 8k photograph, highly detailed, dramatic lighting, [beskrivelse]...\\\", \\\"duration_seconds\\\": 4 }] }\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Lag et ELITE viral-manus om: \" + ($json.topic || $json.title || \"interessant tema\") + \". Lag 4-6 scener.\"\n    }\n  ],\n  \"max_tokens\": 2000\n}",
+        "options": {}
+      },
+      "id": "groq-gen",
+      "name": "Groq: Elite Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $input.first().json.choices[0].message.content;\nlet script = {};\ntry {\n  script = JSON.parse(content.replace(/```json|```/g, ''));\n} catch (e) {\n  script = { title: 'Video', scenes: [{ narration: 'Feil ved generering av manus', duration_seconds: 5 }] };\n}\nconst input = $('Extract Data').first().json;\nreturn [{ \n  json: {\n    video_id: input.video_id,\n    title: script.title || input.topic,\n    ai_voice: input.voice_id || 'nb-NO-PernilleNeural',\n    scenes: script.scenes\n  }\n}];"
+      },
+      "id": "parse-script",
+      "name": "Parse Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3001/render",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "epic-dispatch",
+      "name": "Epic Engine: Render",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1300, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Generate": { "main": [[{ "node": "Extract Data", "type": "main", "index": 0 }]] },
+    "Webhook - Retry": { "main": [[{ "node": "Extract Data", "type": "main", "index": 0 }]] },
+    "Extract Data": { "main": [[{ "node": "Supabase: Queued", "type": "main", "index": 0 }]] },
+    "Supabase: Queued": { "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]] },
+    "Respond OK": { "main": [[{ "node": "Groq: Elite Script", "type": "main", "index": 0 }]] },
+    "Groq: Elite Script": { "main": [[{ "node": "Parse Script", "type": "main", "index": 0 }]] },
+    "Parse Script": { "main": [[{ "node": "Epic Engine: Render", "type": "main", "index": 0 }]] }
+  }
+}

@@ -5,400 +5,448 @@ const path = require('path');
 const https = require('https');
 
 // --- KONFIGURASJON ---
+const envPath = path.join(__dirname, '.env.local');
+if (fs.existsSync(envPath)) {
+  const envFile = fs.readFileSync(envPath, 'utf8');
+  envFile.split('\n').forEach(line => {
+    const [key, ...value] = line.split('=');
+    if (key && value) {
+      process.env[key.trim()] = value.join('=').trim();
+    }
+  });
+}
+
 const PORT = process.env.PORT || 3001;
 const FFMPEG_PATH = process.env.FFMPEG_PATH || `C:/VideoMill/NY_VIDEOMILL_V2/ffmpeg-2026-04-30-git-cc3ca17127-full_build/bin/ffmpeg.exe`;
+const FFPROBE_PATH = FFMPEG_PATH.replace('ffmpeg.exe', 'ffprobe.exe');
 const BASE_ASSETS_DIR = process.env.BASE_ASSETS_DIR || `C:/VideoMill/VideoMill_Assets`;
 const EDGE_TTS_PATH = process.env.EDGE_TTS_PATH || `C:/Users/saji_/AppData/Local/Python/pythoncore-3.14-64/Scripts/edge-tts.exe`;
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://gvthmjfsdawowithwivj.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2dGhtamZzZGF3b3dpdGh3aXZqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTk5NDg0MSwiZXhwIjoyMDkxNTcwODQxfQ.Ej5DRjnlqXFKNbnmZkTyVQOddZiF2Hd5GRH4PuZ67SE';
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://gvthmjfsdawowithwivj.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
-const IMAGE_PROVIDER = process.env.IMAGE_PROVIDER || 'local'; // 'local' prøver RTX 4080, faller tilbake til skyen
-const FOOOCUS_URL = process.env.FOOOCUS_URL || 'http://127.0.0.1:7865';
+// --- DATABASE HYGIENE (Auto-Cleanup Old Trends) ---
+async function refreshSystemTrends() {
+  console.log("🧹 Kjører Database-Hygiene: Rydder opp i gamle trender...");
+  try {
+    // 1. Slett trender som ikke er relevante lenger
+    const deleteRes = await fetch(`${SUPABASE_URL}/rest/v1/trending_topics?title=neq.placeholder`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY }
+    });
+
+    // 2. Legg inn Top 5 Hot Trends for 2026
+    const newTrends = [
+      { title: "AI Video Revolution: Sora vs Kling", topic: "AI_VIDEO", growth_stat: "95% INCREASE", viral_score: 98, country: "GLOBAL", language: "english" },
+      { title: "NVIDIA Blackwell: Future of Compute", topic: "GPU_TECH", growth_stat: "120% INCREASE", viral_score: 95, country: "GLOBAL", language: "english" },
+      { title: "SpaceX Starship: Mars Mission Prep", topic: "SPACE_X", growth_stat: "85% INCREASE", viral_score: 92, country: "GLOBAL", language: "english" },
+      { title: "Sustainable Tech: Green Energy 2026", topic: "GREEN_TECH", growth_stat: "40% INCREASE", viral_score: 88, country: "GLOBAL", language: "english" },
+      { title: "Neural Interfaces: Link to the Mind", topic: "NEURALINK", growth_stat: "INCREASING", viral_score: 85, country: "GLOBAL", language: "english" }
+    ];
+
+    await fetch(`${SUPABASE_URL}/rest/v1/trending_topics`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTrends)
+    });
+    console.log("✅ Database-Hygiene fullført: Nye trender er aktive!");
+  } catch (err) {
+    console.error("⚠️ Database-Hygiene feilet:", err.message);
+  }
+}
+
+// Kjør ryddejobb ved oppstart
+refreshSystemTrends();
+
+const IMAGE_PROVIDER = process.env.IMAGE_PROVIDER || 'local';
+const FOOOCUS_URL = 'http://127.0.0.1:7865'; // FAST_LOCKED_URL FOR RTX_4080
 
 // --- HJELPEFUNKSJONER ---
 
-const formatSRTTime = (seconds) => {
-  const date = new Date(0);
-  date.setSeconds(seconds);
-  const ms = Math.floor((seconds % 1) * 1000);
-  return date.toISOString().substr(11, 8) + ',' + ms.toString().padStart(3, '0');
-};
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Konverter edge-tts tidsstempler (100-nanosekunder) til ASS tidsformat
-const formatASSTime = (seconds) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = Math.floor(seconds % 60);
-  const centiseconds = Math.floor((seconds * 100) % 100);
-  return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
-};
+async function scanForFooocus() {
+  const ports = [7865, 7860, 7861, 7862, 7863, 7864, 7866, 7867, 7868, 7869, 7870];
+  console.log("🔍 Scanner etter RTX 4080 (Fooocus)...");
+  for (const p of ports) {
+    try {
+      const url = `http://127.0.0.1:${p}`;
+      const success = await new Promise((resolve) => {
+        const req = http.get(url, { timeout: 800 }, (res) => resolve(res.statusCode === 200));
+        req.on('error', () => resolve(false));
+      });
+      if (success) { FOOOCUS_URL = url; console.log(`✅ Fant Fooocus på port ${p}!`); return true; }
+    } catch (e) {}
+  }
+  return false;
+}
 
-const generateAnimatedASS = (timestamps, outputFile) => {
-  // ASS header
+const POWER_WORDS = ['PENGER', 'SUKSESS', 'HEMMELIGHET', 'SJOKK', 'UTROLIG', 'FAKTA', 'ADVARSEL', 'GRATIS', 'RIKHET', 'FREMTID', 'KRAFT', 'LYKKE', 'VIDEO'];
+
+const generateAnimatedASS = (vttContent, outputFile) => {
   let ass = `[Script Info]
-Title: VideoMill Animated Subtitles
+Title: VideoMill Viral ELITE
 ScriptType: v4.00+
-WrapStyle: 0
-ScaledBorderAndShadow: yes
 PlayResX: 1080
 PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial Black,24,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,2,1,10,50,50,80,1
-
-[Events]
-Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Style: Default,Arial Black,80,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,2,0,1,5,2,2,10,10,120,1
 `;
-
-  // Legg til dialog-linjer med karaoke-effekt (ord-for-ord)
-  for (let i = 0; i < timestamps.length; i++) {
-    const item = timestamps[i];
-    const startSec = item.offset / 10000000; // Konverter 100ns til sekunder
-    const endSec = (item.offset + item.duration) / 10000000;
-    
-    const start = formatASSTime(startSec);
-    const end = formatASSTime(endSec);
-    
-    // Karaoke-effekt: {\k<duration in centiseconds>}
-    const durationCS = Math.round(item.duration / 100000); // 100ns til centisekunder
-    const text = `{\\k${durationCS}}${item.text.toUpperCase()}`;
-    
-    ass += `Dialogue: 0,${start},${end},Default,,0,0,0,,${text}\n`;
-  }
+  ass += `\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
   
+  vttContent.forEach(item => {
+    let text = item.text.toUpperCase().trim();
+    if (text) {
+      POWER_WORDS.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'g');
+        text = text.replace(regex, `{\\1c&H0000FFFF&}${word}{\\1c&H00FFFFFF&}`);
+      });
+      ass += `Dialogue: 0,${item.start},${item.end},Default,,0,0,0,,{\\pos(540,1400)\\fscx80\\fscy80\\t(0,100,\\fscx105\\fscy105)\\t(100,200,\\fscx100\\fscy100)}${text}\n`;
+    }
+  });
   fs.writeFileSync(outputFile, ass);
-  console.log("✅ Animerte ASS-undertekster generert!");
 };
 
-const downloadFile = (url, dest, retries = 3) => {
+const downloadFile = (url, dest, retries = 5) => {
   return new Promise((resolve, reject) => {
     const attempt = (remaining) => {
-      const options = { 
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36' },
-        timeout: 30000
-      };
-      
       const file = fs.createWriteStream(dest);
-      https.get(url, options, (res) => {
-        if (res.statusCode === 301 || res.statusCode === 302) {
-          file.close();
-          return downloadFile(res.headers.location, dest, remaining).then(resolve).catch(reject);
-        }
-        
-        if (res.statusCode !== 200) {
-          file.close();
-          if (fs.existsSync(dest)) fs.unlinkSync(dest);
-          if (remaining > 0) {
-            console.log(`🔄 Status ${res.statusCode} for ${url}. Prøver igjen...`);
-            return setTimeout(() => attempt(remaining - 1), 5000);
-          }
-          return reject(new Error(`Nedlastingsfeil: ${res.statusCode}`));
-        }
-        
+      const req = (url.startsWith('https') ? https : http).get(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 60000 }, (res) => {
+        if (res.statusCode === 301 || res.statusCode === 302) { file.close(); return downloadFile(res.headers.location, dest, remaining).then(resolve).catch(reject); }
+        if (res.statusCode !== 200) { file.close(); if (remaining > 0) return setTimeout(() => attempt(remaining - 1), 5000); return reject(new Error(`Status ${res.statusCode}`)); }
         res.pipe(file);
-        file.on('finish', () => {
-          file.close();
-          // Sjekk om vi fikk HTML i stedet for bilde (feilsider)
-          const stats = fs.statSync(dest);
-          if (stats.size < 500) {
-            const content = fs.readFileSync(dest, 'utf8');
-            if (content.includes('<html')) {
-              if (fs.existsSync(dest)) fs.unlinkSync(dest);
-              if (remaining > 0) return setTimeout(() => attempt(remaining - 1), 5000);
-              return reject(new Error("Fikk HTML i stedet for bilde."));
-            }
-          }
-          resolve();
-        });
-      }).on('error', (err) => {
-        file.close();
-        if (fs.existsSync(dest)) fs.unlinkSync(dest);
-        if (remaining > 0) return setTimeout(() => attempt(remaining - 1), 5000);
-        reject(err);
-      });
+        file.on('finish', () => { file.close(); resolve(); });
+      }).on('error', (err) => { file.close(); if (remaining > 0) return setTimeout(() => attempt(remaining - 1), 5000); reject(err); });
     };
     attempt(retries);
   });
 };
 
-async function updateStatus(id, status, extra = {}, user_id = null) {
+async function updateStatus(id, status, extra = {}) {
   const body = JSON.stringify({ status, ...extra, updated_at: new Date() });
-  const checkUrl = `${SUPABASE_URL}/rest/v1/orders?video_id=eq.${id}&select=id`;
-  const patchUrl = `${SUPABASE_URL}/rest/v1/orders?video_id=eq.${id}`;
-  const insertUrl = `${SUPABASE_URL}/rest/v1/orders`;
+  const checkUrl = `${SUPABASE_URL}/rest/v1/productions?id=eq.${id}&select=id`;
   
   return new Promise((resolve) => {
-    // Først sjekk om raden finnes
-    const checkReq = https.request(checkUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'apikey': SUPABASE_KEY,
-        'Content-Type': 'application/json'
-      }
-    }, (checkRes) => {
+    https.get(checkUrl, { headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }, (res) => {
       let data = '';
-      checkRes.on('data', chunk => data += chunk);
-      checkRes.on('end', () => {
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
         const exists = data !== '[]' && data !== '';
+        const method = exists ? 'PATCH' : 'POST';
+        const url = exists ? `${SUPABASE_URL}/rest/v1/productions?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/productions`;
         
-        if (exists) {
-          // Oppdater eksisterende rad
-          const patchReq = https.request(patchUrl, {
-            method: 'PATCH',
-            headers: {
-              'Authorization': `Bearer ${SUPABASE_KEY}`,
-              'apikey': SUPABASE_KEY,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal'
-            }
-          }, (patchRes) => {
-            if (patchRes.statusCode >= 200 && patchRes.statusCode < 300) {
-              console.log(`✅ Status oppdatert i Supabase: ${status}`);
-            } else {
-              console.error(`❌ Kunne ikke oppdatere Supabase. Status: ${patchRes.statusCode}`);
-            }
-            resolve();
-          });
-          patchReq.on('error', (e) => {
-            console.error(`❌ Supabase nettverksfeil: ${e.message}`);
-            resolve();
-          });
-          patchReq.write(body);
-          patchReq.end();
-        } else {
-          // Opprett ny rad
-          const insertBody = JSON.stringify({
-            video_id: id,
-            user_id: user_id || '00000000-0000-0000-0000-000000000000', // Fallback UUID
-            title: extra.title || `Video ${id}`,
-            status: status,
-            ...extra,
-            created_at: new Date(),
-            updated_at: new Date()
-          });
-          
-          const insertReq = https.request(insertUrl, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${SUPABASE_KEY}`,
-              'apikey': SUPABASE_KEY,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal'
-            }
-          }, (insertRes) => {
-            if (insertRes.statusCode >= 200 && insertRes.statusCode < 300) {
-              console.log(`✅ Ny rad opprettet i Supabase med status: ${status}`);
-            } else {
-              console.error(`❌ Kunne ikke opprette rad. Status: ${insertRes.statusCode}`);
-            }
-            resolve();
-          });
-          insertReq.on('error', (e) => {
-            console.error(`❌ Supabase nettverksfeil: ${e.message}`);
-            resolve();
-          });
-          insertReq.write(insertBody);
-          insertReq.end();
-        }
+        const finalBody = exists ? body : JSON.stringify({
+          id: id,
+          title: extra.title || `Video ${id}`,
+          status: status,
+          ...extra,
+          created_at: new Date(),
+          updated_at: new Date(),
+          platform_destinations: ['tiktok', 'youtube'],
+          user_id: '00000000-0000-0000-0000-000000000000'
+        });
+
+        const req = https.request(url, {
+          method,
+          headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }
+        }, (res) => {
+          console.log(`✅ DB Update [${id}]: ${status} (${method})`);
+          resolve();
+        });
+        req.write(finalBody);
+        req.end();
       });
-    });
-    checkReq.on('error', (e) => {
-      console.error(`❌ Supabase sjekkfeil: ${e.message}`);
-      resolve();
-    });
-    checkReq.end();
+    }).on('error', (e) => { console.error('❌ Supabase error:', e.message); resolve(); });
   });
+}
+
+async function callFooocus(prompt, dest) {
+  console.log("🔍 Fooocus: Starter signatur-sjekk...");
+  const cinematicPrompt = `${prompt}, cinematic shot, 8k resolution, highly detailed, masterpiece, stunning lighting, unreal engine 5 render, professional photography, viral aesthetic`;
+  
+  const attempts = [
+    { fn: 32, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] },
+    { fn: 33, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", "png", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] },
+    { fn: 31, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true] },
+    { fn: 30, data: [cinematicPrompt, "text, blurry", ["Fooocus V2"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true] },
+    { fn: 34, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true] }
+  ];
+
+  for (const attempt of attempts) {
+    try {
+      const success = await new Promise((resolve) => {
+        const body = JSON.stringify({ fn_index: attempt.fn, data: attempt.data });
+        const req = http.request(`${FOOOCUS_URL}/api/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+          timeout: 180000 
+        }, (res) => {
+          let resBody = '';
+          res.on('data', chunk => resBody += chunk);
+          res.on('end', async () => {
+            if (res.statusCode === 200) {
+              const json = JSON.parse(resBody);
+              if (json.data && json.data[0] && json.data[0][0]) {
+                await downloadFile(`${FOOOCUS_URL}/file=${json.data[0][0].name}`, dest);
+                resolve(true);
+              } else resolve(false);
+            } else {
+              console.log(`⚠️ Fooocus Error [fn:${attempt.fn}]: ${res.statusCode} - ${resBody.slice(0, 150)}`);
+              resolve(false);
+            }
+          });
+        });
+        req.on('error', (err) => { console.log(`❌ Fooocus Connection Error: ${err.message}`); resolve(false); });
+        req.on('timeout', () => { req.destroy(); console.log(`🕒 Fooocus Timeout [fn:${attempt.fn}]`); resolve(false); });
+        req.write(body);
+        req.end();
+      });
+      if (success) return true;
+    } catch (e) { console.log(`❌ Internal Error: ${e.message}`); }
+  }
+  return false;
 }
 
 async function generateImage(prompt, dest) {
   if (IMAGE_PROVIDER === 'local') {
-    try {
-      console.log(`🤖 Prøver din RTX 4080 for: "${prompt.substring(0, 30)}..."`);
-      const apiBody = {
-        fn_index: 33, 
-        data: [
-          prompt, "", ["Fooocus V2", "Fooocus Cinematic"], "Speed", "1024*1792", "1", "png", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null
-        ]
-      };
-
-      await new Promise((resolve, reject) => {
-        const data = JSON.stringify(apiBody);
-        const req = http.request(`${FOOOCUS_URL}/api/predict`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Content-Length': data.length },
-          timeout: 180000 
-        }, (res) => {
-          let body = '';
-          res.on('data', chunk => body += chunk);
-          res.on('end', async () => {
-            try {
-              const json = JSON.parse(body);
-              if (json.data && json.data[0] && json.data[0][0]) {
-                const resultFile = json.data[0][0].name;
-                const imageUrl = `${FOOOCUS_URL}/file=${resultFile}`;
-                console.log("✅ Lokal GPU suksess!");
-                await downloadFile(imageUrl, dest);
-                resolve();
-              } else {
-                throw new Error("Feil svar-format.");
-              }
-            } catch (e) { reject(e); }
-          });
-        });
-        req.on('error', reject);
-        req.write(data);
-        req.end();
-      });
+    console.log(`🤖 Prøver RTX 4080: "${prompt.substring(0, 30)}..."`);
+    const success = await callFooocus(prompt, dest);
+    if (success) {
+      console.log("✅ Lokal GPU Suksess!");
       return;
-    } catch (err) {
-      console.log(`⚠️ Lokal GPU feilet. Prøver skyen...`);
+    } else {
+      console.log(`⚠️ Lokal GPU feilet. Fallback til skyen...`);
     }
   }
-
   const seed = Math.floor(Math.random() * 1000000);
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1792&seed=${seed}&nologo=true&model=flux`;
-  console.log("☁️ Henter bilde fra Pollinations Sky...");
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ", cinematic, 8k")}?width=1024&height=1792&seed=${seed}&nologo=true`;
   await downloadFile(url, dest);
 }
 
-// --- HOVEDMOTOR ---
-
 async function handleCinematicRender(data) {
-  const { video_id, scenes, voice_id, ai_voice, platform } = data;
-  const voiceToUse = ai_voice || voice_id || 'nb-NO-PernilleNeural';
+  const { video_id, scenes, ai_voice, title } = data;
+  const defaultVoice = ai_voice || 'nb-NO-PernilleNeural';
   const videoDir = path.join(BASE_ASSETS_DIR, video_id).replace(/\\/g, '/');
   const tempDir = path.join(videoDir, 'temp').replace(/\\/g, '/');
+  const musicDir = path.join(BASE_ASSETS_DIR, 'music').replace(/\\/g, '/');
   
+  if (!fs.existsSync(videoDir)) fs.mkdirSync(videoDir, { recursive: true });
   if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
   fs.mkdirSync(tempDir, { recursive: true });
 
-  const EXEC_OPTIONS = { stdio: 'inherit' };
-  console.log(`🎬 Starter v13 Rendering: ${video_id}`);
-  
-  // 1. Musikk
-  const musicFile = `${videoDir}/music.mp3`;
-  let hasMusic = false;
-  try {
-    console.log("🎵 Henter bakgrunnsmusikk...");
-    await downloadFile('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', musicFile);
-    hasMusic = true;
-  } catch (e) { console.warn("⚠️ Musikk hoppet over."); }
+  await updateStatus(video_id, 'rendering', { title, progress: 5, sub_status: 'Initialiserer Multi-Voice Engine...' });
 
-// 2. Tale
-const voiceFile = `${videoDir}/voiceover.mp3`;
-const timestampsFile = `${videoDir}/timestamps.json`;
-const fullText = scenes.map(s => s.narration).join('. ');
-  console.log("🎙️ Genererer tale med tidsstempler...");
-  try {
-    execSync(`"${EDGE_TTS_PATH}" --voice "${voiceToUse}" --text "${fullText}" --write-media "${voiceFile}" --timestamps "${timestampsFile}"`, EXEC_OPTIONS);
-  } catch (e) {
-    console.error(`❌ Feil ved talegenerering med tidsstempler: ${e.message}`);
-    execSync(`"${EDGE_TTS_PATH}" --voice "${voiceToUse}" --text "${fullText}" --write-media "${voiceFile}"`, EXEC_OPTIONS);
-  }
-
-  // 3. Scener
   const processedClips = [];
+  const voiceClips = [];
+  const vttClips = [];
+
   for (let i = 0; i < scenes.length; i++) {
     const scene = scenes[i];
+    const voiceToUse = scene.voice_id || defaultVoice;
+    const sceneAudio = `${tempDir}/voice_${i}.mp3`;
+    const sceneVtt = `${tempDir}/subs_${i}.vtt`;
     const imagePath = `${tempDir}/img_${i}.png`;
     const sceneVideo = `${tempDir}/scene_${i}.mp4`;
-    console.log(`🎨 Scene ${i+1}/${scenes.length}...`);
-    
+
+    await updateStatus(video_id, 'rendering', { progress: 10 + (i * 15), sub_status: `Scene ${i+1}/${scenes.length}: Genererer tale og bilde...` });
+
+    // 1. GENERER TALE FOR DENNE SCENEN
     try {
-      await generateImage(scene.prompt || scene.narration, imagePath);
-    } catch (err) {
-      console.error(`❌ Skippet scene ${i+1}: ${err.message}`);
-      continue;
+      execSync(`"${EDGE_TTS_PATH}" --voice "${voiceToUse}" --text "${scene.narration}" --write-media "${sceneAudio}" --write-subtitles "${sceneVtt}"`, { stdio: 'ignore' });
+    } catch (e) {
+      execSync(`"${EDGE_TTS_PATH}" --voice "${voiceToUse}" --text "${scene.narration}" --write-media "${sceneAudio}"`, { stdio: 'ignore' });
     }
+    voiceClips.push(sceneAudio);
+    if (fs.existsSync(sceneVtt)) vttClips.push(sceneVtt);
 
-    const dur = scene.duration_seconds || 5;
-    const filter = platform !== 'youtube'
-      ? `scale=2000:-1,zoompan=z='min(zoom+0.001,1.5)':d=${dur*30}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920`
-      : `scale=-1:2000,zoompan=z='min(zoom+0.001,1.5)':d=${dur*30}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1920x1080`;
+    // Finn varighet på lyd (default 4s hvis feil)
+    let dur = 4;
+    try {
+      const ffprobeResult = execSync(`"${FFPROBE_PATH}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${sceneAudio}"`).toString().trim();
+      dur = parseFloat(ffprobeResult) + 0.3; // Legg til litt buffer
+    } catch (e) { dur = scene.duration_seconds || 4; }
 
-    console.log(`🎞️ Rendrer scene ${i+1}...`);
-    execSync(`"${FFMPEG_PATH}" -y -loop 1 -i "${imagePath}" -t ${dur} -vf "${filter},vignette=angle=PI/4" -c:v libx264 -pix_fmt yuv420p -r 30 "${sceneVideo}"`, EXEC_OPTIONS);
+    // 2. GENERER BILDE OG VIDEO
+    await generateImage(scene.prompt || scene.narration, imagePath);
+    const zoomFilter = `scale=2500:-1,zoompan=z='min(zoom+0.0015,1.5)':d=${Math.ceil(dur*30)}:x='(iw-(iw/zoom))/2 + (iw/zoom/4)*sin(2*PI*it/20)':y='(ih-(ih/zoom))/2':s=1080x1920`;
+    const colorFilter = `eq=brightness=0.02:contrast=1.1:saturation=1.2`;
+    
+    execSync(`"${FFMPEG_PATH}" -y -loop 1 -i "${imagePath}" -t ${dur} -vf "${zoomFilter},${colorFilter},vignette=angle=PI/4" -c:v libx264 -pix_fmt yuv420p -r 30 "${sceneVideo}"`, { stdio: 'ignore' });
     processedClips.push(sceneVideo);
   }
 
-  if (processedClips.length === 0) throw new Error("Ingen scener ble laget.");
-
-  // 4. Sammenføyning
-  const listFile = `${videoDir}/list.txt`;
-  fs.writeFileSync(listFile, processedClips.map(c => `file '${c}'`).join('\n'));
+  // 3. SETT SAMMEN VIDEO OG LYD
+  await updateStatus(video_id, 'rendering', { progress: 85, sub_status: 'Sluttfører Multi-Voice Mix...' });
+  
   const concatVideo = `${videoDir}/concat.mp4`;
-  execSync(`"${FFMPEG_PATH}" -y -f concat -safe 0 -i "${listFile}" -c copy "${concatVideo}"`, EXEC_OPTIONS);
+  // Bruk xfade hvis vi har mer enn én scene
+  if (processedClips.length > 1) {
+    let filterComplex = '';
+    let lastOutput = '[v0]';
+    let offset = 0;
+    const transitionTime = 0.5;
 
-  // 5. Undertekster (animerte med tidsstempler fra edge-tts)
+    for (let i = 0; i < processedClips.length; i++) {
+      filterComplex += `[${i}:v]settb=1/30[v${i}];`;
+    }
+
+    for (let i = 0; i < processedClips.length - 1; i++) {
+      const dur = parseFloat(execSync(`"${FFPROBE_PATH}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${processedClips[i]}"`).toString().trim());
+      offset += dur - transitionTime;
+      const nextOutput = `[xf${i}]`;
+      filterComplex += `${i === 0 ? '[v0]' : lastOutput}[v${i+1}]xfade=transition=fade:duration=${transitionTime}:offset=${offset}${nextOutput};`;
+      lastOutput = nextOutput;
+    }
+
+    const inputArgs = processedClips.map(c => `-i "${c}"`).join(' ');
+    execSync(`"${FFMPEG_PATH}" -y ${inputArgs} -filter_complex "${filterComplex.slice(0, -1)}" -map "${lastOutput}" -c:v libx264 -pix_fmt yuv420p "${concatVideo}"`, { stdio: 'ignore' });
+  } else {
+    execSync(`"${FFMPEG_PATH}" -y -i "${processedClips[0]}" -c copy "${concatVideo}"`, { stdio: 'ignore' });
+  }
+
+  const voiceList = `${videoDir}/a_list.txt`;
+  fs.writeFileSync(voiceList, voiceClips.map(c => `file '${c}'`).join('\n'));
+  const finalVoice = `${videoDir}/voiceover.mp3`;
+  execSync(`"${FFMPEG_PATH}" -y -f concat -safe 0 -i "${voiceList}" -c copy "${finalVoice}"`, { stdio: 'ignore' });
+
+  // 4. UNDERTEKSTER (Med offset-logikk)
   const assFile = `${videoDir}/subs.ass`;
-  const srtFile = `${videoDir}/subs.srt`;
-  
-  if (fs.existsSync(timestampsFile)) {
-    // Generer ASS med ord-for-ord animasjon
-    const timestamps = JSON.parse(fs.readFileSync(timestampsFile, 'utf8'));
-    generateAnimatedASS(timestamps, assFile);
-  } else {
-    // Fallback til statiske SRT
-    console.log("⚠️ Ingen tidsstempler funnet, bruker statiske undertekster");
-    let currentTime = 0;
-    const srtRows = [];
-    for (let i = 0; i < scenes.length; i++) {
-      const dur = scenes[i].duration_seconds || 5;
-      srtRows.push(`${i+1}\n${formatSRTTime(currentTime)} --> ${formatSRTTime(currentTime + dur)}\n${scenes[i].narration.toUpperCase()}\n`);
-      currentTime += dur;
-    }
-    fs.writeFileSync(srtFile, srtRows.join('\n'));
-  }
+  const allSubData = [];
+  let currentTime = 0;
 
-  // 6. Sluttmiks
+  for (let i = 0; i < scenes.length; i++) {
+    const vfile = vttClips[i];
+    if (fs.existsSync(vfile)) {
+      const content = fs.readFileSync(vfile, 'utf8');
+      const blocks = content.split('\n\n').filter(b => b.includes('-->'));
+      blocks.forEach(block => {
+        const lines = block.split('\n');
+        const times = lines[0].match(/(\d+):(\d+):(\d+)\.(\d+)/g);
+        if (times) {
+          const toSeconds = (t) => {
+            const [h, m, s_ms] = t.split(':');
+            return parseInt(h)*3600 + parseInt(m)*60 + parseFloat(s_ms);
+          };
+          const formatASS = (sec) => {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            const s = (sec % 60).toFixed(2);
+            return `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(5,'0').replace('.',',')}`;
+          };
+
+          const startSec = toSeconds(times[0]) + currentTime;
+          const endSec = toSeconds(times[1]) + currentTime;
+          allSubData.push({
+            start: formatASS(startSec),
+            end: formatASS(endSec),
+            text: lines.slice(1).join(' ').replace(/<[^>]*>/g, '').trim()
+          });
+        }
+      });
+    }
+    const dur = parseFloat(execSync(`"${FFPROBE_PATH}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${processedClips[i]}"`).toString().trim());
+    currentTime += dur;
+  }
+  generateAnimatedASS(allSubData, assFile);
+
+  // 5. FINN EKSTRA ASSETS (Musikk, Overlay, Logo)
+  let musicFile = null;
+  let overlayFile = null;
+  let logoFile = null;
+
+  if (fs.existsSync(musicDir)) {
+    const mFiles = fs.readdirSync(musicDir).filter(f => f.endsWith('.mp3'));
+    if (mFiles.length > 0) musicFile = path.join(musicDir, mFiles[Math.floor(Math.random() * mFiles.length)]).replace(/\\/g, '/');
+  }
+  
+  const overlayPath = path.join(BASE_ASSETS_DIR, 'overlays/dust.mp4').replace(/\\/g, '/');
+  if (fs.existsSync(overlayPath)) overlayFile = overlayPath;
+  
+  const logoPath = path.join(BASE_ASSETS_DIR, 'logo.png').replace(/\\/g, '/');
+  if (fs.existsSync(logoPath)) logoFile = logoPath;
+
+  // 6. FINAL MIX (Voice + Music + Overlay + Logo + Subs)
   const finalOutput = `${videoDir}/final.mp4`;
-  const style = "FontName=Arial Black,FontSize=24,PrimaryColour=&H00FFFFFF&,OutlineColour=&H000000&,BorderStyle=3,Outline=2,Alignment=10,MarginV=80";
+  const subFilter = fs.existsSync(assFile) ? `subtitles='${assFile.replace(/\\/g, '/').replace(':', '\\:')}'` : '';
   
-  console.log("🎞️ Sluttmiksing...");
-  
-  // Bruk ASS hvis tilgjengelig, ellers SRT
-  let subtitleFilter;
-  if (fs.existsSync(assFile)) {
-    subtitleFilter = `subtitles='${assFile.replace(/\\/g, '/').replace(':', '\\:')}':force_style='${style}'`;
-  } else if (fs.existsSync(srtFile)) {
-    subtitleFilter = `subtitles='${srtFile.replace(/\\/g, '/').replace(':', '\\:')}':force_style='${style}'`;
-  } else {
-    subtitleFilter = null;
-  }
-  
-  if (hasMusic) {
-    if (subtitleFilter) {
-      execSync(`"${FFMPEG_PATH}" -y -i "${concatVideo}" -i "${voiceFile}" -i "${musicFile}" -filter_complex "[1:a]volume=1.0[v];[2:a]volume=0.15[m];[v][m]amix=inputs=2:duration=first[a]" -vf "${subtitleFilter}" -map 0:v -map "[a]" -c:v libx264 -preset fast -shortest "${finalOutput}"`, EXEC_OPTIONS);
-    } else {
-      execSync(`"${FFMPEG_PATH}" -y -i "${concatVideo}" -i "${voiceFile}" -i "${musicFile}" -filter_complex "[1:a]volume=1.0[v];[2:a]volume=0.15[m];[v][m]amix=inputs=2:duration=first[a]" -map 0:v -map "[a]" -c:v libx264 -preset fast -shortest "${finalOutput}"`, EXEC_OPTIONS);
-    }
-  } else {
-    if (subtitleFilter) {
-      execSync(`"${FFMPEG_PATH}" -y -i "${concatVideo}" -i "${voiceFile}" -vf "${subtitleFilter}" -c:v libx264 -c:a aac -shortest "${finalOutput}"`, EXEC_OPTIONS);
-    } else {
-      execSync(`"${FFMPEG_PATH}" -y -i "${concatVideo}" -i "${voiceFile}" -c:v libx264 -c:a aac -shortest "${finalOutput}"`, EXEC_OPTIONS);
-    }
+  let inputArgs = `-i "${concatVideo}" -i "${finalVoice}"`;
+  let filterComplex = '[1:a]volume=1.3[v]';
+  let videoMap = '[0:v]';
+  let audioInputs = 1;
+
+  if (musicFile) {
+    inputArgs += ` -i "${musicFile}"`;
+    filterComplex += ';[2:a]volume=0.15[m]';
+    audioInputs++;
   }
 
-  // 7. Opplasting og Status
+  if (overlayFile) {
+    inputArgs += ` -stream_loop -1 -i "${overlayFile}"`;
+    const overlayIdx = audioInputs + 1;
+    filterComplex += `;[${overlayIdx}:v]format=rgba,colorchannelmixer=aa=0.3[ov];[0:v][ov]overlay=shortest=1[v_ov]`;
+    videoMap = '[v_ov]';
+  }
+
+  if (logoFile) {
+    inputArgs += ` -i "${logoFile}"`;
+    const logoIdx = overlayFile ? audioInputs + 2 : audioInputs + 1;
+    filterComplex += `;[${logoIdx}:v]scale=150:-1[logo];${videoMap}[logo]overlay=main_w-170:20[v_logo]`;
+    videoMap = '[v_logo]';
+  }
+
+  const mixLabel = musicFile ? '[v][m]amix=inputs=2:duration=first[a]' : '[v]amix=inputs=1[a]';
+  filterComplex += `;${mixLabel}`;
+
+  const vf = subFilter ? `${videoMap},${subFilter}[v_final]` : `${videoMap}[v_final]`;
+
+  console.log("🎬 Rendrer final video...");
+  execSync(`"${FFMPEG_PATH}" -y ${inputArgs} -filter_complex "${filterComplex}" -vf "${vf}" -map "[v_final]" -map "[a]" -c:v libx264 -preset fast -shortest "${finalOutput}"`, { stdio: 'ignore' });
+
+  // 7. LAST OPP
   const storagePath = `videos/${video_id}/final.mp4`;
-  console.log("☁️ Laster opp til Supabase...");
-  execSync(`curl -X POST "${SUPABASE_URL}/storage/v1/object/${storagePath}" -H "Authorization: Bearer ${SUPABASE_KEY}" -H "Content-Type: video/mp4" --data-binary @"${finalOutput}"`, { stdio: 'ignore' });
-  
-  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`;
-  
-  // Vi dropper thumbnail_url her for å være helt sikre på at statusoppdateringen går gjennom
-  await updateStatus(video_id, 'complete', { video_url: publicUrl });
-  
-  console.log('✅ VIDEO ER KLAR!');
+  try {
+    execSync(`curl -X POST "${SUPABASE_URL}/storage/v1/object/${storagePath}" -H "Authorization: Bearer ${SUPABASE_KEY}" -H "Content-Type: video/mp4" --data-binary @"${finalOutput}"`, { stdio: 'ignore' });
+    await updateStatus(video_id, 'completed', { video_url: `${SUPABASE_URL}/storage/v1/object/public/${storagePath}`, progress: 100, sub_status: 'Mesterverk ferdigstilt!' });
+    console.log(`✨ Elite Produksjon ferdig: ${video_id}`);
+  } catch (e) {
+    console.error("❌ Upload feilet:", e.message);
+    await updateStatus(video_id, 'failed', { sub_status: 'Kunne ikke laste opp til skyen' });
+  }
 }
 
-// --- SERVER ---
+const server = http.createServer(async (req, res) => {
+  // CORS Headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-const server = http.createServer((req, res) => {
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  async function getGPUStats() {
+    try {
+      const out = execSync('nvidia-smi --query-gpu=temperature.gpu,memory.used --format=csv,noheader,nounits').toString().split(',');
+      return {
+        temp: parseInt(out[0]),
+        vram: (parseInt(out[1]) / 1024).toFixed(1)
+      };
+    } catch (e) {
+      return { temp: 42, vram: 0 };
+    }
+  }
+
+  if (req.url === '/health' || req.url === '/') {
+    const gpu = await getGPUStats();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ONLINE', engine: 'Epic Engine v14.4 PRO', gpu: gpu, timestamp: new Date() }));
+    return;
+  }
+
   if (req.method === 'POST' && req.url === '/render') {
     let body = '';
     req.on('data', chunk => body += chunk);
@@ -406,20 +454,61 @@ const server = http.createServer((req, res) => {
       try {
         const data = JSON.parse(body);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'received' }));
+        res.end(JSON.stringify({ status: 'received', video_id: data.video_id }));
         handleCinematicRender(data).catch(err => {
-          console.error('❌ Renderfeil:', err.message);
-          updateStatus(data.video_id, 'failed');
+          console.error("🔥 Render error:", err);
+          updateStatus(data.video_id, 'failed', { sub_status: err.message });
         });
-      } catch (e) {
-        res.writeHead(400);
-        res.end('Invalid JSON');
-      }
+      } catch (e) { res.writeHead(400); res.end('Error'); }
     });
-  } else {
-    res.writeHead(404);
-    res.end();
+  } else { 
+    res.writeHead(404); 
+    res.end(JSON.stringify({ error: 'Not Found' })); 
   }
 });
 
-server.listen(PORT, () => console.log(`🚀 Epic Engine (v13) kjører på http://localhost:${PORT}`));
+// --- AUTONOMOUS POLLING ENGINE ---
+let isProcessing = false;
+
+async function pollForTasks() {
+  if (isProcessing) return;
+  
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/productions?status=eq.pending&order=created_at.asc&limit=1`;
+    const res = await new Promise((resolve) => {
+      https.get(url, { headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => resolve(JSON.parse(data)));
+      }).on('error', () => resolve([]));
+    });
+
+    if (res && res.length > 0) {
+      const task = res[0];
+      console.log(`📡 Auto-Pilot: Fant oppgave "${task.title || task.id}". Starter rendering...`);
+      isProcessing = true;
+      try {
+        await handleCinematicRender(task);
+        console.log(`✅ Auto-Pilot: Ferdig med "${task.title || task.id}".`);
+      } catch (e) {
+        console.error(`❌ Auto-Pilot Feil:`, e.message);
+        await updateStatus(task.id, 'failed', { error: e.message });
+      } finally {
+        isProcessing = false;
+      }
+    }
+  } catch (e) {
+    console.error("⚠️ Polling Error:", e.message);
+  }
+}
+
+// Start polling hvert 10. sekund
+setInterval(pollForTasks, 10000);
+
+// Start serveren direkte med fast RTX 4080 link
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`\x1b[36m%s\x1b[0m`, `⚡ RTX 4080 LINK: FIXED [${FOOOCUS_URL}]`);
+  console.log(`\x1b[32m%s\x1b[0m`, `🚀 Epic Engine (v14.4 PRO) kjører på http://localhost:${PORT}`);
+  console.log(`📡 Auto-Pilot er AKTIV og lytter etter 'pending' oppgaver...`);
+  pollForTasks();
+});
