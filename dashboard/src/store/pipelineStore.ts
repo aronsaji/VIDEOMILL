@@ -164,8 +164,9 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
 
   subscribeToChanges: () => {
     try {
+      const channelId = `pipeline-changes-${Math.random().toString(36).slice(2, 9)}`;
       const channel = supabase
-        .channel('pipeline-changes')
+        .channel(channelId)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => get().fetchOrders())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'productions' }, () => get().fetchProductions())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'trending_topics' }, () => get().fetchTrends())

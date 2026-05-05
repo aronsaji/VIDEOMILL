@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Logo from './Logo';
 import { triggerProduction } from '../lib/api';
+import { supabase } from '../lib/supabase';
 
 const NAV_ITEMS = [
   { path: '/', label: 'COMMAND_CENTER', icon: LayoutDashboard, color: 'text-[#BD00FF]' },
