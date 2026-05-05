@@ -9,9 +9,11 @@ import {
 } from 'lucide-react';
 
 const LANGUAGES = [
-  { id: 'Norsk', label: 'Norway (Norsk)' },
-  { id: 'English', label: 'UK/USA (English)' },
-  { id: 'Español', label: 'Spain (Español)' },
+  { id: 'Norsk', label: 'NO' },
+  { id: 'English', label: 'EN' },
+  { id: 'Tamil', label: 'TA' },
+  { id: 'Hindi', label: 'HI' },
+  { id: 'Español', label: 'ES' },
 ];
 
 const PLATFORMS = [
@@ -73,9 +75,24 @@ export default function Factory() {
     }
   };
 
-  const activeCycles = orders.filter(o => o.status === 'rendering' || o.status === 'processing').length;
+   const getAgentStatus = (agentId: string) => {
+      const activeCount = orders.filter(o => o.status !== 'completed' && o.status !== 'failed').length;
+      
+      if (isGenerating) {
+         if (agentId === 'agent-w') return { label: 'SYNTHESIZING', color: 'text-[#BD00FF]', pulse: true };
+         return { label: 'PREPARING', color: 'text-zinc-500', pulse: false };
+      }
 
-  return (
+      if (activeCount > 0) {
+         if (agentId === 'agent-w') return { label: 'IDLE', color: 'text-zinc-600', pulse: false };
+         if (agentId === 'agent-e') return { label: 'ASSEMBLING', color: 'text-[#00f5ff]', pulse: true };
+         if (agentId === 'agent-r') return { label: 'RENDERING', color: 'text-[#6bff83]', pulse: true };
+      }
+
+      return null; // Fallback to default
+   };
+
+   return (
     <div className="max-w-[1600px] mx-auto space-y-10">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative border-b border-white/5 pb-8">
         <div className="relative z-10">
@@ -110,33 +127,40 @@ export default function Factory() {
               </div>
               
               <div className="space-y-4">
-                 {AGENTS.map((agent, i) => (
-                   <motion.div 
-                     key={agent.id}
-                     initial={{ opacity: 0, x: -20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     transition={{ delay: i * 0.1 }}
-                     className="p-6 bg-white/[0.01] border border-white/5 group hover:bg-white/[0.03] transition-all cursor-crosshair clipped-corner-sm hover:border-[#BD00FF]/30"
-                   >
-                      <div className="flex justify-between items-start mb-4">
-                         <div className={`p-4 bg-black/60 border border-white/5 clipped-corner-sm ${agent.color}`}>
-                            <agent.icon size={22} />
+                 {AGENTS.map((agent, i) => {
+                    const dynamic = getAgentStatus(agent.id);
+                    const statusLabel = dynamic?.label || agent.status;
+                    const statusColor = dynamic?.color || (agent.status === 'ACTIVE' ? 'text-[#6bff83]' : 'text-zinc-600');
+                    const isPulsing = dynamic?.pulse || agent.status === 'ACTIVE';
+
+                    return (
+                      <motion.div 
+                        key={agent.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className={`p-6 bg-white/[0.01] border transition-all cursor-crosshair clipped-corner-sm ${
+                           dynamic?.pulse ? 'border-[#BD00FF]/40 bg-[#BD00FF]/5' : 'border-white/5'
+                        }`}
+                      >
+                         <div className="flex justify-between items-start mb-4">
+                            <div className={`p-4 bg-black/60 border border-white/5 clipped-corner-sm ${agent.color}`}>
+                               <agent.icon size={22} className={dynamic?.pulse ? 'animate-pulse' : ''} />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`font-data-mono text-[9px] px-2 py-0.5 font-black italic tracking-widest ${statusColor}`}>
+                                {statusLabel}
+                              </span>
+                              <div className={`w-1.5 h-1.5 rounded-full ${isPulsing ? 'bg-[#6bff83]' : 'bg-zinc-800'} ${isPulsing ? 'animate-pulse-led' : ''}`} />
+                            </div>
                          </div>
-                         <div className="flex items-center gap-2">
-                           <span className={`font-data-mono text-[9px] px-2 py-0.5 font-black italic tracking-widest ${
-                             agent.status === 'ACTIVE' ? 'text-[#6bff83]' : 'text-zinc-600'
-                           }`}>
-                             {agent.status}
-                           </span>
-                           <div className={`w-1.5 h-1.5 rounded-full ${agent.status === 'ACTIVE' ? 'bg-[#6bff83]' : 'bg-zinc-800'} animate-pulse-led`} />
-                         </div>
-                      </div>
-                      <h3 className="font-headline text-xl font-black text-white uppercase italic mb-1 group-hover:text-[#BD00FF] transition-colors tracking-tight">
-                        {agent.name}
-                      </h3>
-                      <p className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">{agent.role}</p>
-                   </motion.div>
-                 ))}
+                         <h3 className="font-headline text-xl font-black text-white uppercase italic mb-1 tracking-tight">
+                           {agent.name}
+                         </h3>
+                         <p className="font-data-mono text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">{agent.role}</p>
+                      </motion.div>
+                    );
+                 })}
               </div>
            </section>
 

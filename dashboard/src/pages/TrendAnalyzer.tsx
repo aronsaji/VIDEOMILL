@@ -31,12 +31,12 @@ export default function TrendAnalyzer() {
   ];
 
   useEffect(() => {
-    fetchTrends();
+    fetchTrends(selectedCountry);
     const unsubscribe = subscribeToChanges();
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
-  }, [fetchTrends, subscribeToChanges]);
+  }, [fetchTrends, subscribeToChanges, selectedCountry]);
 
   const safeTrends = Array.isArray(trends) ? trends : [];
 

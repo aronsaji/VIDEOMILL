@@ -18,7 +18,7 @@ interface PipelineState {
   fetchOrders: () => Promise<void>;
   fetchProductions: () => Promise<void>;
   fetchVideos: () => Promise<void>;
-  fetchTrends: () => Promise<void>;
+  fetchTrends: (country?: string) => Promise<void>;
   fetchAnalytics: () => Promise<void>;
   fetchSeries: () => Promise<void>;
   fetchEpisodes: () => Promise<void>;
@@ -41,23 +41,15 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
   error: null,
 
   fetchInitialData: async () => {
-    // Avoid multiple concurrent initial fetches
     if (get().isLoading) return;
-    
     set({ isLoading: true });
     try {
-      // Execute all core fetches in parallel
-      const results = await Promise.allSettled([
+      await Promise.allSettled([
         get().fetchOrders(),
         get().fetchProductions(),
         get().fetchTrends(),
         get().fetchAnalytics()
       ]);
-      
-      const failed = results.filter(r => r.status === 'rejected');
-      if (failed.length > 0) {
-        console.warn('⚠️ Some initial data fetches failed:', failed);
-      }
     } catch (err: any) {
       console.error('❌ critical_fetch_failure:', err);
       set({ error: err.message });
@@ -96,12 +88,18 @@ export const usePipelineStore = create<PipelineState>((set, get) => ({
     return get().fetchProductions();
   },
 
-  fetchTrends: async () => {
+  fetchTrends: async (country?: string) => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('trending_topics')
         .select('*')
         .order('viral_score', { ascending: false });
+      
+      if (country && country !== 'GLOBAL' && country !== 'ALL') {
+        query = query.eq('country', country);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       set({ trends: data || [] });
     } catch (err) {
