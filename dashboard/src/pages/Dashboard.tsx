@@ -51,14 +51,14 @@ export default function Dashboard() {
             <div className="space-y-4 relative z-10">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] italic">{stat.label}</span>
-                <div className={`w-2 h-2 rounded-full bg-${stat.color} animate-pulse shadow-[0_0_8px_${stat.color}]`} />
+                <div className={`w-2 h-2 rounded-full bg-${stat.color} animate-pulse`} />
               </div>
               <div className="text-3xl font-black text-white italic tracking-tighter uppercase">{stat.value}</div>
               <div className="flex gap-1">
                 {[...Array(12)].map((_, j) => (
                   <div 
                     key={j} 
-                    className={`segment-meter-block ${j < stat.val ? `bg-${stat.color} shadow-[0_0_8px_rgba(var(--${stat.color}-rgb),0.5)]` : 'bg-white/5'}`} 
+                    className={`segment-meter-block ${j < stat.val ? `bg-${stat.color}` : 'bg-white/5'}`} 
                   />
                 ))}
               </div>
