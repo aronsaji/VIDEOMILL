@@ -129,57 +129,58 @@ async function updateStatus(id, status, extra = {}) {
   });
 }
 
-async function callFooocus(prompt, dest, fnIndex = 32) {
+async function callFooocus(prompt, dest) {
   const cinematicPrompt = `${prompt}, cinematic shot, 8k resolution, highly detailed, masterpiece, stunning lighting, unreal engine 5 render, professional photography, viral aesthetic`;
-  const apiBody = {
-    fn_index: fnIndex, 
-    data: [cinematicPrompt, "text, watermark, blurry, low quality", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null]
-  };
   
-  return new Promise((resolve, reject) => {
-    const data = JSON.stringify(apiBody);
-    const req = http.request(`${FOOOCUS_URL}/api/predict`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': data.length },
-      timeout: 300000 
-    }, (res) => {
-      let body = '';
-      res.on('data', chunk => body += chunk);
-      res.on('end', async () => {
-        try {
-          if (res.statusCode !== 200) throw new Error(`HTTP ${res.statusCode}`);
-          const json = JSON.parse(body);
-          if (json.data && json.data[0] && json.data[0][0]) {
-            await downloadFile(`${FOOOCUS_URL}/file=${json.data[0][0].name}`, dest);
-            resolve(true);
-          } else { throw new Error("Formatfeil i svar"); }
-        } catch (e) { reject(e); }
+  // Vi prøver flere vanlige signaturer for Fooocus API
+  const attempts = [
+    { fn: 32, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] },
+    { fn: 33, data: [cinematicPrompt, "text, watermark, blurry", ["Fooocus V2", "Fooocus Cinematic"], "Quality", "1024*1792", "1", "png", -1, false, 2, 4, "Default", "Default", 0.5, [], true, 0.5, "None", 0, 0.5, "None", "", 0.75, "None", null, "None", null, "None", null, "None", null] }
+  ];
+
+  for (const attempt of attempts) {
+    try {
+      const success = await new Promise((resolve, reject) => {
+        const body = JSON.stringify({ fn_index: attempt.fn, data: attempt.data });
+        const req = http.request(`${FOOOCUS_URL}/api/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+          timeout: 120000 
+        }, (res) => {
+          let resBody = '';
+          res.on('data', chunk => resBody += chunk);
+          res.on('end', async () => {
+            if (res.statusCode === 200) {
+              const json = JSON.parse(resBody);
+              if (json.data && json.data[0] && json.data[0][0]) {
+                await downloadFile(`${FOOOCUS_URL}/file=${json.data[0][0].name}`, dest);
+                resolve(true);
+              } else resolve(false);
+            } else {
+              console.log(`⚠️ Fooocus Error [fn:${attempt.fn}]: ${res.statusCode} - ${resBody.slice(0, 100)}`);
+              resolve(false);
+            }
+          });
+        });
+        req.on('error', () => resolve(false));
+        req.write(body);
+        req.end();
       });
-    });
-    req.on('error', reject);
-    req.write(data);
-    req.end();
-  });
+      if (success) return true;
+    } catch (e) {}
+  }
+  return false;
 }
 
 async function generateImage(prompt, dest) {
   if (IMAGE_PROVIDER === 'local') {
     console.log(`🤖 Prøver RTX 4080: "${prompt.substring(0, 30)}..."`);
-    try {
-      // Prøv først standard fn_index 33
-      await callFooocus(prompt, dest, 33);
-      console.log("✅ Lokal GPU Suksess (Metode A)!");
+    const success = await callFooocus(prompt, dest);
+    if (success) {
+      console.log("✅ Lokal GPU Suksess!");
       return;
-    } catch (err) {
-      console.log(`⚠️ Metode A feilet, prøver Metode B...`);
-      try {
-        // Prøv alternativ fn_index 34
-        await callFooocus(prompt, dest, 34);
-        console.log("✅ Lokal GPU Suksess (Metode B)!");
-        return;
-      } catch (err2) {
-        console.log(`⚠️ Alle GPU-metoder feilet (${err2.message}). Fallback til skyen...`);
-      }
+    } else {
+      console.log(`⚠️ Lokal GPU feilet. Fallback til skyen...`);
     }
   }
   const seed = Math.floor(Math.random() * 1000000);
@@ -380,7 +381,7 @@ async function handleCinematicRender(data) {
   }
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -432,5 +433,8 @@ const server = http.createServer((req, res) => {
 });
 
 scanForFooocus().then(() => {
-  server.listen(PORT, () => console.log(`🚀 Epic Engine (v14.4 PRO) kjører på http://localhost:${PORT}`));
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Epic Engine (v14.4 PRO) kjører på http://localhost:${PORT}`);
+    console.log(`📡 Lyttetid: ${new Date().toLocaleTimeString()}`);
+  });
 });

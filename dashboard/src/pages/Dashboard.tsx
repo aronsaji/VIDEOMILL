@@ -133,7 +133,11 @@ export default function Dashboard() {
             
             <div className="divide-y divide-white/5 flex-1">
               {safeVideos.length > 0 ? [...safeVideos]
-                .sort((a, b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime())
+                .sort((a, b) => {
+                  const timeA = new Date(a.created_at || a.updated_at || 0).getTime();
+                  const timeB = new Date(b.created_at || b.updated_at || 0).getTime();
+                  return timeB - timeA;
+                })
                 .slice(0, 6).map((video) => (
                 <div key={video.id} className="p-8 flex items-center gap-8 group hover:bg-white/[0.02] transition-all relative overflow-hidden">
                   <div className="w-24 h-32 bg-[#0A0A0B] border border-white/10 relative overflow-hidden shrink-0 clipped-corner-sm group-hover:border-[#BD00FF]/40 transition-colors">
