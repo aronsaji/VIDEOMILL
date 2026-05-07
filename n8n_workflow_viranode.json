@@ -1,0 +1,212 @@
+{
+  "name": "Viranode Professional Production Suite",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "viranode-generate",
+        "options": {}
+      },
+      "id": "webhook-gen",
+      "name": "WebhookGenerate",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "viranode-retry",
+        "options": {}
+      },
+      "id": "webhook-retry",
+      "name": "WebhookRetry",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1000,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "video_id",
+              "value": "={{ $json.body.id || $json.body.video_id }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.body.title }}"
+            },
+            {
+              "name": "music_mood",
+              "value": "={{ $json.body.music_mood || 'Viral/Upbeat' }}"
+            },
+            {
+              "name": "caption_style",
+              "value": "={{ $json.body.caption_style || 'Animated/Viral' }}"
+            },
+            {
+              "name": "transition_style",
+              "value": "={{ $json.body.transition_style || 'Cinematic Zoom' }}"
+            },
+            {
+              "name": "language",
+              "value": "={{ $json.body.language || 'Norsk' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-params",
+      "name": "Normalize Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        -700,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.GROQ_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "llama-3.3-70b-versatile"
+            },
+            {
+              "name": "messages",
+              "value": "=[{\"role\": \"system\", \"content\": \"Du er en viral video-manusforfatter. Lag et manus i JSON-format med 5-8 scener. Hver scene må ha 'text' (narrasjon på {{ $node[\\\"Normalize Input\\\"].json.language }}), 'image_prompt' (beskrivelse for AI-bilde på engelsk), og 'duration' (ca sekunder). Stil: {{ $node[\\\"Normalize Input\\\"].json.caption_style }}. Musikk-mood: {{ $node[\\\"Normalize Input\\\"].json.music_mood }}.\"}, {\"role\": \"user\", \"content\": \"Tema: {{ $node[\\\"Normalize Input\\\"].json.title }}\"}]"
+            },
+            {
+              "name": "response_format",
+              "value": "={ \"type\": \"json_object\" }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "groq-script",
+      "name": "AI Script Generator (Groq)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -480,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const script = JSON.parse($input.first().json.choices[0].message.content);\nconst params = $node[\"Normalize Input\"].json;\n\nreturn [{\n  json: {\n    render_config: {\n      video_id: params.video_id,\n      scenes: script.scenes,\n      audio: {\n        voice: \"Neural Adam\",\n        music: params.music_mood,\n        captions: params.caption_style\n      },\n      visual: {\n        transitions: params.transition_style,\n        quality: \"4K/Cinematic\"\n      }\n    }\n  }\n}];"
+      },
+      "id": "prepare-render",
+      "name": "Prepare Render Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PC_RENDER_WEBHOOK_URL || 'http://your-local-pc-ip:3000/render' }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "payload",
+              "value": "={{ $json.render_config }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "trigger-pc",
+      "name": "Send to PC Renderer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -40,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "WebhookGenerate": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WebhookRetry": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "AI Script Generator (Groq)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Script Generator (Groq)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Render Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Render Payload": {
+      "main": [
+        [
+          {
+            "node": "Send to PC Renderer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
