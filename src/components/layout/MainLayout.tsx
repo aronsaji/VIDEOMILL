@@ -7,7 +7,7 @@ export const MainLayout = () => {
   return (
     <div className="flex h-screen bg-background overflow-hidden selection:bg-primary/30 selection:text-white">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 ml-72">
+      <div className="flex-1 flex flex-col min-w-0 ml-80">
         <TopBar />
         <main className="flex-1 overflow-y-auto pt-16 h-full custom-scrollbar">
           <div className="max-w-[1600px] mx-auto p-8 relative">

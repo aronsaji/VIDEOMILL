@@ -79,14 +79,14 @@ export const Sidebar = () => {
   ];
 
   return (
-    <nav className="fixed left-0 top-0 h-full w-72 border-r border-primary/20 bg-[#0a0a0a] flex flex-col py-6 px-4 z-40 overflow-y-auto custom-scrollbar">
+    <nav className="fixed left-0 top-0 h-full w-80 border-r border-primary/20 bg-[#0a0a0a] flex flex-col py-6 px-4 z-40 overflow-y-auto custom-scrollbar">
       <div className="mb-10 px-2 flex flex-col items-center">
         <NavLink to="/" className="mb-6 hover:scale-105 transition-transform">
           <Logo size="md" />
         </NavLink>
         <div className="text-center px-2">
-          <span className="text-2xl font-display font-black tracking-tighter text-text uppercase block">VideoMill</span>
-          <span className="text-[9px] mono text-primary uppercase tracking-[0.1em] font-bold block mt-1 leading-tight opacity-80">
+          <span className="text-3xl font-display font-black tracking-tighter text-text uppercase block">VideoMill</span>
+          <span className="text-[10px] mono text-primary uppercase tracking-[0.1em] font-bold block mt-1 leading-tight opacity-80">
             The Non-Stop Viral Engine
           </span>
         </div>
@@ -115,19 +115,19 @@ export const Sidebar = () => {
       <div className="flex-1 space-y-6">
         {groups.map((group) => (
           <div key={group.label} className="space-y-1">
-            <p className="px-4 text-[9px] font-bold text-text-muted uppercase tracking-[0.2em] mb-2 opacity-50">{group.label}</p>
+            <p className="px-4 text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] mb-2 opacity-50">{group.label}</p>
             {group.items.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-4 py-2 rounded-lg text-xs font-medium text-text-muted hover:bg-white/5 transition-all group relative border border-transparent",
+                  "flex items-center gap-3 px-4 py-2.5 rounded-lg text-[13px] font-medium text-text-muted hover:bg-white/5 transition-all group relative border border-transparent",
                   isActive && "bg-primary/10 text-primary border-primary/20 shadow-sleek"
                 )}
               >
                 {({ isActive }) => (
                   <>
-                    <item.icon size={16} className={cn("transition-transform group-hover:scale-110", isActive && "text-primary")} />
+                    <item.icon size={18} className={cn("transition-transform group-hover:scale-110", isActive && "text-primary")} />
                     <span>{item.name}</span>
                     {isActive && (
                       <motion.div 

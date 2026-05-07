@@ -19,7 +19,7 @@ export const TopBar = () => {
   const nodeID = user?.id ? `PRO_NODE_${user.id.substring(0, 4).toUpperCase()}` : 'PRO_NODE_04';
 
   return (
-    <header className="fixed top-0 right-0 w-[calc(100%-18rem)] h-16 border-b border-primary/20 bg-background flex justify-end items-center px-8 z-30">
+    <header className="fixed top-0 right-0 w-[calc(100%-20rem)] h-16 border-b border-primary/20 bg-background flex justify-end items-center px-8 z-30">
       <div className="flex items-center gap-6">
         <div className="hidden md:flex items-center gap-2">
           <button 
