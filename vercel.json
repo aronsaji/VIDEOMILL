@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/generate",
+      "destination": "https://fsnmrm8qy0a6an-5678.proxy.runpod.net/webhook/viranode-generate"
+    },
+    {
+      "source": "/api/retry",
+      "destination": "https://fsnmrm8qy0a6an-5678.proxy.runpod.net/webhook/viranode-retry"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "https://fsnmrm8qy0a6an-5678.proxy.runpod.net/webhook/$1"
+    },
+    {
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
