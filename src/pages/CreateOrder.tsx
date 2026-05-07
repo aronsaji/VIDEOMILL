@@ -225,7 +225,7 @@ export const CreateOrder = () => {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
-    const videoId = `v-${Date.now()}`;
+    const videoId = crypto.randomUUID();
     const productionDataPayload = {
       id: videoId,
       title: formData.title || 'Generell Trend',

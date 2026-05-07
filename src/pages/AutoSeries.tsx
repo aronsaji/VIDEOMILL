@@ -56,7 +56,7 @@ export const AutoSeries = () => {
   const handlePlay = async (series: Series) => {
     setSubmitting(series.id);
     try {
-      const videoId = `v-ser-${series.id}-${Date.now()}`;
+      const videoId = crypto.randomUUID();
       const productionDataPayload = {
         id: videoId,
         title: `Episode: ${series.name}`,

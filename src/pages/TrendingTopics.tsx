@@ -184,7 +184,7 @@ export const TrendingTopics = () => {
 
   const handleQuickOrder = async (trend: Trend) => {
     try {
-      const videoId = `v-q-${Date.now()}`;
+      const videoId = crypto.randomUUID();
       const productionDataPayload = {
         id: videoId,
         title: trend.title || 'Generell Trend',
